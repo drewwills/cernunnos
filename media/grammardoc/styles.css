@@ -1,0 +1,67 @@
+/*
+ * Copyright 2007 Andrew Wills
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+h1 {
+  color:  #003366;
+  font-size:  20pt;
+  margin-top:  12px;
+  margin-bottom:  12px;
+}
+
+h2 {
+  color:  #003366;
+  font-size:  16pt;
+  margin-top:  8px;
+  margin-bottom:  8px;
+}
+
+h3 {
+  color:  #FFFFFF;
+  background-color:  #003366;
+  font-size:  14pt;
+  margin-top:  6px;
+  margin-bottom:  6px;
+}
+
+p {
+  margin-top:  4px;
+  margin-bottom:  4px;
+}
+
+table {
+  background-color:  #003366;
+  margin-top:  6px;
+  margin-bottom:  6px;
+}
+
+th {
+  color:  #003366;
+  background-color:  #CCCCFF;
+}
+
+td {
+  background-color:  #FFFFFF;
+}
+
+pre {
+  margin-top:  0px;
+  margin-bottom:  0px;
+}
+
+xmp {
+  margin-top:  0px;
+  margin-bottom:  0px;
+}
