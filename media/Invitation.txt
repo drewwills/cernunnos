@@ -4,9 +4,9 @@ I want to invite you to discover Cernunnos, a new Open Source initiative hosted 
 
   http://code.google.com/p/cernunnos/
 
-Cernunnos is a Java technology designed to promote and support effective Object Oriented Development.  It can help you do all sorts of things, and is not limited to a particular domain or problem space.
+Cernunnos is a Java technology designed to promote and support effective Object Oriented development.  It can help you do all sorts of things, and is not limited to a particular domain or problem space.
 
-For example, it has been used to analyze changes to a database and compile documentation for a software project.
+For example, it has been used to analyze changes to a database and to compile documentation for a software project (viz. this one).
 
 In fact, this email was sent to you using a Script written for Cernunnos, and it's content was pulled from a Subversion repository using the following address:
 
