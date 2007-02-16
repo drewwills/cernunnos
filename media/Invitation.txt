@@ -1,0 +1,21 @@
+Dear ${req($1)},
+
+I want to invite you to discover Cernunnos, a new Open Source initiative hosted by Google Code.  You can check it out at the following address:
+
+  http://code.google.com/p/cernunnos/
+
+Cernunnos is a Java technology designed to promote and support effective Object Oriented Development.  It can help you do all sorts of things, and is not limited to a particular domain or problem space.
+
+For example, it has been used to analyze changes to a database and compile documentation for a software project.
+
+In fact, this email was sent to you using a Script written for Cernunnos, and it's content was pulled from a Subversion repository using the following address:
+
+  http://cernunnos.googlecode.com/svn/trunk/media/Invitation.txt
+
+Cernunnos is simple to install, simple to use, and simple to extend.
+
+Please take a look and consider sharing some of your expertise.
+
+Sincerely,
+
+Andrew Wills
