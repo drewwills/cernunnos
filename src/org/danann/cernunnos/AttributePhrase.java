@@ -26,7 +26,7 @@ public final class AttributePhrase implements Phrase {
 	// Instance Members.
 	private Phrase name;
 	private Phrase dflt;
-
+	
 	/*
 	 * Public API.
 	 */

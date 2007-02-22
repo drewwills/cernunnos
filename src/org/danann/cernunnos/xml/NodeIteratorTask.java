@@ -60,7 +60,7 @@ public final class NodeIteratorTask extends AbstractContainerTask {
 	public static final Reagent XPATH = new SimpleReagent("XPATH", "@xpath", ReagentType.PHRASE, String.class, 
 						"The XPATH expression this task will iterate over.");
 	
-	public static final Reagent SOURCE = new SimpleReagent("NODE", "@source", ReagentType.PHRASE, Node.class,
+	public static final Reagent SOURCE = new SimpleReagent("SOURCE", "@source", ReagentType.PHRASE, Node.class,
 						"Optional source node to evaluate XPATH against.  If not specified, the value of "
 						+ "the request attribute 'Attributes.NODE' will be used.", new AttributePhrase(Attributes.NODE));
 

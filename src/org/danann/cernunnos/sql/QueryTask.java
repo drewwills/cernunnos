@@ -60,7 +60,7 @@ public final class QueryTask extends AbstractContainerTask {
 										+ "the name 'SqlAttributes.CONNECTION' will be used.", 
 										new AttributePhrase(SqlAttributes.CONNECTION));
 	
-	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class, 
+	public static final Reagent SQL = new SimpleReagent("@sql", "sql", ReagentType.PHRASE, String.class, 
 										"The SQL query statement that will be executed.");
 
 	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class, 
@@ -113,6 +113,7 @@ public final class QueryTask extends AbstractContainerTask {
 			// Execute the query, perform subtasks...
 			rs = pstmt.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
+			res.setAttribute(SqlAttributes.RESULT_SET_METADATA, rsmd);
 			while (rs.next()) {
 
 				// Make all the data on the current row available to subtasks...

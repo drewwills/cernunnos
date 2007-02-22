@@ -16,6 +16,9 @@
 
 package org.danann.cernunnos;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Encapsulates input for a <code>Task</code>.
  */
@@ -30,6 +33,21 @@ public interface TaskRequest {
 	 * @return The value of the attribute with the specified name.
 	 */
 	Object getAttribute(String name);
+	
+	/**
+	 * Obtains a collection of attribute names that currently have values.
+	 * 
+	 * @return All attribute names currently in use.
+	 */
+	Set<String> getAttributeNames();
+	
+	/**
+	 * Obtains the complete collection of attributes as a read-only 
+	 * <code>Map</code>.
+	 * 
+	 * @return All current attributes.
+	 */
+	Map<String,Object> getAttributes();
 	
 	/**
 	 * Checks to see if the specified attribute is present on the request. 

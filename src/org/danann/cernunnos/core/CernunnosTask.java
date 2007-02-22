@@ -22,6 +22,7 @@ import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Phrase;
@@ -32,7 +33,6 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
-import org.danann.cernunnos.EntityConfig;
 
 public class CernunnosTask implements Task {
 

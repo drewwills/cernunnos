@@ -28,7 +28,6 @@ import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -54,7 +53,7 @@ public class CopyFileTask implements Task {
 				"Optional context location which missing elements of the LOCATION location can be inferred if it is "
 				+ "relative.  If omitted, this task will use either: (1) the value of the 'Attributes.CONTEXT' "
 				+ "request attribute if present; or (2) the directory within which Java is executing.", 
-				new AttributePhrase(new LiteralPhrase(Attributes.CONTEXT), new CurrentDirectoryUrlPhrase()));
+				new AttributePhrase(Attributes.CONTEXT, new CurrentDirectoryUrlPhrase()));
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class, 
 				"Optional location of the resource that will be copied.  It may be a filesystem path or "

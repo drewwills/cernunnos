@@ -37,29 +37,29 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 /**
- * <code>Task</code> implementation that writes the SOURCE node to the specified 
- * path.
+ * <code>Task</code> implementation that writes the NODE node to the specified 
+ * file.
  */
 public final class WriteDocumentTask implements Task {
 
 	// Instance Members.
-	private Phrase path;
-	private Phrase source;
+	private Phrase file;
+	private Phrase node;
 
 	/*
 	 * Public API.
 	 */
 	
-	public static final Reagent PATH = new SimpleReagent("LOCATION", "@path", ReagentType.PHRASE, String.class, 
+	public static final Reagent FILE = new SimpleReagent("FILE", "@file", ReagentType.PHRASE, String.class, 
 							"File system location to which the document should be written.");
 
-	public static final Reagent SOURCE = new SimpleReagent("NODE", "@source", ReagentType.PHRASE, Node.class,
+	public static final Reagent NODE = new SimpleReagent("NODE", "@node", ReagentType.PHRASE, Node.class,
 							"Optional source node to be written.  If not provided, the value of the "
 							+ "'Attributes.NODE' request attribute will be used.", 
 							new AttributePhrase(Attributes.NODE));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {PATH, SOURCE};
+		Reagent[] reagents = new Reagent[] {FILE, NODE};
 		final Formula rslt = new SimpleFormula(WriteDocumentTask.class, reagents);
 		return rslt;
 	}
@@ -67,20 +67,20 @@ public final class WriteDocumentTask implements Task {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.path = (Phrase) config.getValue(PATH); 
-		this.source = (Phrase) config.getValue(SOURCE); 
+		this.file = (Phrase) config.getValue(FILE); 
+		this.node = (Phrase) config.getValue(NODE); 
 		
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		File f = new File((String) path.evaluate(req, res));
+		File f = new File((String) file.evaluate(req, res));
 		
 		try {
 			XMLWriter writer = new XMLWriter(new FileOutputStream(f), new OutputFormat("  ", true));
-			writer.write((Node) source.evaluate(req, res));
+			writer.write((Node) node.evaluate(req, res));
 		} catch (Throwable t) {
-			String msg = "Unable to write the specified path:  " + f.getPath();
+			String msg = "Unable to write the specified file:  " + f.getPath();
 			throw new RuntimeException(msg, t);
 		}
 				

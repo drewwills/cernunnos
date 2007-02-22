@@ -57,6 +57,14 @@
 	  | Package:  core
 	  +-->
 
+	<phrase name="jexl" impl="org.danann.cernunnos.core.JexlPhrase"/>
+	<doc entry="jexl">
+		<description>Evaluates the specified JEXL expression and returns the result.  All current request attributes will be visible.</description>
+		<example caption="Writes 'Hello World!' to System.out">
+			<pre><xmp><echo>${jexl('Hello' + ' World!')}</echo></xmp></pre>
+		</example>
+	</doc>
+
 	<task name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask"/>
 	<doc entry="with-attribute">
 		<description>Creates a request attribute with the specified name and value, then invokes subtasks.</description>
@@ -111,6 +119,14 @@
 		</example>
 	</doc>
 
+	<task name="process" impl="org.danann.cernunnos.core.ExecuteProcessTask"/>
+	<doc entry="process">
+		<description>Invokes the specified process from the specified directory.</description>
+		<example caption="Invokes the Ant tool to deploy a project.">
+			<pre><xmp><process>ant deploy</process></xmp></pre>
+		</example>
+	</doc>
+
 	<!-- 
 	  | Package:  io
 	  +-->
@@ -140,6 +156,16 @@
 			<pre><xmp><file-iterator dir="some_folder">
   <copy-file to-dir="another_folder"/>
 </file-iterator></xmp></pre>
+		</example>
+	</doc>
+
+	<task name="print-stream" impl="org.danann.cernunnos.io.OpenPrintStreamTask"/>
+	<doc entry="print-stream">
+		<description>Opens a PrintStream that writes to the specified file system location.</description>
+		<example caption="Writes 'Hello World!' to the file 'hello.txt'">
+			<pre><xmp><print-stream file="hello.txt">
+  <echo>Hello World!</echo>
+</print-stream></xmp></pre>
 		</example>
 	</doc>
 
@@ -212,6 +238,11 @@
 		<description>Executes the specified UPDATE statement.  If zero rows are affected, executes the specified INSERT statement.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</description>
 	</doc>
 
+	<task name="column-iterator" impl="org.danann.cernunnos.sql.ColumnIteratorTask"/>
+	<doc entry="column-iterator">
+		<description>Iterates over the columns in a ResultSet, placing each column name under the request attribute 'SqlAttributes.COLUMN_NAME'.</description>
+	</doc>
+
 	<!-- 
 	  | Package:  xml
 	  +-->
@@ -265,6 +296,11 @@
   <echo-ln>${valueOf(.)}</echo-ln>
 </node-iterator></xmp></pre>
 		</example>
+	</doc>
+
+	<task name="delete-node" impl="org.danann.cernunnos.xml.DeleteNodeTask"/>
+	<doc entry="delete-node">
+		<description>Deletes the specified node from the document that contains it.  This change must be persisted by another task (if persistence is desired).</description>
 	</doc>
 
 </grammar>

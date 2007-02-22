@@ -39,4 +39,9 @@ public class Attributes {
 	 */
 	public static final String NODE = "Attributes.NODE";
 	
+	/**
+	 * Use this name to create a request attribute containing a PrintStream.
+	 */
+	public static final String STREAM = "Attributes.STREAM";
+	
 }

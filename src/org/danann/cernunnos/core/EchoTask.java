@@ -18,6 +18,8 @@ package org.danann.cernunnos.core;
 
 import java.io.PrintStream;
 
+import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
@@ -43,17 +45,18 @@ public class EchoTask implements Task {
 	 */
 
 	public static final Reagent STREAM = new SimpleReagent("STREAM", "@stream", ReagentType.PHRASE, PrintStream.class,
-									"PrintStream to which the message should be written.  Default is System.out", 
-									new LiteralPhrase(System.out));
+					"Optional PrintStream to which the message should be written.  If omitted, this task will use "
+					+ "either: (1) the value of the 'Attributes.STREAM' request attribute if present; or (2) "
+					+ "System.out.", new AttributePhrase(Attributes.STREAM, new LiteralPhrase(System.out)));
 
 	public static final Reagent PREFIX = new SimpleReagent("PREFIX", "@prefix", ReagentType.PHRASE, String.class,
-										"Characters that preceed the main message.", new LiteralPhrase(""));
+					"Characters that preceed the main message.", new LiteralPhrase(""));
 	
 	public static final Reagent MESSAGE = new SimpleReagent("MESSAGE", "text()", ReagentType.PHRASE, String.class, 
-										"Message to write to the specified PrintStream.");
+					"Message to write to the specified PrintStream.");
 
 	public static final Reagent SUFFIX = new SimpleReagent("SUFFIX", "@suffix", ReagentType.PHRASE, String.class,
-										"Characters that follow the main message.", new LiteralPhrase(""));
+					"Characters that follow the main message.", new LiteralPhrase(""));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {STREAM, PREFIX, MESSAGE, SUFFIX};

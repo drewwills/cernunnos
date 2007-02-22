@@ -84,6 +84,9 @@ public final class ConcatenatingPhrase implements Phrase {
 						// Concatenate the text value...
 						String text = ((Node) value).getText();
 						buffer.append(text);
+					} else if (value == null) {
+						// If null just write null...
+						buffer.append("null");
 					} else {
 						// Try toString()...
 						buffer.append(value.toString());

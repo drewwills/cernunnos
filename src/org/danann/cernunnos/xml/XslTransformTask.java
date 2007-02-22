@@ -50,7 +50,7 @@ import org.danann.cernunnos.TaskResponse;
 
 /**
  * <code>Task</code> implementation that performs an XSL Transformation over the 
- * SOURCE node or LOCATION document.  Specify the location of the .xsl 
+ * NODE node or LOCATION document.  Specify the location of the .xsl 
  * stylesheet through the (mandatory) STYLESHEET reagent.  
  */
 public class XslTransformTask extends AbstractContainerTask {

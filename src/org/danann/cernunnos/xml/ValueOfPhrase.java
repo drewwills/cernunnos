@@ -32,7 +32,7 @@ import org.danann.cernunnos.TaskResponse;
 
 /**
  * <code>PhraseComponent</code> implementation that evaluates by performing an 
- * XPATH query on the SOURCE node and returns the textual value of the 
+ * XPATH query on the NODE node and returns the textual value of the 
  * identified node(s).
  */
 public final class ValueOfPhrase implements Phrase {
