@@ -127,6 +127,11 @@
 		</example>
 	</doc>
 
+	<task name="string-replace" impl="org.danann.cernunnos.core.StringReplaceTask"/>
+	<doc entry="string-replace">
+		<description>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</description>
+	</doc>
+
 	<!-- 
 	  | Package:  io
 	  +-->
@@ -157,6 +162,11 @@
   <copy-file to-dir="another_folder"/>
 </file-iterator></xmp></pre>
 		</example>
+	</doc>
+
+	<task name="write-file" impl="org.danann.cernunnos.io.WriteFileTask"/>
+	<doc entry="write-file">
+		<description>Writes the specified content to the specified file.</description>
 	</doc>
 
 	<task name="print-stream" impl="org.danann.cernunnos.io.OpenPrintStreamTask"/>

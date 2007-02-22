@@ -23,25 +23,35 @@ package org.danann.cernunnos;
 public class Attributes {
 
 	/**
-	 * Use this name to create a request attribute representing the URL context 
-	 * from which relative paths should be resolved.
+	 * Use this name to create a request attribute containing a 
+	 * <code>java.lang.String</code> that describes a valid URL.  Many 
+	 * <code>Task</code> implementations will use this URL to resolve relative 
+	 * paths.
 	 */
 	public static final String CONTEXT = "Attributes.CONTEXT";
 	
 	/**
-	 * Use this name to create a request attribute representing the location of 
-	 * a resource given the current CONTEXT.
+	 * Use this name to create a request attribute containing a 
+	 * <code>java.lang.String</code> that represents the location of a resource.
 	 */
 	public static final String LOCATION = "Attributes.LOCATION";
 	
 	/**
-	 * Use this name to create a request attribute containing an XML node.
+	 * Use this name to create a request attribute containing an 
+	 * <code>org.dom4j.Node</code>.
 	 */
 	public static final String NODE = "Attributes.NODE";
 	
 	/**
-	 * Use this name to create a request attribute containing a PrintStream.
+	 * Use this name to create a request attribute containing a 
+	 * <code>java.io.PrintStream</code>.
 	 */
 	public static final String STREAM = "Attributes.STREAM";
+	
+	/**
+	 * Use this name to create a request attribute containing a 
+	 * <code>java.lang.String</code>.
+	 */
+	public static final String STRING = "Attributes.STREAM";
 	
 }

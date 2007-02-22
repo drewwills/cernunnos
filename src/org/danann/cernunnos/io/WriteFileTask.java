@@ -17,75 +17,72 @@
 package org.danann.cernunnos.io;
 
 import java.io.File;
-import java.io.PrintStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
-import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
+import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class OpenPrintStreamTask extends AbstractContainerTask {
+public class WriteFileTask implements Task {
 
 	// Instance Members.
-	private Phrase attribute_name;
+	private Phrase string;
 	private Phrase file;
 
-	/*
-	 * Public API.
-	 */
-
-	public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", ReagentType.PHRASE, String.class,
-			"Optional name under which the new PrintStream will be registered as a request attribute.  If omitted, the name "
-			+ "'Attributes.STREAM' will be used.", new LiteralPhrase(Attributes.STREAM));
+	public static final Reagent STRING = new SimpleReagent("STRING", "@string", ReagentType.PHRASE, String.class, 
+			"Contents of the new file as a String.  The default is the value of the 'Attributes.STRING' "
+			+ "request attribute.", new AttributePhrase(Attributes.STRING));
 
 	public static final Reagent FILE = new SimpleReagent("FILE", "@file", ReagentType.PHRASE, String.class, 
-			"File system path to which the PrintStream will be written.  It may be absolute or relative.  "
-			+ "If relative, it will be evaluated from the directory in which Java is executing.  ");
+			"Optional file system path to which the contents of STRING will be written.  It may be "
+			+ "absolute or relative, in which case it will be evaluated from the directory in which Java "
+			+ "is executing.  The default is the value of the 'Attributes.LOCATION' request attribute.",
+			new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, FILE, AbstractContainerTask.SUBTASKS};
-		final Formula rslt = new SimpleFormula(OpenPrintStreamTask.class, reagents);
+		Reagent[] reagents = new Reagent[] {STRING, FILE};
+		final Formula rslt = new SimpleFormula(WriteFileTask.class, reagents);
 		return rslt;
 	}
 
 	public void init(EntityConfig config) {
 		
-		super.init(config);		
-
 		// Instance Members.
-		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
+		this.string = (Phrase) config.getValue(STRING); 
 		this.file = (Phrase) config.getValue(FILE);
 
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-		
-		String loc = (String) file.evaluate(req, res);
-		try {
 
-			File f = new File(loc);
+		String path = (String) file.evaluate(req, res);
+
+		try {
+			
+			String s = (String) string.evaluate(req, res);
+			
+			File f = new File(path);
 			if (f.getParentFile() != null) {
 				// Make sure the necessary directories are in place...
 				f.getParentFile().mkdirs();
 			}
-			PrintStream stream = new PrintStream(f);
 			
-			// Invoke subtasks...
-			res.setAttribute((String) attribute_name.evaluate(req, res), stream);
-			super.performSubtasks(req, res);
+			OutputStream os = new FileOutputStream(f);
+			os.write(s.getBytes());
+			os.close();
 			
-			stream.close();
-
 		} catch (Throwable t) {
-			String msg = "There was a problem writing to the specified location:  " + loc;
+			String msg = "Unable to write to the specified file:  " + path;
 			throw new RuntimeException(msg, t);
 		}
 		

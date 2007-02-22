@@ -16,7 +16,9 @@
 
 package org.danann.cernunnos.runtime;
 
+import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
@@ -35,7 +37,7 @@ public final class Main {
 		System.out.println("");
 
 		// Analyze the command-line arguments & make some decisions...
-		String path = null;
+		URL url = null;
 		RuntimeRequestResponse req = new RuntimeRequestResponse();
 		switch (args.length) {
 			case 0:
@@ -43,7 +45,12 @@ public final class Main {
 				System.out.println("Usage:\n\n\t>crn [script_name] [arguments]");
 				break;
 			default:
-				path = args[0];
+				try {
+					url = new URL(new File(".").toURL(), args[0]);
+				} catch (Throwable t) {
+					String msg = "Unable to read the specified script:  " + args[0];
+					throw new RuntimeException(msg, t);
+				}
 				for (int i=1; i < args.length; i++) {
 					req.setAttribute("$" + i, args[i]);
 				}
@@ -66,7 +73,7 @@ public final class Main {
 		// Project.
 		Task script = null;
 		try {
-			Document doc = reader.read(path);
+			Document doc = reader.read(url);
 			script = g.newTask(doc.getRootElement(), null);
 		} catch (Throwable t) {
 			System.out.println("");

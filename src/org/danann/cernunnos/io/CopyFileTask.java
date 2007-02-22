@@ -68,7 +68,7 @@ public class CopyFileTask implements Task {
 
 	public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class, 
 				"Optional file system path to which the specified resource will be copied.  It may be absolute "
-				+ "or relative (in which case the location will be evaluated relative to the CONTEXT).  "
+				+ "or relative (in which case the location will be evaluated relative to the TO_DIR).  "
 				+ "If omitted, the the value of the 'Attributes.LOCATION' request attribute will be used.",
 				new AttributePhrase(Attributes.LOCATION));
 
@@ -101,7 +101,6 @@ public class CopyFileTask implements Task {
 			URLConnection conn = loc.openConnection();
 			InputStream is = conn.getInputStream();
 
-			
 			File f = new File(dir, destination);
 			if (f.getParentFile() != null) {
 				// Make sure the necessary directories are in place...
