@@ -54,7 +54,7 @@ public final class UpsertTask implements Task {
 										+ "the name 'SqlAttributes.CONNECTION' will be used.", 
 										new AttributePhrase(SqlAttributes.CONNECTION));
 
-	public static final Reagent UPDATE_SQL = new SimpleReagent("SQL", "update-statement", ReagentType.PHRASE, String.class, 
+	public static final Reagent UPDATE_SQL = new SimpleReagent("UPDATE_SQL", "update-statement", ReagentType.PHRASE, String.class, 
 										"The SQL statement that performs the Update portion of the 'Upsert' operation.");
 
 	public static final Reagent INSERT_SQL = new SimpleReagent("INSERT_SQL", "insert-statement", ReagentType.PHRASE, String.class,
