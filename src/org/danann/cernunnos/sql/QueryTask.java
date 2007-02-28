@@ -56,9 +56,8 @@ public final class QueryTask extends AbstractContainerTask {
 	 */
 
 	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-										"Optional name of a request attribute containing a dgatabase connection.  If omitted, "
-										+ "the name 'SqlAttributes.CONNECTION' will be used.", 
-										new AttributePhrase(SqlAttributes.CONNECTION));
+			"Optional Connection object.  The default is the value of the 'SqlAttributes.CONNECTION' request attribute.", 
+			new AttributePhrase(SqlAttributes.CONNECTION));
 	
 	public static final Reagent SQL = new SimpleReagent("@sql", "sql", ReagentType.PHRASE, String.class, 
 										"The SQL query statement that will be executed.");
