@@ -77,7 +77,7 @@ public final class WriteDocumentTask implements Task {
 		File f = new File((String) file.evaluate(req, res));
 		
 		try {
-			XMLWriter writer = new XMLWriter(new FileOutputStream(f), new OutputFormat("  ", true));
+			XMLWriter writer = new XMLWriter(new FileOutputStream(f), OutputFormat.createPrettyPrint());
 			writer.write((Node) node.evaluate(req, res));
 		} catch (Throwable t) {
 			String msg = "Unable to write the specified file:  " + f.getPath();
