@@ -8,13 +8,17 @@ Cernunnos is a Java technology designed to promote and support effective Object 
 
 For example, it has been used to analyze changes to a database and to compile documentation for a software project (viz. this one).
 
-In fact, this email was sent to you using a Script written for Cernunnos, and it's content was pulled from a Subversion repository using the following address:
+In fact, this email was sent to you using a Script written for Cernunnos, and it's content was pulled from a Subversion repository at the following location:
 
   http://cernunnos.googlecode.com/svn/trunk/media/Invitation.txt
 
-Cernunnos is simple to install, simple to use, and simple to extend.
+Cernunnos is simple to install, simple to use, and simple to extend.  Please take a look and consider sharing some of your expertise.
 
-Please take a look and consider sharing some of your expertise.
+There is also a Google Groups community for Cernunnos discussion.  You can visit it here:
+
+  http://groups.google.com/group/cernunnos-discussion
+  
+There you can find a lot of helpful information and useful scripts for Cernunnos.
 
 Sincerely,
 
