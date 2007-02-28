@@ -60,13 +60,8 @@ public class DeleteNodeTask implements Task {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 		
-		try {
-			Node n = (Node) node.evaluate(req, res);
-			n.getParent().remove(n);
-		} catch (Throwable t) {
-			String msg = "Unable to delete the specified node.";
-			throw new RuntimeException(msg, t);
-		}
+		Node n = (Node) node.evaluate(req, res);
+		n.getParent().remove(n);
 				
 	}
 	
