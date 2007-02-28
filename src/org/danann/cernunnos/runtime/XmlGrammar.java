@@ -195,7 +195,7 @@ public final class XmlGrammar implements Grammar {
 								if (this.parent != null) {
 									return this.parent.newPhrase(inpt);
 								} else {
-									String msg = "The specified phrase is not defined:  " + name;
+									String msg = "The specified Phrase name is not defined:  " + name;
 									throw new IllegalArgumentException(msg);
 								}
 							}
