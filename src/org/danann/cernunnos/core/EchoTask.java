@@ -50,13 +50,13 @@ public class EchoTask implements Task {
 					+ "System.out.", new AttributePhrase(Attributes.STREAM, new LiteralPhrase(System.out)));
 
 	public static final Reagent PREFIX = new SimpleReagent("PREFIX", "@prefix", ReagentType.PHRASE, String.class,
-					"Characters that preceed the main message.", new LiteralPhrase(""));
+					"Characters that preceed the main message.  The default is an empty string.", new LiteralPhrase(""));
 	
 	public static final Reagent MESSAGE = new SimpleReagent("MESSAGE", "text()", ReagentType.PHRASE, String.class, 
-					"Message to write to the specified PrintStream.");
+					"Message to write to the specified PrintStream.  The default is an empty string.", new LiteralPhrase(""));
 
 	public static final Reagent SUFFIX = new SimpleReagent("SUFFIX", "@suffix", ReagentType.PHRASE, String.class,
-					"Characters that follow the main message.", new LiteralPhrase(""));
+					"Characters that follow the main message.  The default is an empty string.", new LiteralPhrase(""));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {STREAM, PREFIX, MESSAGE, SUFFIX};
