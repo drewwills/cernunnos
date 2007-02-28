@@ -50,7 +50,7 @@ public class CopyFileTask implements Task {
 	 */
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
-				"Optional context location which missing elements of the LOCATION location can be inferred if it is "
+				"Optional context from which missing elements of the LOCATION will be inferred if it is "
 				+ "relative.  If omitted, this task will use either: (1) the value of the 'Attributes.CONTEXT' "
 				+ "request attribute if present; or (2) the directory within which Java is executing.", 
 				new AttributePhrase(Attributes.CONTEXT, new CurrentDirectoryUrlPhrase()));
