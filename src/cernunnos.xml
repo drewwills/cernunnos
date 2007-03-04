@@ -146,6 +146,11 @@
 	  | Package:  io
 	  +-->
 
+	<phrase name="file" impl="org.danann.cernunnos.io.FilePhrase"/>
+	<doc entry="file">
+		<description>Creates a java.io.File object from thbe specified LOCATION and returns it.</description>
+	</doc>
+
 	<task name="file-iterator" impl="org.danann.cernunnos.io.FileIteratorTask"/>
 	<doc entry="file-iterator">
 		<description>Builds a collection of file names within a specified directory and iterates over them.  Use optional pattern expressions to specify groups of files to include or exclude.</description>
@@ -192,6 +197,11 @@
 	<task name="archive-iterator" impl="org.danann.cernunnos.io.ArchiveIteratorTask"/>
 	<doc entry="archive-iterator">
 		<description>Iterates over the entries found in the specified archive.  Each entry name will be registered as the request attribute 'Attributes.LOCATION' for subtasks.</description>
+	</doc>
+
+	<task name="extract-archive" impl="org.danann.cernunnos.io.ExtractArchiveTask"/>
+	<doc entry="extract-archive">
+		<description>Extracts the contents of the specified archive and writes them to the specified directory.</description>
 	</doc>
 
 	<!-- 
