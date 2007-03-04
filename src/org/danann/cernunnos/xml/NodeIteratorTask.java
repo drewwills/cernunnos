@@ -54,8 +54,8 @@ public final class NodeIteratorTask extends AbstractContainerTask {
 	 */
 
 	public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", ReagentType.PHRASE, String.class,
-			"Optional name under which the new connection will be registered as a request attribute.  If omitted, the name "
-			+ "'SqlAttributes.CONNECTION' will be used.", new LiteralPhrase(Attributes.NODE));
+						"Optional name under which the new connection will be registered as a request attribute.  If omitted, the name "
+						+ "'Attributes.NODE' will be used.", new LiteralPhrase(Attributes.NODE));
 
 	public static final Reagent XPATH = new SimpleReagent("XPATH", "@xpath", ReagentType.PHRASE, String.class, 
 						"The XPATH expression this task will iterate over.");
@@ -85,6 +85,7 @@ public final class NodeIteratorTask extends AbstractContainerTask {
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		Node srcNode = (Node) source.evaluate(req, res);
+
 		List nodes = srcNode.selectNodes((String) xpath.evaluate(req, res));
 		
 		String name = (String) attribute_name.evaluate(req, res);
