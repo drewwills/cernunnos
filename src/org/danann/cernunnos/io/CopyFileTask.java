@@ -63,7 +63,7 @@ public class CopyFileTask implements Task {
 
 	public static final Reagent TO_DIR = new SimpleReagent("TO_DIR", "@to-dir", ReagentType.PHRASE, String.class, 
 				"Optional file system directory to which the specified resource will be copied.  It may be "
-				+ "absolute or relative.  If relative, it will be evaluated relative to the directory in "
+				+ "absolute or relative.  If relative, it will be evaluated from the directory in "
 				+ "which Java is executing.", null);
 
 	public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class, 
@@ -120,7 +120,7 @@ public class CopyFileTask implements Task {
 			
 		} catch (Throwable t) {
 			String msg = "Unable to copy the specified file [" + origin 
-								+ "] to_file the specified location [" 
+								+ "] to the specified location [" 
 								+ destination + "].";
 			throw new RuntimeException(msg, t);
 		}
