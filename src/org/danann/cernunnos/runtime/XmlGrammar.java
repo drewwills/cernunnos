@@ -112,15 +112,7 @@ public final class XmlGrammar implements Grammar {
 		// NB:  parent may be null...
 		
 		String name = e.getName();		
-		Entry n = entries.get(name);
-		if (n == null) {
-			if (this.parent != null) {
-				return this.parent.newTask(e, parent);
-			} else {
-				String msg = "The specified task is not defined:  " + name;
-				throw new IllegalArgumentException(msg);
-			}
-		}
+		Entry n = getEntry(name);
 		if (!n.getType().equals(EntryType.TASK)) {
 			String msg = "The specified name does not define a task:  " + name;
 			throw new IllegalArgumentException(msg);
@@ -190,15 +182,7 @@ public final class XmlGrammar implements Grammar {
 							String name = expression.substring(0, expression.indexOf("("));
 							String nested = expression.substring(expression.indexOf("(") + 1, expression.length() - 1);
 
-							Entry n = entries.get(name);
-							if (n == null) {
-								if (this.parent != null) {
-									return this.parent.newPhrase(inpt);
-								} else {
-									String msg = "The specified Phrase name is not defined:  " + name;
-									throw new IllegalArgumentException(msg);
-								}
-							}
+							Entry n = getEntry(name);
 							if (n.getType() != EntryType.PHRASE) {
 								String msg = "The specified name does not define a phrase:  " + name;
 								throw new IllegalArgumentException(msg);
@@ -341,6 +325,20 @@ public final class XmlGrammar implements Grammar {
 		
 	}
 
+	private Entry getEntry(String name) {
+		Entry rslt = null;
+		if (entries.containsKey(name)) {
+			return entries.get(name);
+		} else if (parent != null && parent instanceof XmlGrammar) {
+			// This is a little hokey... perhaps Entry should be a first-class type?
+			rslt = ((XmlGrammar) parent).getEntry(name);
+		} else {
+			String msg = "The specified entry is not defined:  " + name;
+			throw new IllegalArgumentException(msg);
+		}
+		return rslt;
+	}
+	
 	private void setEntries(Map<String,Entry> entries) {
 
 		// Assertions...
