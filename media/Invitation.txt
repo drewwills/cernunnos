@@ -1,14 +1,22 @@
-Dear ${req($1)},
+${req($1)},
 
-I want to invite you to discover Cernunnos, a new Open Source initiative hosted by Google Code.  You can check it out at the following address:
+I'd like to trun your attention for a moment to a pet project I've been brewing for about a year:  Cernunnos.  I've created an Open Source Java project hosted by Google Code to manage it.  You can check it out at the following address:
 
   http://code.google.com/p/cernunnos/
 
-Cernunnos is a Java technology designed to promote and support effective Object Oriented development.  It can help you do all sorts of things, and is not limited to a particular domain or problem space.
+It's hard to say in a few words what Cernunnos is.  It's a bit like the story of the blind men and the elephant -- describing a part of it doesn't adequately convey the big picture.
 
-For example, it has been used to analyze changes to a database and to compile documentation for a software project (viz. this one).
+In one sense Cernunnos is a *task harness*:  usefull operations can be implemented abstractly as _tasks_, and later instrumented and combined to satisfy current and future needs.
 
-In fact, this email was sent to you using a Script written for Cernunnos, and it's content was pulled from a Subversion repository at the following location:
+You could also say that Cernunnos promotes interoperability.  It provides a _thin layer of lubrication_ between systems, technologies, and existing Java code.
+
+Cernunnos has been used -- almost exclusively by me, unfortunately -- to do a wide variety of things:
+  - analyze changes to a database
+  - compile documentation for a software project (viz. this one)
+  - automate business processes for a Vacation Rental business
+  - serch JAR archives for classes with names that match a regular expression
+
+In fact, this email was sent to you programmatically using Cernunnos, and it's content was pulled from a Subversion repository at the following location:
 
   http://cernunnos.googlecode.com/svn/trunk/media/Invitation.txt
 
@@ -17,9 +25,9 @@ Cernunnos is simple to install, simple to use, and simple to extend.  Please tak
 There is also a Google Groups community for Cernunnos discussion.  You can visit it here:
 
   http://groups.google.com/group/cernunnos-discussion
-  
+
 There you can find a lot of helpful information and useful scripts for Cernunnos.
 
-Sincerely,
+Thanks,
 
 Andrew Wills
