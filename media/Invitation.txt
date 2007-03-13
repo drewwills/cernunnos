@@ -1,12 +1,12 @@
 ${req($1)},
 
-I'd like to trun your attention for a moment to a pet project I've been brewing for about a year:  Cernunnos.  I've created an Open Source Java project hosted by Google Code to manage it.  You can check it out at the following address:
+I'd like to turn your attention for a moment to a pet project I've been brewing for about a year:  Cernunnos.  I've created an Open Source Java project hosted by Google Code to manage it.  You can check it out at the following address:
 
   http://code.google.com/p/cernunnos/
 
 It's hard to say in a few words what Cernunnos is.  It's a bit like the story of the blind men and the elephant -- describing a part of it doesn't adequately convey the big picture.
 
-In one sense Cernunnos is a *task harness*:  usefull operations can be implemented abstractly as _tasks_, and later instrumented and combined to satisfy current and future needs.
+In one sense Cernunnos is a *task harness*:  useful operations can be implemented abstractly as _tasks_, and later instrumented and combined to satisfy current and future needs.
 
 You could also say that Cernunnos promotes interoperability.  It provides a _thin layer of lubrication_ between systems, technologies, and existing Java code.
 
@@ -14,7 +14,7 @@ Cernunnos has been used -- almost exclusively by me, unfortunately -- to do a wi
   - analyze changes to a database
   - compile documentation for a software project (viz. this one)
   - automate business processes for a Vacation Rental business
-  - serch JAR archives for classes with names that match a regular expression
+  - search JAR archives for classes with names that match a regular expression
 
 In fact, this email was sent to you programmatically using Cernunnos, and it's content was pulled from a Subversion repository at the following location:
 
