@@ -16,6 +16,8 @@
 
 package org.danann.cernunnos.core;
 
+import java.util.regex.Pattern;
+
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
@@ -74,7 +76,9 @@ public class StringReplaceTask extends AbstractContainerTask {
 		String x = (String) regex.evaluate(req, res);
 		String r = (String) replacement.evaluate(req, res);
 		
-		res.setAttribute(Attributes.STRING, s.replaceAll(x, r));
+	    String rslt = Pattern.compile(x, Pattern.DOTALL).matcher(s).replaceAll(r);
+		
+		res.setAttribute(Attributes.STRING, rslt);
 		
 		super.performSubtasks(req, res);
 		
