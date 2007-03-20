@@ -31,7 +31,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class TransactionTask extends AbstractContainerTask {
+public final class TransactionTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase connection;

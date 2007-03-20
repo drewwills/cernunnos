@@ -31,7 +31,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class DeleteNodeTask implements Task {
+public final class DeleteNodeTask implements Task {
 
 	// Instance Members.
 	private Phrase node;

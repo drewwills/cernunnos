@@ -21,7 +21,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class ExtractArchiveTask implements Task {
+public final class ExtractArchiveTask implements Task {
 
 	// Instance Members.
 	private Phrase context;

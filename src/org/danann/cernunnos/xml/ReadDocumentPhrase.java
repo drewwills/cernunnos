@@ -32,7 +32,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class ReadDocumentPhrase implements Phrase {
+public final class ReadDocumentPhrase implements Phrase {
 
 	// Instance Members.
 	private Phrase context;

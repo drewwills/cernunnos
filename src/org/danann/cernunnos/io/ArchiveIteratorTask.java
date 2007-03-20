@@ -34,7 +34,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class ArchiveIteratorTask extends AbstractContainerTask {
+public final class ArchiveIteratorTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase context;

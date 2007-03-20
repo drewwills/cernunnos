@@ -33,7 +33,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class ExecuteProcessTask implements Task {
+public final class ExecuteProcessTask implements Task {
 	
 	// Instance Members.
 	private Phrase cmd;

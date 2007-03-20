@@ -31,7 +31,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class StringReplaceTask extends AbstractContainerTask {
+public final class StringReplaceTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase string;

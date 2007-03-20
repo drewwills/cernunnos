@@ -27,7 +27,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class IfTask extends AbstractContainerTask {
+public final class IfTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase test;

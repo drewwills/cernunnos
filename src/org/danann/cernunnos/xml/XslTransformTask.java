@@ -53,7 +53,7 @@ import org.danann.cernunnos.TaskResponse;
  * NODE node or LOCATION document.  Specify the location of the .xsl 
  * stylesheet through the (mandatory) STYLESHEET reagent.  
  */
-public class XslTransformTask extends AbstractContainerTask {
+public final class XslTransformTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private TransformerFactory fac;

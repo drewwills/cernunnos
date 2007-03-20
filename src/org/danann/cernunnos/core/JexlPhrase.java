@@ -31,7 +31,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class JexlPhrase implements Phrase {
+public final class JexlPhrase implements Phrase {
 
 	// Instance Members.
 	private Phrase expression;

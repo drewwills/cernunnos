@@ -32,7 +32,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class AppendNodeTask extends AbstractContainerTask {
+public final class AppendNodeTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase node;
@@ -86,7 +86,7 @@ public class AppendNodeTask extends AbstractContainerTask {
 		} else {
 			// Work from the PARENT...
 			p = (Branch) parent.evaluate(req, res);
-			index = 0;
+			index = p.content().size();
 		}
 		
 		p.content().add(index, node.evaluate(req, res));

@@ -31,7 +31,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class UrlPhrase implements Phrase {
+public final class UrlPhrase implements Phrase {
 
 	// Instance Members.
 	private Grammar grammar;

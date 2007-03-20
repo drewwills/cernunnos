@@ -34,7 +34,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class CernunnosTask implements Task {
+public final class CernunnosTask implements Task {
 
 	// Instance Members.
 	private Grammar grammar;

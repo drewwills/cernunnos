@@ -32,7 +32,7 @@ import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class EchoTask implements Task {
+public final class EchoTask implements Task {
 
 	// Instance Members.
 	private Phrase stream;

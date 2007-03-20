@@ -23,7 +23,7 @@ import java.io.File;
  * which Java is executing and returns a <code>String</code> representation of 
  * it.
  */
-public class CurrentDirectoryUrlPhrase implements Phrase {
+public final class CurrentDirectoryUrlPhrase implements Phrase {
 	
 	/*
 	 * Public API.

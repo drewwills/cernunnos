@@ -28,7 +28,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class FilePhrase implements Phrase {
+public final class FilePhrase implements Phrase {
 
 	// Instance Members.
 	private Phrase location;

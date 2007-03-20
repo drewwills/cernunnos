@@ -33,7 +33,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class WriteFileTask implements Task {
+public final class WriteFileTask implements Task {
 
 	// Instance Members.
 	private Phrase string;

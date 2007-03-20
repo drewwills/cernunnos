@@ -20,7 +20,7 @@ package org.danann.cernunnos;
  * Provides static access to some very common attribute names that facilitate 
  * elegant cooperation between <code>Task</code> implementations.
  */
-public class Attributes {
+public final class Attributes {
 
 	/**
 	 * Use this name to create a request attribute containing a 

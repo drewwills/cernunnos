@@ -29,7 +29,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class MakeDirectoriesTask implements Task {
+public final class MakeDirectoriesTask implements Task {
 
 	// Instance Members.
 	private Phrase path;

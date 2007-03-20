@@ -33,7 +33,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class AddGrammarTask extends AbstractContainerTask {
+public final class AddGrammarTask extends AbstractContainerTask {
 	
 	// Instance Members.
 	private String context;

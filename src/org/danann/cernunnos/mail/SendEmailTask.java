@@ -35,7 +35,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class SendEmailTask implements Task {
+public final class SendEmailTask implements Task {
 
     // Instance Members.
     private Phrase protocol;

@@ -30,7 +30,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class SingleNodePhrase  implements Phrase {
+public final class SingleNodePhrase  implements Phrase {
 
 	// Instance Members.
 	private Phrase source;

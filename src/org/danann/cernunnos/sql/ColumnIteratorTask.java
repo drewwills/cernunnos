@@ -26,7 +26,7 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class ColumnIteratorTask extends AbstractContainerTask {
+public final class ColumnIteratorTask extends AbstractContainerTask {
 
 	/*
 	 * Public API.

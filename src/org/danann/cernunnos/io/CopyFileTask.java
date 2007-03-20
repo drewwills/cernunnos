@@ -37,7 +37,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class CopyFileTask implements Task {
+public final class CopyFileTask implements Task {
 
 	// Instance Members.
 	private Phrase context;

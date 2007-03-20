@@ -16,7 +16,7 @@
 
 package org.danann.cernunnos.sql;
 
-public class SqlAttributes {
+public final class SqlAttributes {
 
 	/**
 	 * The default name under which the new connection will be registered as a 

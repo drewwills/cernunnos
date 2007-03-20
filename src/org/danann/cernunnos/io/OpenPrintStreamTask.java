@@ -32,7 +32,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public class OpenPrintStreamTask extends AbstractContainerTask {
+public final class OpenPrintStreamTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase attribute_name;
