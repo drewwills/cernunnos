@@ -49,10 +49,18 @@ public final class ClasspathURLStreamHandler extends URLStreamHandler {
 		public void connect() {}
 		
 		public InputStream getInputStream() {
+			
 			String s = url.toExternalForm();
 			s = s.substring((url.getProtocol() + "://").length(), s.length());
-System.out.println("s="+s);
-			return ClassLoader.getSystemResourceAsStream(s);
+			
+			InputStream rslt = ClassLoader.getSystemResourceAsStream(s);
+			if (rslt == null) {
+				String msg = "Unable to read the specified resource from the classpath:  " + s;
+				throw new RuntimeException(msg);
+			}
+
+			return rslt;
+			
 		}
 		
 		public OutputStream getOutputStream() {
