@@ -21,6 +21,8 @@ import java.net.URL;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
+import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -43,12 +45,14 @@ public final class ReadDocumentPhrase implements Phrase {
 	 */
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
-			"The context from which missing elements of the LOCATION can be inferred if it "
-			+ "is relative.  The default is a URL representing the filesystem location from which "
-			+ "Java is executing.", new CurrentDirectoryUrlPhrase());
+					"The context from which missing elements of the LOCATION can be inferred if it "
+					+ "is relative.  The default is a URL representing the filesystem location from which "
+						+ "Java is executing.", new CurrentDirectoryUrlPhrase());
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "descendant-or-self::text()", ReagentType.PHRASE, String.class, 
-			"Location of a resource from which a document may be read.  May be a filesystem path (absolute or relative), or a URL.");
+					"Location of a resource from which a document may be read.  May be a filesystem path (absolute or relative), "
+					+ "or a URL.  If relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
+					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};

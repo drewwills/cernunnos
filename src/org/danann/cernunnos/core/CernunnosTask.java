@@ -21,6 +21,8 @@ import java.net.URL;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
+import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -51,7 +53,9 @@ public final class CernunnosTask implements Task {
 					+ "Java is executing.", new CurrentDirectoryUrlPhrase());
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
-					"Location of a Cernunnos script.  May be a filesystem path (absolute or relative), or a URL.");
+					"Location of a Cernunnos script.  May be a filesystem path (absolute or relative), or a URL.  If "
+					+ "relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
+					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};
@@ -73,11 +77,15 @@ public final class CernunnosTask implements Task {
 		String loc = (String) location.evaluate(req, res);
 
 		try {
+			
+			// Choose a script...
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL crn = new URL(ctx, loc);
+
 			Document doc = new SAXReader().read(crn.openStream());
 			Task k = grammar.newTask(doc.getRootElement(), this);
 			k.perform(req, res);
+			
 		} catch (Throwable t) {
 			String msg = "Unable to invoke the specified script:  " + loc;
 			throw new RuntimeException(msg, t);

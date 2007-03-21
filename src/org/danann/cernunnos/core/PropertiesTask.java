@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.Properties;
 
 import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -47,7 +49,9 @@ public final class PropertiesTask extends AbstractContainerTask {
 					+ "Java is executing.", new CurrentDirectoryUrlPhrase());
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
-					"Location of a .properties file.  May be a filesystem path (absolute or relative), or a URL.");
+					"Location of a .properties file.  May be a filesystem path (absolute or relative), or a URL.  If "
+					+ "relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
+					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
