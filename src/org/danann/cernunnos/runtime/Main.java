@@ -19,6 +19,8 @@ package org.danann.cernunnos.runtime;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
 
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
@@ -28,11 +30,15 @@ import org.danann.cernunnos.Task;
 
 public final class Main {
 	
+	static {
+		URL.setURLStreamHandlerFactory(new URLStreamHandlerFactoryImpl());
+	}
+	
 	// Static Members.
 	private static final String DEFAULT_GRAMMAR = "cernunnos.xml";
 		
 	public static void main(String[] args) {
-		
+				
 		// Put some whitespace between the command and the output...
 		System.out.println("");
 
@@ -81,6 +87,26 @@ public final class Main {
 		}
 		
 		script.perform(req, new RuntimeRequestResponse());
+		
+	}
+
+	/*
+	 * Nested Types.
+	 */
+	
+	private static final class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
+		
+		public URLStreamHandler createURLStreamHandler(String protocol) {
+			
+			URLStreamHandler rslt = null;
+			
+			if (protocol != null && protocol.equals("classpath")) {
+				rslt = new ClasspathURLStreamHandler();
+			}
+			
+			return rslt;
+			
+		}
 		
 	}
 
