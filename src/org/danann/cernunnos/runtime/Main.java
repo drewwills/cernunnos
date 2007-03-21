@@ -35,7 +35,7 @@ public final class Main {
 	}
 	
 	// Static Members.
-	private static final String DEFAULT_GRAMMAR = "cernunnos.xml";
+	private static final String DEFAULT_GRAMMAR = "main.grammar";
 		
 	public static void main(String[] args) {
 				
