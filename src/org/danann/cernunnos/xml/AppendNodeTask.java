@@ -16,10 +16,12 @@
 
 package org.danann.cernunnos.xml;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.dom4j.Branch;
 import org.dom4j.Node;
 
-import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
@@ -29,15 +31,17 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
+import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public final class AppendNodeTask extends AbstractContainerTask {
+public final class AppendNodeTask implements Task {
 
 	// Instance Members.
 	private Phrase node;
 	private Phrase parent;
 	private Phrase sibling;
+	private List content;
 
 	/*
 	 * Public API.
@@ -56,20 +60,24 @@ public final class AppendNodeTask extends AbstractContainerTask {
 					"Optional node after which the specified content will be added.  Specify only PARENT or "
 					+ "SIBLING, not both.", null);
 
+	public static final Reagent CONTENT = new SimpleReagent("CONTENT", "*", ReagentType.NODE_LIST, List.class,
+					"Optional XML nodes to append.  Use this reagent to specify content in-line.  If "
+					+ "CONTENT is present, it will be prefered over NODE.", null);
+			
+			
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, CONTENT};
 		final Formula rslt = new SimpleFormula(AppendNodeTask.class, reagents);
 		return rslt;
 	}
 
 	public void init(EntityConfig config) {
 
-		super.init(config);		
-
 		// Instance Members.
 		this.node = (Phrase) config.getValue(NODE); 
 		this.parent = (Phrase) config.getValue(PARENT); 
 		this.sibling = (Phrase) config.getValue(SIBLING); 
+		this.content = (List) config.getValue(CONTENT); 
 		
 	}
 
@@ -89,10 +97,19 @@ public final class AppendNodeTask extends AbstractContainerTask {
 			index = p.content().size();
 		}
 		
-		p.content().add(index, node.evaluate(req, res));
+		// Figure out what content to add...
+		List list = null;
+		if (content != null && content.size() > 0) {
+			list = content;
+		} else {
+			list = new LinkedList();
+			list.add(node.evaluate(req, res));
+		}
 		
-		super.performSubtasks(req, res);
-		
+		for (Object o : list) {
+			p.content().add(index++, o);
+		}
+				
 	}
 
 }
