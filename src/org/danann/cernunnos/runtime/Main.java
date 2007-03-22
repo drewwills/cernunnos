@@ -98,10 +98,18 @@ public final class Main {
 		
 		public URLStreamHandler createURLStreamHandler(String protocol) {
 			
+			// Assertions.
+			if (protocol == null) {
+				String msg = "Argument 'protocol' cannot be null.";
+				throw new IllegalArgumentException(msg);
+			}
+			
 			URLStreamHandler rslt = null;
 			
-			if (protocol != null && protocol.equals("classpath")) {
+			if (protocol.equals("classpath")) {
 				rslt = new ClasspathURLStreamHandler();
+			} else if (protocol.matches("\\A[a-zA-Z]\\z")) {
+				rslt = new WindowsDriveURLStreamHandler();
 			}
 			
 			return rslt;
