@@ -65,6 +65,11 @@
 		</example>
 	</doc>
 
+	<phrase name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase"/>
+	<doc entry="isNull">
+		<description>Returns Boolean.TRUE if the specified VALUE is nulll, otherwise Boolean.FALSE.</description>
+	</doc>
+
 	<task name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask"/>
 	<doc entry="with-attribute">
 		<description>Creates a request attribute with the specified name and value, then invokes subtasks.</description>
@@ -346,7 +351,12 @@
 
 	<task name="append-node" impl="org.danann.cernunnos.xml.AppendNodeTask"/>
 	<doc entry="append-node">
-		<description>Adds the specified child node to the specified parent node.</description>
+		<description>Adds the specified XML content to the specified PARENT (at the end) or after the specified SIBLING.</description>
+	</doc>
+
+	<task name="prepend-node" impl="org.danann.cernunnos.xml.PrependNodeTask"/>
+	<doc entry="prepend-node">
+		<description>Adds the specified XML content to the specified PARENT (at the beginning) or before the specified SIBLING.</description>
 	</doc>
 
 </grammar>
