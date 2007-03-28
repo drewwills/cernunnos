@@ -75,6 +75,10 @@ public final class WriteDocumentTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		File f = new File((String) file.evaluate(req, res));
+		if (f.getParentFile() != null) {
+			// Make sure the necessary directories are in place...
+			f.getParentFile().mkdirs();
+		}
 		
 		try {
 			XMLWriter writer = new XMLWriter(new FileOutputStream(f), OutputFormat.createPrettyPrint());
