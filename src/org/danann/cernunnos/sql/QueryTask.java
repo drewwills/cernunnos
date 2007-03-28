@@ -59,7 +59,7 @@ public final class QueryTask extends AbstractContainerTask {
 			"Optional Connection object.  The default is the value of the 'SqlAttributes.CONNECTION' request attribute.", 
 			new AttributePhrase(SqlAttributes.CONNECTION));
 	
-	public static final Reagent SQL = new SimpleReagent("@sql", "sql", ReagentType.PHRASE, String.class, 
+	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class, 
 										"The SQL query statement that will be executed.");
 
 	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class, 
