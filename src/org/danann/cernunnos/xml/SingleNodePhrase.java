@@ -34,22 +34,22 @@ public final class SingleNodePhrase  implements Phrase {
 
 	// Instance Members.
 	private Phrase source;
-	private Phrase expression;
+	private Phrase xpath;
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent SOURCE = new SimpleReagent("NODE", "@source", ReagentType.PHRASE, Node.class,
-					"Optional source node against which the EXPRESSION will be evaluated.  If not "
+	public static final Reagent SOURCE = new SimpleReagent("SOURCE", "@source", ReagentType.PHRASE, Node.class,
+					"Optional source node against which the XPATH expression will be evaluated.  If not "
 					+ "provided, the value of the 'Attributes.NODE' request attribute will be used.", 
 					new AttributePhrase(Attributes.NODE));
 
-	public static final Reagent EXPRESSION = new SimpleReagent("LOCATION", "descendant-or-self::text()", 
+	public static final Reagent XPATH = new SimpleReagent("XPATH", "descendant-or-self::text()", 
 					ReagentType.PHRASE, String.class, "An XPATH expression.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {SOURCE, EXPRESSION};
+		Reagent[] reagents = new Reagent[] {SOURCE, XPATH};
 		return new SimpleFormula(SingleNodePhrase.class, reagents);
 	}
 	
@@ -57,14 +57,14 @@ public final class SingleNodePhrase  implements Phrase {
 
 		// Instance Members.
 		this.source = (Phrase) config.getValue(SOURCE); 
-		this.expression = (Phrase) config.getValue(EXPRESSION); 
+		this.xpath = (Phrase) config.getValue(XPATH); 
 		
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 
 		Node src = (Node) source.evaluate(req, res);
-		return src.selectSingleNode((String) expression.evaluate(req, res));
+		return src.selectSingleNode((String) xpath.evaluate(req, res));
 		
 	}
 	
