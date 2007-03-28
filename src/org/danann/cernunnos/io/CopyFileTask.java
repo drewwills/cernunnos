@@ -90,14 +90,16 @@ public final class CopyFileTask implements Task {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
+		
+		String ctx = (String) context.evaluate(req, res);
 		String origin = (String) location.evaluate(req, res);
 		String dir = to_dir != null ? (String) to_dir.evaluate(req, res) : null;
 		String destination = (String) to_file.evaluate(req, res);
 
 		try {
 
-			URL ctx = new URL((String) context.evaluate(req, res));
-			URL loc = new URL(ctx, origin);
+			URL ctxUrl = new URL(ctx);
+			URL loc = new URL(ctxUrl, origin);
 			URLConnection conn = loc.openConnection();
 			InputStream is = conn.getInputStream();
 
@@ -120,7 +122,8 @@ public final class CopyFileTask implements Task {
 			
 		} catch (Throwable t) {
 			String msg = "Unable to copy the specified file [" + origin 
-								+ "] to the specified location [" 
+								+ "] in the specified context [" + ctx 
+								+ "]to the specified location [" 
 								+ destination + "].";
 			throw new RuntimeException(msg, t);
 		}
