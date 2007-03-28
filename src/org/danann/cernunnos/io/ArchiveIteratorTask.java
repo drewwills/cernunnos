@@ -79,9 +79,18 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 		try {
 			
 			URL ctx = new URL((String) context.evaluate(req, res));
-			ZipInputStream zip = new ZipInputStream(new URL(ctx, loc).openStream());
+			URL url = new URL(ctx, loc);
+			ZipInputStream zip = new ZipInputStream(url.openStream());
 			
+			// Set the default CONTEXT for subtasks...
+			res.setAttribute(Attributes.CONTEXT, "jar:" + url.toString() + "!/");
+
 			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+				if (entry.isDirectory()) {
+					// We need to skip these b/c many possible subtasks will 
+					// choke on them.  Hope that doesn't become a problem.
+					continue;
+				}
 				res.setAttribute(Attributes.LOCATION, entry.getName());
 				super.performSubtasks(req, res);
 				zip.closeEntry();
