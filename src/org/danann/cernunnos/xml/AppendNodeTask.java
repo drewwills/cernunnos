@@ -26,6 +26,7 @@ import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -42,6 +43,7 @@ public final class AppendNodeTask implements Task {
 	private Phrase parent;
 	private Phrase sibling;
 	private List content;
+	private Grammar grammar;
 
 	/*
 	 * Public API.
@@ -77,7 +79,8 @@ public final class AppendNodeTask implements Task {
 		this.node = (Phrase) config.getValue(NODE); 
 		this.parent = (Phrase) config.getValue(PARENT); 
 		this.sibling = (Phrase) config.getValue(SIBLING); 
-		this.content = (List) config.getValue(CONTENT); 
+		this.content = (List) config.getValue(CONTENT);
+		this.grammar = config.getGrammar();
 		
 	}
 
@@ -105,9 +108,12 @@ public final class AppendNodeTask implements Task {
 			list = new LinkedList();
 			list.add(node.evaluate(req, res));
 		}
-		
+				
+		// Evaluate phrases & add...
 		for (Object o : list) {
-			p.content().add(index++, o);
+			Node n = (Node) ((Node) o).clone();
+			NodeProcessor.evaluatePhrases(n, grammar, req, res);
+			p.content().add(index++, n);
 		}
 				
 	}
