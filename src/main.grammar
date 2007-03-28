@@ -70,6 +70,11 @@
 		<description>Returns Boolean.TRUE if the specified VALUE is nulll, otherwise Boolean.FALSE.</description>
 	</doc>
 
+	<phrase name="parseInt" impl="org.danann.cernunnos.core.ParseIntegerPhrase"/>
+	<doc entry="parseInt">
+		<description>Evaluates the Integer value of the specified EXPRESSION and returns it.</description>
+	</doc>
+
 	<task name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask"/>
 	<doc entry="with-attribute">
 		<description>Creates a request attribute with the specified name and value, then invokes subtasks.</description>
@@ -295,7 +300,7 @@
 
 	<phrase name="singleNode" impl="org.danann.cernunnos.xml.SingleNodePhrase"/>
 	<doc entry="singleNode">
-		<description>Returns the first node that matches the specified XPath expression when evaluated against the SOURCE node.</description>
+		<description>Returns the first node that matches the specified XPATH expression when evaluated against the SOURCE node.</description>
 	</doc>
 
 	<phrase name="doc" impl="org.danann.cernunnos.xml.ReadDocumentPhrase"/>
@@ -311,6 +316,11 @@
 	<phrase name="newDoc" impl="org.danann.cernunnos.xml.NewDocumentPhrase"/>
 	<doc entry="newDoc">
 		<description>Creates a new XML Document.  If provided, this task also creates a root element with the specified NAME.  This task return either the root element (if present) or the document node.</description>
+	</doc>
+
+	<phrase name="textNode" impl="org.danann.cernunnos.xml.TextNodePhrase"/>
+	<doc entry="textNode">
+		<description>Creates a new XML text node from the specified VALUE.</description>
 	</doc>
 
 	<task name="xslt" impl="org.danann.cernunnos.xml.XslTransformTask"/>
