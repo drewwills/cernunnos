@@ -143,7 +143,10 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 			if (to_file != null) {
 				File f = new File((String) to_file.evaluate(req, res));
-				f.getParentFile().mkdirs();
+				if (f.getParentFile() != null) {
+					// Make sure the necessary directories are in place...
+					f.getParentFile().mkdirs();
+				}
 				XMLWriter writer = new XMLWriter(new FileOutputStream(f), 
 										new OutputFormat("  ", true));
 				writer.write(rslt.getDocument().getRootElement());
