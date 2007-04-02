@@ -75,6 +75,11 @@
 		<description>Evaluates the Integer value of the specified EXPRESSION and returns it.</description>
 	</doc>
 
+	<phrase name="false" impl="org.danann.cernunnos.core.FalsePhrase"/>
+	<doc entry="false">
+		<description>Returns Boolean.FALSE.</description>
+	</doc>
+
 	<task name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask"/>
 	<doc entry="with-attribute">
 		<description>Creates a request attribute with the specified name and value, then invokes subtasks.</description>
@@ -138,13 +143,18 @@
 		</example>
 	</doc>
 
+	<task name="invoke-method" impl="org.danann.cernunnos.core.InvokeMethodTask"/>
+	<doc entry="invoke-method">
+		<description>Invokes the specified METHOD on the specified OBJECT or CLASS.</description>
+	</doc>
+
 	<task name="string-replace" impl="org.danann.cernunnos.core.StringReplaceTask"/>
 	<doc entry="string-replace">
 		<description>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</description>
 	</doc>
 
 	<!-- 
-	  | Package:  core
+	  | Package:  flow
 	  +-->
 
 	<task name="if" impl="org.danann.cernunnos.flow.IfTask"/>
