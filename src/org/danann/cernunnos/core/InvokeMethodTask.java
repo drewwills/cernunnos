@@ -129,6 +129,7 @@ public class InvokeMethodTask extends AbstractContainerTask {
 						boolean matches = true;
 						for (int i=0; i < params.length; i++) {
 							ArrayList<Class> types = new ArrayList<Class>();
+							types.add(argTypes[i]);
 							types.addAll(Arrays.asList(argTypes[i].getInterfaces()));
 							for (Class sup = argTypes[i].getSuperclass(); sup != null; sup = sup.getSuperclass()) {
 								types.add(sup);
