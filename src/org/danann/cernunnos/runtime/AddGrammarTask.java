@@ -17,7 +17,6 @@
 package org.danann.cernunnos.runtime;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URL;
 
 import org.dom4j.io.SAXReader;
@@ -38,7 +37,6 @@ public final class AddGrammarTask extends AbstractContainerTask {
 	// Instance Members.
 	private String context;
 	private String location;
-	private String classpath;
 	
 	/*
 	 * Public API.
@@ -53,14 +51,9 @@ public final class AddGrammarTask extends AbstractContainerTask {
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.STRING, String.class,
 					"The location of the grammar file that defines the grammar to add.  WARNING:  This reagent "
 					+ "must be a String (not a Phrase) because it gets used at boostrap time (not runtime).");
-
-	public static final Reagent CLASSPATH = new SimpleReagent("CLASSPATH", "@classpath", ReagentType.STRING, String.class,
-					"Optional filesystem location from which task implementations should be loaded.  By "
-					+ "default, the system classpath is used.  WARNING:  This reagent must be a String (not "
-					+ "a Phrase) because it gets used at boostrap time (not runtime).", null);
 	
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, CLASSPATH, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(AddGrammarTask.class, reagents);
 		return rslt;
 	}
@@ -70,19 +63,12 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		// Instance Members.
 		this.context = (String) config.getValue(CONTEXT);
 		this.location = (String) config.getValue(LOCATION);
-		this.classpath = (String) config.getValue(CLASSPATH);
-		
-		ClassLoader loader = ClassLoader.getSystemClassLoader();	// default...
-		if (this.classpath != null) {
-			loader = new ClassLoaderImpl(this.classpath);
-		}
-		
+				
 		Grammar g = null;
 		try {
 			URL ctx = new URL(this.context); 
 			URL loc = new URL(ctx, location);
-			g = XmlGrammar.parse(new SAXReader().read(loc.openStream()).getRootElement(), 
-													config.getGrammar(), loader);
+			g = XmlGrammar.parse(new SAXReader().read(loc.openStream()).getRootElement(), config.getGrammar());
 		} catch (Throwable t) {
 			String msg = "Unable to parse a grammar from the specified location:  " + this.location; 
 			throw new RuntimeException(msg, t);
@@ -114,66 +100,5 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		return rslt;
 		
 	}
-	
-	/*
-	 * Nested Types.
-	 */
-
-	private static final class ClassLoaderImpl extends ClassLoader {
 		
-		// Instance Members.
-		private final String classpath;
-		
-		/*
-		 * Public API.
-		 */
-
-		public ClassLoaderImpl(String classpath) {
-
-			// Assertions...
-			if (classpath == null) {
-				String msg = "Argument 'classpath' cannot be null.";
-				throw new IllegalArgumentException(msg);
-			}
-			if (!(new File(classpath).exists())) {
-				String msg = "The specified classpath location does not exist:  " + classpath;
-				throw new IllegalArgumentException(msg);
-			}
-			if (classpath.endsWith("/")) {
-				// This isn't an exception, but we must clean it up...
-				classpath = classpath.substring(0, classpath.length() - 1);
-			}
-			
-			// Instance Members.
-			this.classpath = classpath;
-			
-		}
-		
-		protected Class<?> findClass(String name) {
-			
-			// Assertions...
-			if (name == null) {
-				String msg = "Argument 'name' cannot be null.";
-				throw new IllegalArgumentException(msg);
-			}
-
-			String path = classpath + "/" + name.replace('.', '/') + ".class";
-			
-			Class rslt = null;
-			try {
-				FileInputStream inpt = new FileInputStream(path);
-				byte[] bytes = new byte[inpt.available()];
-				inpt.read(bytes, 0, inpt.available());
-				rslt = super.defineClass(name, bytes, 0, bytes.length);				
-			} catch (Throwable t) {
-				String msg = "Unable to load the specified class file:  " + path;
-				throw new RuntimeException(msg, t);
-			}
-			
-			return rslt;
-
-		}
-		
-	}
-	
 }

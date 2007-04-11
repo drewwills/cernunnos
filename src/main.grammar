@@ -37,6 +37,13 @@
 		<description>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</description>
 	</doc>
 
+<!-- Not ready
+	<task name="classpath" impl="org.danann.cernunnos.runtime.AddToClasspathTask"/>
+	<doc entry="classpath">
+		<description>Adds the path elements specified in PATH the classpath for subtasks.</description>
+	</doc>
+-->
+
 	<task name="serialize-grammar" impl="org.danann.cernunnos.runtime.XmlGrammar$SerializeGrammarTask"/>
 	<doc entry="serialize-grammar">
 		<description>Creates an XML representation of the current grammar and sets it as the value of the 'Attributes.NODE' attribute.</description>
@@ -160,6 +167,11 @@
 	<task name="if" impl="org.danann.cernunnos.flow.IfTask"/>
 	<doc entry="if">
 		<description>Execustes SUBTASKS if the conditions of TEST are met.</description>
+	</doc>
+
+	<task name="choose" impl="org.danann.cernunnos.flow.ChooseTask"/>
+	<doc entry="choose">
+		<description>Performs the subtasks within the first WHEN element (&lt;when&gt;) whose 'test' attribute returns true.  You may optionally provide an OTHERWISE (&lt;otherwise&gt;) element whose subtasks will be performed if none of the WHEN conditions are met.</description>
 	</doc>
 
 	<!-- 

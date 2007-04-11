@@ -64,4 +64,10 @@ public final class IfTask extends AbstractContainerTask {
 		
 	}
 	
+	public boolean isApplicable(TaskRequest req, TaskResponse res) {
+		
+		return ((Boolean) test.evaluate(req, res)).booleanValue();
+				
+	}
+	
 }
