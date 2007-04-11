@@ -333,8 +333,26 @@ public final class XmlGrammar implements Grammar {
 			// This is a little hokey... perhaps Entry should be a first-class type?
 			rslt = ((XmlGrammar) parent).getEntry(name);
 		} else {
-			String msg = "The specified entry is not defined:  " + name;
-			throw new IllegalArgumentException(msg);
+			try {
+				Class c = Class.forName(name);
+				Bootstrappable b = (Bootstrappable) c.newInstance();
+				EntryType y = null;
+				if (b instanceof Phrase) {
+					y = EntryType.PHRASE;
+				} else if (b instanceof Task) {
+					y = EntryType.TASK;
+				} else {
+					String msg = "The specified class is neither a Phrase nor a Task:  " + name;
+					throw new RuntimeException(msg);
+				}
+				rslt = new Entry(name, y, null, b.getFormula(), new HashMap<Reagent,Object>(), new LinkedList<Node>());
+			} catch (ClassNotFoundException cnfe) {
+				String msg = "The specified entry name does not match a known entry or an available class:  " + name;
+				throw new IllegalArgumentException(msg);
+			} catch (Throwable t) {
+				String msg = "Error preparing the specified entry:  " + name;
+				throw new RuntimeException(msg);
+			}
 		}
 		return rslt;
 	}
