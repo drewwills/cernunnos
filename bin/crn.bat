@@ -13,23 +13,18 @@ rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem See the License for the specific language governing permissions and
 rem limitations under the License.
 
-rem Establish the classpath & script we expext to use...
+rem Establish the classpath...
 set CRN_CLASSPATH=%CRN_HOME%\build
 for %%f in (%CRN_HOME%\lib\*.jar) do call add-jar %%f
-set CRN_PROJECT=%1
 
 rem (Re)Marshall the command line args...
 set CRN_ARGS=
 :nextArg
-shift
-if ""%1""=="""" goto addEnv
+if ""%1""=="""" goto invoke
 set CRN_ARGS=%CRN_ARGS% %1
+shift
 goto nextArg
-
-:addEnv
-if "%CRN_ENV%"=="" goto invoke
-set CRN_ARGS=%CRN_ENV% %CRN_ARGS%
 
 :invoke
 @echo on
-java -cp %CRN_CLASSPATH% org.danann.cernunnos.runtime.Main %CRN_PROJECT% %CRN_ARGS%
+java -cp %CRN_CLASSPATH% org.danann.cernunnos.runtime.Main %CRN_ARGS%
