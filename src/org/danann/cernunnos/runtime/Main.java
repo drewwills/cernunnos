@@ -16,105 +16,30 @@
 
 package org.danann.cernunnos.runtime;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
-
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
-
-import org.danann.cernunnos.Grammar;
-import org.danann.cernunnos.Task;
-
 public final class Main {
-	
-	static {
-		URL.setURLStreamHandlerFactory(new URLStreamHandlerFactoryImpl());
-	}
-	
-	// Static Members.
-	private static final String DEFAULT_GRAMMAR = "main.grammar";
-		
+				
 	public static void main(String[] args) {
 				
 		// Put some whitespace between the command and the output...
 		System.out.println("");
 
-		// Analyze the command-line arguments & make some decisions...
-		URL url = null;
+		// Analyze the command-line arguments...
 		RuntimeRequestResponse req = new RuntimeRequestResponse();
 		switch (args.length) {
 			case 0:
 				// No file provided, can't continue...
 				System.out.println("Usage:\n\n\t>crn [script_name] [arguments]");
+				System.exit(0);
 				break;
 			default:
-				try {
-					url = new URL(new File(".").toURL(), args[0]);
-				} catch (Throwable t) {
-					String msg = "Unable to read the specified script:  " + args[0];
-					throw new RuntimeException(msg, t);
-				}
 				for (int i=1; i < args.length; i++) {
 					req.setAttribute("$" + i, args[i]);
 				}
 				break;
 		}
-
-		SAXReader reader = new SAXReader();		
-
-		// XmlGrammar.
-		Grammar g = null;
-		try {
-			InputStream inpt = ClassLoader.getSystemResourceAsStream(DEFAULT_GRAMMAR);	// ToDo:  Make the grammar configurable...
-			Document doc = reader.read(inpt);
-			g = XmlGrammar.parse(doc.getRootElement());
-		} catch (Throwable t) {
-			System.out.println("");
-			t.printStackTrace(System.out);
-		}
 		
-		// Project.
-		Task script = null;
-		try {
-			Document doc = reader.read(url);
-			script = g.newTask(doc.getRootElement(), null);
-		} catch (Throwable t) {
-			System.out.println("");
-			t.printStackTrace(System.out);
-		}
-		
-		script.perform(req, new RuntimeRequestResponse());
-		
-	}
-
-	/*
-	 * Nested Types.
-	 */
-	
-	private static final class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
-		
-		public URLStreamHandler createURLStreamHandler(String protocol) {
-			
-			// Assertions.
-			if (protocol == null) {
-				String msg = "Argument 'protocol' cannot be null.";
-				throw new IllegalArgumentException(msg);
-			}
-			
-			URLStreamHandler rslt = null;
-			
-			if (protocol.equals("classpath")) {
-				rslt = new ClasspathURLStreamHandler();
-			} else if (protocol.matches("\\A[a-zA-Z]\\z")) {
-				rslt = new WindowsDriveURLStreamHandler();
-			}
-			
-			return rslt;
-			
-		}
+		ScriptRunner runner = new ScriptRunner();
+		runner.run(args[0], req);
 		
 	}
 

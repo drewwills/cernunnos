@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos.runtime;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,9 +25,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
@@ -51,6 +54,8 @@ public final class XmlGrammar implements Grammar {
 
 	// Static Members.
 	private static final DocumentFactory fac = new DocumentFactory();
+	private static final String MAIN_GRAMMAR_LOCATION = "main.grammar";
+	private static Grammar mainGrammar = null;
 
 	// Instance Members.
 	private final Grammar parent;
@@ -60,6 +65,27 @@ public final class XmlGrammar implements Grammar {
 	/*
 	 * Public API.
 	 */
+	
+	public static Grammar getMainGrammar() {
+		
+		if (mainGrammar == null) {
+			synchronized(XmlGrammar.class) {
+				if (mainGrammar == null) {
+					try {
+						InputStream inpt = ClassLoader.getSystemResourceAsStream(MAIN_GRAMMAR_LOCATION);
+						Document doc = new SAXReader().read(inpt);
+						mainGrammar = XmlGrammar.parse(doc.getRootElement());
+					} catch (Throwable t) {
+						String msg = "Error parsing Main Grammar.";
+						throw new RuntimeException(msg, t);
+					}
+				}
+			}
+		}
+		
+		return mainGrammar;
+
+	}
 	
 	public static Grammar parse(Element e) {
 		return parse(e, null, ClassLoader.getSystemClassLoader());
