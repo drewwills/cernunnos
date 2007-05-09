@@ -54,4 +54,10 @@ public final class Attributes {
 	 */
 	public static final String STRING = "Attributes.STREAM";
 	
+	/**
+	 * Use this name to create a request attribute containing a 
+	 * <code>java.lang.Object</code>.
+	 */
+	public static final String OBJECT = "Attributes.OBJECT";
+	
 }

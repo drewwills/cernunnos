@@ -27,8 +27,10 @@ import java.util.List;
 import org.dom4j.Node;
 
 import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -69,7 +71,8 @@ public class InvokeMethodTask extends AbstractContainerTask {
 							"The set of tasks that are children of this task.", new LinkedList<Task>());
 
 	public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", ReagentType.PHRASE, String.class,
-							"Optional name under which the result of invoking METHOD will be registered as a request attribute.", null);
+							"Optional name under which the result of invoking METHOD will be registered as a request attribute.", 
+							new LiteralPhrase(Attributes.OBJECT));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {OBJECT, CLASS, METHOD, PARAMETERS, ATTRIBUTE_NAME, SUBTASKS};
@@ -156,11 +159,8 @@ public class InvokeMethodTask extends AbstractContainerTask {
 			}
 			
 			Object rslt = myMethod.invoke(target, argValues);
-			
-			if (attribute_name != null) {
-				String name = (String) attribute_name.evaluate(req, res);
-				res.setAttribute(name, rslt);
-			}
+			String attr = (String) attribute_name.evaluate(req, res);
+			res.setAttribute(attr, rslt);
 
 			super.performSubtasks(req, res);
 			
