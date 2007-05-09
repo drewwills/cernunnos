@@ -72,6 +72,16 @@
 		</example>
 	</doc>
 
+	<phrase name="seq" impl="org.danann.cernunnos.core.NamedSequencePhrase"/>
+	<doc entry="seq">
+		<description>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</description>
+	</doc>
+
+	<phrase name="null" impl="org.danann.cernunnos.core.NullPhrase"/>
+	<doc entry="null">
+		<description>Returns null.</description>
+	</doc>
+
 	<phrase name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase"/>
 	<doc entry="isNull">
 		<description>Returns Boolean.TRUE if the specified VALUE is nulll, otherwise Boolean.FALSE.</description>
@@ -152,7 +162,7 @@
 
 	<task name="invoke-method" impl="org.danann.cernunnos.core.InvokeMethodTask"/>
 	<doc entry="invoke-method">
-		<description>Invokes the specified METHOD on the specified OBJECT or CLASS.</description>
+		<description>Invokes the specified METHOD on the specified OBJECT or CLASS.  If the specified method has a non-void return type, use ATTRIBUTE_NAME to gain access to the object returned when the method is invoked.</description>
 	</doc>
 
 	<task name="string-replace" impl="org.danann.cernunnos.core.StringReplaceTask"/>
