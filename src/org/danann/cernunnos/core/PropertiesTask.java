@@ -17,6 +17,7 @@
 package org.danann.cernunnos.core;
 
 import java.net.URL;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.danann.cernunnos.AbstractContainerTask;
@@ -80,8 +81,8 @@ public final class PropertiesTask extends AbstractContainerTask {
 			Properties p = new Properties();
 			p.load(u.openStream());
 
-			for (Object name : p.keySet()) {
-				res.setAttribute((String) name, p.get(name));
+			for (Entry e : p.entrySet()) {
+				res.setAttribute((String) e.getKey(), e.getValue());
 			}
 			
 			super.performSubtasks(req, res);

@@ -39,7 +39,7 @@ public final class NodeProcessor {
 				Phrase p = g.newPhrase(d.getText());
 				Object o = p.evaluate(req, res);
 				String value = o != null ? o.toString() : "null";
-				d.setText(value.toString());
+				d.setText(value);
 			}
 		}
 				

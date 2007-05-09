@@ -66,21 +66,15 @@ public final class XmlGrammar implements Grammar {
 	 * Public API.
 	 */
 	
-	public static Grammar getMainGrammar() {
+	public static synchronized Grammar getMainGrammar() {
 		
-		if (mainGrammar == null) {
-			synchronized(XmlGrammar.class) {
-				if (mainGrammar == null) {
-					try {
-						InputStream inpt = ClassLoader.getSystemResourceAsStream(MAIN_GRAMMAR_LOCATION);
-						Document doc = new SAXReader().read(inpt);
-						mainGrammar = XmlGrammar.parse(doc.getRootElement());
-					} catch (Throwable t) {
-						String msg = "Error parsing Main Grammar.";
-						throw new RuntimeException(msg, t);
-					}
-				}
-			}
+		try {
+			InputStream inpt = ClassLoader.getSystemResourceAsStream(MAIN_GRAMMAR_LOCATION);
+			Document doc = new SAXReader().read(inpt);
+			mainGrammar = XmlGrammar.parse(doc.getRootElement());
+		} catch (Throwable t) {
+			String msg = "Error parsing Main Grammar.";
+			throw new RuntimeException(msg, t);
 		}
 		
 		return mainGrammar;

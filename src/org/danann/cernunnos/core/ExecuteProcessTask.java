@@ -18,6 +18,8 @@ package org.danann.cernunnos.core;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,6 +69,7 @@ public final class ExecuteProcessTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		int value;
+		InputStream inpt = null;
 		String fullCmd = (String) cmd.evaluate(req, res);
 		try {
 			
@@ -79,12 +82,9 @@ public final class ExecuteProcessTask implements Task {
 			pb.directory(new File((String) from.evaluate(req, res)));
 			
 			Process p = pb.start();
-
-//			Process p = Runtime.getRuntime().exec(fullCmd);
-			
 			value = p.waitFor();
 			
-			BufferedInputStream inpt = new BufferedInputStream(p.getInputStream());
+			inpt = new BufferedInputStream(p.getInputStream());
 			int size = inpt.available();
 			byte[] bytes = new byte[size];
 			inpt.read(bytes, 0, size);
@@ -93,6 +93,15 @@ public final class ExecuteProcessTask implements Task {
 		} catch (Throwable t) {
 			String msg = "ExecuteProcessTask encountered a problem invoking the specified command:  " + fullCmd;
 			throw new RuntimeException(msg, t);
+		} finally {
+			if (inpt != null) {
+				try {
+					inpt.close();
+				} catch (IOException ioe) {
+					String msg = "ExecuteProcessTask failed to close the process InputStream.";
+					throw new RuntimeException(msg, ioe);
+				}
+			}
 		}
 		
 		if (value != 0) {
