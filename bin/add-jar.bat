@@ -12,11 +12,4 @@ rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 rem See the License for the specific language governing permissions and
 rem limitations under the License.
 
-rem Add everything that has been passed...
-:nextChunk
-if ""%1""=="""" goto done
 set CRN_CLASSPATH=%CRN_CLASSPATH%;%1
-shift
-goto nextChunk
-
-:done
