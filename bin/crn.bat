@@ -15,7 +15,7 @@ rem limitations under the License.
 
 rem Establish the classpath...
 set CRN_CLASSPATH=%CRN_HOME%\build
-for %%f in (%CRN_HOME%\lib\*.jar) do call add-jar %%f
+for %%f in ("%CRN_HOME%\lib\*.jar") do call add-jar %%f
 
 rem (Re)Marshall the command line args...
 set CRN_ARGS=
