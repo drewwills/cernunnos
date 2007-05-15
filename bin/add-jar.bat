@@ -17,7 +17,7 @@ shift
 
 :nextChunk
 if ""%1""=="""" goto finished
-set CRN_CLASSPATH=%CRN_CLASSPATH%; %1
+set CRN_CLASSPATH=%CRN_CLASSPATH% %1
 shift
 goto nextChunk
 
