@@ -13,3 +13,12 @@ rem See the License for the specific language governing permissions and
 rem limitations under the License.
 
 set CRN_CLASSPATH=%CRN_CLASSPATH%;%1
+shift
+
+:nextChunk
+if ""%1""=="""" goto finished
+set CRN_CLASSPATH=%CRN_CLASSPATH%; %1
+shift
+goto nextChunk
+
+:finished

@@ -27,4 +27,5 @@ goto nextArg
 
 :invoke
 @echo on
+echo %CRN_CLASSPATH%
 java -cp "%CRN_CLASSPATH%" org.danann.cernunnos.runtime.Main %CRN_ARGS%
