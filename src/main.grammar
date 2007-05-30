@@ -221,6 +221,11 @@
 		</example>
 	</doc>
 
+	<task name="delete-file" impl="org.danann.cernunnos.io.DeleteFileTask"/>
+	<doc entry="delete-file">
+		<description>Deletes the specified file or directory.</description>
+	</doc>
+
 	<task name="write-file" impl="org.danann.cernunnos.io.WriteFileTask"/>
 	<doc entry="write-file">
 		<description>Writes the specified content to the specified file.</description>
