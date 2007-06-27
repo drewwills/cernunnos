@@ -18,7 +18,7 @@
 
 CRN_CLASSPATH=$CRN_HOME/build
 
-for f in $CRN_HOME/lib/*.jar; do
+for f in $(ls $CRN_HOME/lib/*.jar); do
     CRN_CLASSPATH=${CRN_CLASSPATH}:$f
 done
 
