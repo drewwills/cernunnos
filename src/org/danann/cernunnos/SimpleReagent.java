@@ -43,7 +43,7 @@ public final class SimpleReagent implements Reagent {
 	 * 
 	 * @param name A descriptive name.
 	 * @param xpath An expression to use in gathering the value of this reagent.
-	 * @param reagentType The type of this <code>Reagent</code> as defined by
+	 * @param type The type of this <code>Reagent</code> as defined by
 	 * the <code>ReagentType</code> enumeration.
 	 * @param returnType The runtime data type that instances of this 
 	 * <code>Reagent</code> must return
