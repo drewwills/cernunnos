@@ -101,6 +101,7 @@ public final class CopyFileTask implements Task {
 			URL ctxUrl = new URL(ctx);
 			URL loc = new URL(ctxUrl, origin);
 			URLConnection conn = loc.openConnection();
+			conn.connect();
 			InputStream is = conn.getInputStream();
 
 			File f = new File(dir, destination);
@@ -111,7 +112,7 @@ public final class CopyFileTask implements Task {
 			OutputStream os = new FileOutputStream(f);
 			
 			int bytesRead = 0;
-			for (int avail = is.available(); bytesRead < conn.getContentLength(); avail = is.available()) {
+			for (int avail = is.available(); avail > 0 || bytesRead < conn.getContentLength() ; avail = is.available()) {
 				byte[] b = new byte[avail];
 				is.read(b);
 				os.write(b);
