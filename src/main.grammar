@@ -77,6 +77,11 @@
 		<description>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</description>
 	</doc>
 
+	<phrase name="not" impl="org.danann.cernunnos.core.NotPhrase"/>
+	<doc entry="not">
+		<description>Returns the opposite of the specified Boolean value.</description>
+	</doc>
+
 	<phrase name="null" impl="org.danann.cernunnos.core.NullPhrase"/>
 	<doc entry="null">
 		<description>Returns null.</description>
