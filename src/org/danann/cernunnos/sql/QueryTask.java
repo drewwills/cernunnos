@@ -41,7 +41,7 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 /**
- * Performs a specified query, then invokes child tasks once for each row in the 
+ * Performs a specified query, then invokes child tasks once for each row in the
  * result set.
  */
 public final class QueryTask extends AbstractContainerTask {
@@ -56,17 +56,17 @@ public final class QueryTask extends AbstractContainerTask {
 	 */
 
 	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-			"Optional Connection object.  The default is the value of the 'SqlAttributes.CONNECTION' request attribute.", 
+			"Optional Connection object.  The default is the value of the 'SqlAttributes.CONNECTION' request attribute.",
 			new AttributePhrase(SqlAttributes.CONNECTION));
-	
-	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class, 
+
+	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class,
 										"The SQL query statement that will be executed.");
 
-	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class, 
-					"The parameters (if any) for the PreparedStatement that will perform this query.", 
+	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class,
+					"The parameters (if any) for the PreparedStatement that will perform this query.",
 					Collections.emptyList());
 
-	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class, 
+	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
 									"The set of tasks that are children of this query task.", new LinkedList<Task>());
 
 	public Formula getFormula() {
@@ -77,22 +77,22 @@ public final class QueryTask extends AbstractContainerTask {
 
 	public void init(EntityConfig config) {
 
-		super.init(config);		
+		super.init(config);
 
 		// Instance Members.
 		this.connection = (Phrase) config.getValue(CONNECTION);
-		this.sql = (Phrase) config.getValue(SQL); 
+		this.sql = (Phrase) config.getValue(SQL);
 		this.parameters = new LinkedList<Phrase>();
-		List nodes = (List) config.getValue(PARAMETERS);		
+		List nodes = (List) config.getValue(PARAMETERS);
 		for (Iterator it = nodes.iterator(); it.hasNext();) {
 			Node n = (Node) it.next();
 			parameters.add(config.getGrammar().newPhrase(n.getText()));
 		}
-		
+
 	}
-	
+
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		String finalSql = (String) sql.evaluate(req, res);
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -108,7 +108,7 @@ public final class QueryTask extends AbstractContainerTask {
 			for (Phrase p : parameters) {
 				pstmt.setObject(++index, p.evaluate(req, res));
 			}
-						
+
 			// Execute the query, perform subtasks...
 			rs = pstmt.executeQuery();
 			ResultSetMetaData rsmd = rs.getMetaData();
@@ -121,19 +121,19 @@ public final class QueryTask extends AbstractContainerTask {
 
 					// Access either by column name or column index...
 					res.setAttribute(String.valueOf(i), value);
-					res.setAttribute(rsmd.getColumnName(i), value);
+					res.setAttribute(rsmd.getColumnName(i).toUpperCase(), value);
 				}
-				
+
 				// Invoke subtasks...
 				super.performSubtasks(req, res);
-				
+
 			}
-			
+
 		} catch (Throwable t) {
 			String msg = "Unable to perform the specified query:  " + finalSql;
 			throw new RuntimeException(msg, t);
 		} finally {
-			
+
 			// Cleanup...
 			if (pstmt != null) {
 				try {
@@ -143,9 +143,9 @@ public final class QueryTask extends AbstractContainerTask {
 					throw new RuntimeException(msg, t);
 				}
 			}
-			
+
 		}
-		
+
 	}
-	
+
 }
