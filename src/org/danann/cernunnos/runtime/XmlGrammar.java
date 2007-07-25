@@ -46,8 +46,8 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 /**
- * Represents a "task language" or syntax in Cernunnos.  <code>XmlGrammar</code> 
- * instances are responsible for bootsrapping <code>Task</code> objects from 
+ * Represents a "task language" or syntax in Cernunnos.  <code>XmlGrammar</code>
+ * instances are responsible for bootsrapping <code>Task</code> objects from
  * XML.
  */
 public final class XmlGrammar implements Grammar {
@@ -61,13 +61,13 @@ public final class XmlGrammar implements Grammar {
 	private final Grammar parent;
 	private final ClassLoader loader;
 	private Map<String,Entry> entries;
-	
+
 	/*
 	 * Public API.
 	 */
-	
+
 	public static synchronized Grammar getMainGrammar() {
-		
+
 		try {
 			InputStream inpt = ClassLoader.getSystemResourceAsStream(MAIN_GRAMMAR_LOCATION);
 			Document doc = new SAXReader().read(inpt);
@@ -76,23 +76,23 @@ public final class XmlGrammar implements Grammar {
 			String msg = "Error parsing Main Grammar.";
 			throw new RuntimeException(msg, t);
 		}
-		
+
 		return mainGrammar;
 
 	}
-	
+
 	public static Grammar parse(Element e) {
 		return parse(e, null, ClassLoader.getSystemClassLoader());
 	}
-	
+
 	public static Grammar parse(Element e, Grammar parent) {
 		return parse(e, parent, ClassLoader.getSystemClassLoader());
 	}
-	
+
 	public static Grammar parse(Element e, ClassLoader loader) {
 		return parse(e, null, loader);
 	}
-	
+
 	public static Grammar parse(Element e, Grammar parent, ClassLoader loader) {
 
 		// Assertions...
@@ -109,7 +109,7 @@ public final class XmlGrammar implements Grammar {
 			String msg = "Argument 'loader' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
-		
+
 		XmlGrammar rslt = new XmlGrammar(parent, loader);	// Chicken-egg problem...
 
 		// Create the entries collection...
@@ -119,7 +119,7 @@ public final class XmlGrammar implements Grammar {
 		rslt.setEntries(entries);
 
 		return rslt;
-		
+
 	}
 
 	public Task newTask(Element e, Task parent) {
@@ -130,8 +130,8 @@ public final class XmlGrammar implements Grammar {
 			throw new IllegalArgumentException(msg);
 		}
 		// NB:  parent may be null...
-		
-		String name = e.getName();		
+
+		String name = e.getName();
 		Entry n = getEntry(name);
 		if (!n.getType().equals(EntryType.TASK)) {
 			String msg = "The specified name does not define a task:  " + name;
@@ -140,7 +140,7 @@ public final class XmlGrammar implements Grammar {
 
 		Task rslt = null;
 		try {
-			
+
 			// Create & bootstrap the result...
 			rslt = (Task) n.getFormula().getImplementationClass().newInstance();
 			rslt.init(prepareEntryConfig(n, e));
@@ -149,11 +149,11 @@ public final class XmlGrammar implements Grammar {
 			String msg = "Unable to create the specified task:  " + name;
 			throw new RuntimeException(msg, t);
 		}
-		
+
 		return new RuntimeTaskDecorator(rslt);
 
 	}
-			
+
 	public Phrase newPhrase(String inpt) {
 
 		// Assertions...
@@ -161,7 +161,7 @@ public final class XmlGrammar implements Grammar {
 			String msg = "Argument 'inpt' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
-		
+
 		List<String> chunks = new LinkedList<String>();
 		String chunkMe = inpt;
 		while (chunkMe.length() != 0) {
@@ -173,7 +173,7 @@ public final class XmlGrammar implements Grammar {
 				chunkMe = chunkMe.substring(1);
 			}
 		}
-		
+
 		List<Phrase> children = new LinkedList<Phrase>();
 		StringBuffer buffer = new StringBuffer();
 		int openCount = 0;
@@ -197,10 +197,18 @@ public final class XmlGrammar implements Grammar {
 					} else if (chunk.equals(Phrase.CLOSE_PHRASE_DELIMITER)) {
 						--openCount;
 						if (openCount == 0) {
+
 							// Time to create a dynamic component...
 							String expression = buffer.toString();
-							String name = expression.substring(0, expression.indexOf("("));
-							String nested = expression.substring(expression.indexOf("(") + 1, expression.length() - 1);
+							String name = null;
+							String nested = null;
+							try {
+								name = expression.substring(0, expression.indexOf("("));
+								nested = expression.substring(expression.indexOf("(") + 1, expression.length() - 1);
+							} catch (Throwable t) {
+								String msg = "The specified expression is not well formed:  " + expression;
+								throw new RuntimeException(msg, t);
+							}
 
 							Entry n = getEntry(name);
 							if (n.getType() != EntryType.PHRASE) {
@@ -219,7 +227,7 @@ public final class XmlGrammar implements Grammar {
 								String msg = "Unable to create the specified phrase:  " + name;
 								throw new RuntimeException(msg, t);
 							}
-							
+
 							children.add(p);
 							buffer.setLength(0);
 						} else {
@@ -239,13 +247,13 @@ public final class XmlGrammar implements Grammar {
 		return new ConcatenatingPhrase(children);
 
 	}
-	
+
 	/*
 	 * Implementation.
 	 */
 
 	private static Map<String,Entry> parseEntries(List nodes, XmlGrammar g) {
-		
+
 		// Assertions...
 		if (nodes == null) {
 			String msg = "Argument 'nodes' cannot be null.";
@@ -268,16 +276,16 @@ public final class XmlGrammar implements Grammar {
 									+ "attribute '@name':  " + e.asXML();
 				throw new IllegalArgumentException(msg);
 			}
-			
+
 			// Formula.
 			String impl = e.valueOf("@impl");
 			if (impl.trim().length() == 0) {
-				String msg = "The following element is missing required " 
+				String msg = "The following element is missing required "
 									+ "attribute '@impl':  " + e.asXML();
 				throw new IllegalArgumentException(msg);
 			}
 			try {
-				
+
 				// Get the description, if present...
 				String description = null;	// default...
 				Element desc = (Element) e.selectSingleNode("//doc[@entry = '" + name + "']/description");
@@ -289,11 +297,11 @@ public final class XmlGrammar implements Grammar {
 				Class c = g.loader.loadClass(impl);
 				Bootstrappable b = (Bootstrappable) c.newInstance();
 				Formula f = b.getFormula();
-				
+
 				// Sanity check -- refuse the formula if the class doesn't match!
 				if (!f.getImplementationClass().equals(c)) {
-					String msg = "Invalid Formula Provided by Task Implementation:  class '" 
-								+ c.getName() + "' provided a formula specifying implementation class '" 
+					String msg = "Invalid Formula Provided by Task Implementation:  class '"
+								+ c.getName() + "' provided a formula specifying implementation class '"
 								+ f.getImplementationClass().getName() + "'.";
 					throw new RuntimeException(msg);
 				}
@@ -306,7 +314,7 @@ public final class XmlGrammar implements Grammar {
 						mappings.put(r, value);
 					}
 				}
-				
+
 				// Pull the examples as well...
 				List<Node> examples = new LinkedList<Node>();
 				for (Iterator xItr = e.selectNodes("//doc[@entry = '" + name + "']/example").iterator(); xItr.hasNext();) {
@@ -320,15 +328,15 @@ public final class XmlGrammar implements Grammar {
 				String msg = "Unable to parse the specified entry.";
 				throw new RuntimeException(msg, t);
 			}
-			
+
 		}
 
 		return rslt;
-		
+
 	}
-	
+
 	private XmlGrammar(Grammar parent, ClassLoader loader) {
-		
+
 		// Assertions...
 		// NB:  Parent may be null.
 		if (loader == null) {
@@ -339,10 +347,10 @@ public final class XmlGrammar implements Grammar {
 		// Instance Members.
 		this.parent = parent;
 		this.loader = loader;
-		
-		// NB:  Tasks & phrases are set after creation  
+
+		// NB:  Tasks & phrases are set after creation
 		// (viz. in parse() method) due to chicken-egg scenario...
-		
+
 	}
 
 	private Entry getEntry(String name) {
@@ -376,7 +384,7 @@ public final class XmlGrammar implements Grammar {
 		}
 		return rslt;
 	}
-	
+
 	private void setEntries(Map<String,Entry> entries) {
 
 		// Assertions...
@@ -390,11 +398,11 @@ public final class XmlGrammar implements Grammar {
 		}
 
 		this.entries = (Map<String,Entry>) Collections.unmodifiableMap(entries);
-		
+
 	}
 
 	private EntityConfig prepareEntryConfig(Entry n, Node d) {
-		
+
 		// Assertions...
 		if (n == null) {
 			String msg = "Argument 'n [Entry]' cannot be null.";
@@ -417,19 +425,19 @@ public final class XmlGrammar implements Grammar {
 				if (r.hasDefault()) {
 					value = r.getDefault();
 				} else {
-					String msg = "The required expression '" + r.getXpath() 
+					String msg = "The required expression '" + r.getXpath()
 						+ "' is missing from the following node:  " + d.asXML();
 					throw new RuntimeException(msg);
 				}
 			}
 			mappings.put(r, value);
-		}			
+		}
 		mappings.putAll(n.getMappings());
-		
+
 		return new SimpleEntityConfig(this, n.getFormula(), mappings);
 
 	}
-	
+
 	/*
 	 * Nested Types.
 	 */
@@ -438,7 +446,7 @@ public final class XmlGrammar implements Grammar {
 		TASK,
 		PHRASE
 	}
-	
+
 	private static final class Entry {
 
 		// Instance Members.
@@ -448,7 +456,7 @@ public final class XmlGrammar implements Grammar {
 		private final Formula formula;
 		private final Map<Reagent,Object> mappings;
 		private final List<Node> examples;
-		
+
 		/*
 		 * Public API.
 		 */
@@ -485,17 +493,17 @@ public final class XmlGrammar implements Grammar {
 			this.formula = f;
 			this.mappings = (Map<Reagent,Object>) Collections.unmodifiableMap(mappings);
 			this.examples = (List<Node>) Collections.unmodifiableList(examples);
-			
+
 		}
 
 		public String getName() {
 			return name;
 		}
-		
+
 		public EntryType getType() {
 			return type;
 		}
-		
+
 		public String getDescription() {
 			return description;
 		}
@@ -503,7 +511,7 @@ public final class XmlGrammar implements Grammar {
 		public Formula getFormula() {
 			return formula;
 		}
-		
+
 		public Map<Reagent,Object> getMappings() {
 			return mappings;
 		}
@@ -513,12 +521,12 @@ public final class XmlGrammar implements Grammar {
 		}
 
 	}
-	
+
 	public static final class SerializeGrammarTask extends AbstractContainerTask {
-		
+
 		// Injstance Members.
 		private XmlGrammar grammar;
-		
+
 		/*
 		 * Public API.
 		 */
@@ -541,15 +549,15 @@ public final class XmlGrammar implements Grammar {
 		public void perform(TaskRequest req, TaskResponse res) {
 
 			Element rslt = fac.createElement("grammar");
-			
+
 			for (Entry e : grammar.entries.values()) {
 				rslt.add(serializeEntry(e, fac));
 			}
-						
+
 			res.setAttribute(Attributes.NODE, rslt);
-			
+
 			super.performSubtasks(req, res);
-		
+
 		}
 
 		/*
@@ -557,7 +565,7 @@ public final class XmlGrammar implements Grammar {
 		 */
 
 		private static Node serializeEntry(Entry e, DocumentFactory fac) {
-			
+
 			// Assertions...
 			if (e == null) {
 				String msg = "Argument 'e [Entry]' cannot be null.";
@@ -567,10 +575,10 @@ public final class XmlGrammar implements Grammar {
 				String msg = "Argument 'fac' cannot be null.";
 				throw new IllegalArgumentException(msg);
 			}
-			
+
 			Element rslt = fac.createElement("entry");
 			rslt.addAttribute("type", e.getType().name());
-			
+
 			// Name.
 			Element name = fac.createElement("name");
 			name.setText(e.getName());
@@ -590,13 +598,13 @@ public final class XmlGrammar implements Grammar {
 			for (Node x : e.getExamples()) {
 				rslt.add((Node) x.clone());
 			}
-			
+
 			return rslt;
 
 		}
-		
+
 		private static Node serializeFormula(Formula f, Map<Reagent,Object> mappings, DocumentFactory fac) {
-			
+
 			// Assertions...
 			if (f == null) {
 				String msg = "Argument 'f [Formula]' cannot be null.";
@@ -606,7 +614,7 @@ public final class XmlGrammar implements Grammar {
 				String msg = "Argument 'fac' cannot be null.";
 				throw new IllegalArgumentException(msg);
 			}
-			
+
 			Element rslt = fac.createElement("formula");
 
 			// Impl.
@@ -634,11 +642,11 @@ public final class XmlGrammar implements Grammar {
 				reagents.add(reagent);
 			}
 			rslt.add(reagents);
-			
+
 			return rslt;
 
 		}
-		
+
 	}
 
 }
