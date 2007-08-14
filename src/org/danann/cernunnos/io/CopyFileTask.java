@@ -49,24 +49,24 @@ public final class CopyFileTask implements Task {
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 				"Optional context from which missing elements of the LOCATION will be inferred if it is "
 				+ "relative.  If omitted, this task will use either: (1) the value of the 'Attributes.CONTEXT' "
-				+ "request attribute if present; or (2) the directory within which Java is executing.", 
+				+ "request attribute if present; or (2) the directory within which Java is executing.",
 				new AttributePhrase(Attributes.CONTEXT, new CurrentDirectoryUrlPhrase()));
 
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class, 
+	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
 				"Optional location of the resource that will be copied.  It may be a filesystem path or "
 				+ "a URL, and may be absolute or relative.  If relative, the location will be evaluated "
 				+ "from the CONTEXT.  If omitted, the value of the 'Attributes.LOCATION' request "
 				+ "attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
-	public static final Reagent TO_DIR = new SimpleReagent("TO_DIR", "@to-dir", ReagentType.PHRASE, String.class, 
+	public static final Reagent TO_DIR = new SimpleReagent("TO_DIR", "@to-dir", ReagentType.PHRASE, String.class,
 				"Optional file system directory to which the specified resource will be copied.  It may be "
 				+ "absolute or relative.  If relative, it will be evaluated from the directory in "
 				+ "which Java is executing.", null);
 
-	public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class, 
+	public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class,
 				"Optional file system path to which the specified resource will be copied.  It may be absolute "
 				+ "or relative (in which case the location will be evaluated relative to the TO_DIR).  "
 				+ "If omitted, the the value of the 'Attributes.LOCATION' request attribute will be used.",
@@ -77,11 +77,11 @@ public final class CopyFileTask implements Task {
 		final Formula rslt = new SimpleFormula(CopyFileTask.class, reagents);
 		return rslt;
 	}
-	
+
 	public void init(EntityConfig config) {
-		
+
 		// Instance Members.
-		this.context = (Phrase) config.getValue(CONTEXT); 
+		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
 		this.to_dir = (Phrase) config.getValue(TO_DIR);
 		this.to_file = (Phrase) config.getValue(TO_FILE);
@@ -90,7 +90,7 @@ public final class CopyFileTask implements Task {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		
+
 		String ctx = (String) context.evaluate(req, res);
 		String origin = (String) location.evaluate(req, res);
 		String dir = to_dir != null ? (String) to_dir.evaluate(req, res) : null;
@@ -110,9 +110,9 @@ public final class CopyFileTask implements Task {
 				f.getParentFile().mkdirs();
 			}
 			OutputStream os = new FileOutputStream(f);
-			
+
 			int bytesRead = 0;
-			for (int avail = is.available(); avail > 0 || bytesRead < conn.getContentLength() ; avail = is.available()) {
+			for (int avail = is.available(); avail > 0 || bytesRead < conn.getContentLength(); avail = is.available()) {
 				byte[] b = new byte[avail];
 				is.read(b);
 				os.write(b);
@@ -120,15 +120,15 @@ public final class CopyFileTask implements Task {
 			}
 			is.close();
 			os.close();
-			
+
 		} catch (Throwable t) {
-			String msg = "Unable to copy the specified file [" + origin 
-								+ "] in the specified context [" + ctx 
-								+ "]to the specified location [" 
+			String msg = "Unable to copy the specified file [" + origin
+								+ "] in the specified context [" + ctx
+								+ "]to the specified location ["
 								+ destination + "].";
 			throw new RuntimeException(msg, t);
 		}
-		
+
 	}
 
 }

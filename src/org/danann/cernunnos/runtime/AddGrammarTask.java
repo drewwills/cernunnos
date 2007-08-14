@@ -33,16 +33,16 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class AddGrammarTask extends AbstractContainerTask {
-	
+
 	// Instance Members.
 	private String context;
 	private String location;
-	
+
 	/*
 	 * Public API.
 	 */
-	
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.STRING, String.class, 
+
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.STRING, String.class,
 				"The context from which missing elements of the LOCATION can be inferred if it is relative.  "
 				+ "The default is the filesystem location from which Java is executing.  WARNING:  This reagent "
 				+ "must be a String (not a Phrase) because it gets used at boostrap time.  A URL will be "
@@ -51,31 +51,33 @@ public final class AddGrammarTask extends AbstractContainerTask {
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.STRING, String.class,
 					"The location of the grammar file that defines the grammar to add.  WARNING:  This reagent "
 					+ "must be a String (not a Phrase) because it gets used at boostrap time (not runtime).");
-	
+
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(AddGrammarTask.class, reagents);
 		return rslt;
 	}
-	
+
 	public void init(EntityConfig config) {
 
 		// Instance Members.
 		this.context = (String) config.getValue(CONTEXT);
 		this.location = (String) config.getValue(LOCATION);
-				
+
 		Grammar g = null;
 		try {
-			URL ctx = new URL(this.context); 
+			URL ctx = new URL(this.context);
 			URL loc = new URL(ctx, location);
-			g = XmlGrammar.parse(new SAXReader().read(loc.openStream()).getRootElement(), config.getGrammar());
+
+			// Read by passing a URL -- don't manage the URLConnection yourself...
+			g = XmlGrammar.parse(new SAXReader().read(loc).getRootElement(), config.getGrammar());
 		} catch (Throwable t) {
-			String msg = "Unable to parse a grammar from the specified location:  " + this.location; 
+			String msg = "Unable to parse a grammar from the specified location:  " + this.location;
 			throw new RuntimeException(msg, t);
 		}
 
 		super.init(new SimpleEntityConfig(g, config.getFormula(), config.getValues()));
-		
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
@@ -85,11 +87,11 @@ public final class AddGrammarTask extends AbstractContainerTask {
 	/*
 	 * Implementation.
 	 */
-	
+
 	private static String createDefaultUrl() {
 
 		String rslt = null;
-		
+
 		try {
 			rslt = new File(".").toURL().toString();
 		} catch (Throwable t) {
@@ -98,7 +100,7 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		}
 
 		return rslt;
-		
+
 	}
-		
+
 }

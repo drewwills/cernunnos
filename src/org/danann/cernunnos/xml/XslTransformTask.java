@@ -49,9 +49,9 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 /**
- * <code>Task</code> implementation that performs an XSL Transformation over the 
- * NODE node or LOCATION document.  Specify the location of the .xsl 
- * stylesheet through the (mandatory) STYLESHEET reagent.  
+ * <code>Task</code> implementation that performs an XSL Transformation over the
+ * NODE node or LOCATION document.  Specify the location of the .xsl
+ * stylesheet through the (mandatory) STYLESHEET reagent.
  */
 public final class XslTransformTask extends AbstractContainerTask {
 
@@ -62,31 +62,31 @@ public final class XslTransformTask extends AbstractContainerTask {
 	private Phrase node;
 	private Phrase location;
 	private Phrase to_file;
-	
+
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the STYLESHEET and LOCATION may be inferred in "
 					+ "appropriate circumstances.  The default is a URL representing the filesystem location "
 					+ "from which Java is executing.", new CurrentDirectoryUrlPhrase());
 
-	public static final Reagent STYLESHEET = new SimpleReagent("STYLESHEET", "@stylesheet", ReagentType.PHRASE, String.class, 
+	public static final Reagent STYLESHEET = new SimpleReagent("STYLESHEET", "@stylesheet", ReagentType.PHRASE, String.class,
 					"Location of the XSLT stylesheet to use in transformation.  May be a file system path (absolute "
 					+ "or relative) or a URL.");
 
 	public static final Reagent NODE = new SimpleReagent("NODE", "@node", ReagentType.PHRASE, Element.class,
 					"Optional XML node to act as the source of the transformation.  If not explicitly "
 					+ "specified, this task will attempt to use the 'Attributes.NODE' request attribute.  "
-					+ "If that attribute is not present, the LOCATION reagent will be used.", 
+					+ "If that attribute is not present, the LOCATION reagent will be used.",
 					new AttributePhrase(Attributes.NODE, null));
 
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class, 
+	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
 					"Optional location of an XML resource that will be transformed (assuming the NODE reagent is not "
 					+ "provided).  It may be a filesystem path or a URL, and may be absolute or relative.  If "
 					+ "relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
-					+ "'Attributes.LOCATION' request attribute will be used.", 
+					+ "'Attributes.LOCATION' request attribute will be used.",
 					new AttributePhrase(Attributes.LOCATION));
 
 	public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class,
@@ -96,7 +96,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 					+ "'Attributes.NODE' on the task request for subtasks.", null);
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, STYLESHEET, NODE, LOCATION, 
+		Reagent[] reagents = new Reagent[] {CONTEXT, STYLESHEET, NODE, LOCATION,
 									TO_FILE, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(XslTransformTask.class, reagents);
 		return rslt;
@@ -108,21 +108,21 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 		// Instance Members.
 		this.fac = TransformerFactory.newInstance();
-		this.context = (Phrase) config.getValue(CONTEXT); 
-		this.stylesheet = (Phrase) config.getValue(STYLESHEET); 
+		this.context = (Phrase) config.getValue(CONTEXT);
+		this.stylesheet = (Phrase) config.getValue(STYLESHEET);
 		this.node = (Phrase) config.getValue(NODE);
 		this.location = (Phrase) config.getValue(LOCATION);
-		this.to_file = (Phrase) config.getValue(TO_FILE); 
-		
+		this.to_file = (Phrase) config.getValue(TO_FILE);
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		try {
-			
+
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL transUrl = new URL(ctx, (String) stylesheet.evaluate(req, res));
-			Transformer trans = fac.newTransformer(new StreamSource(transUrl.openStream()));
+			Transformer trans = fac.newTransformer(new StreamSource(transUrl.toExternalForm()));
 
 			Element srcElement = null;
 			if (node != null) {
@@ -133,11 +133,11 @@ public final class XslTransformTask extends AbstractContainerTask {
 				URL loc = new URL(ctx, (String) location.evaluate(req, res));
 				srcElement = new SAXReader().read(loc).getRootElement();
 			}
-			
+
 			DocumentFactory dfac = new DocumentFactory();
 			Document ddoc = dfac.createDocument((Element) srcElement.clone());
-			DOMWriter dwriter = new DOMWriter();			
-			
+			DOMWriter dwriter = new DOMWriter();
+
 			DocumentResult rslt = new DocumentResult();
 			trans.transform(new DOMSource(dwriter.write(ddoc)), rslt);
 
@@ -147,7 +147,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 					// Make sure the necessary directories are in place...
 					f.getParentFile().mkdirs();
 				}
-				XMLWriter writer = new XMLWriter(new FileOutputStream(f), 
+				XMLWriter writer = new XMLWriter(new FileOutputStream(f),
 										new OutputFormat("  ", true));
 				writer.write(rslt.getDocument().getRootElement());
 			} else {
@@ -159,9 +159,9 @@ public final class XslTransformTask extends AbstractContainerTask {
 			String msg = "Unable to perform the requested transformation.";
 			throw new RuntimeException(msg, t);
 		}
-		
+
 		super.performSubtasks(req, res);
-		
+
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package org.danann.cernunnos.core;
 
+import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -44,7 +46,7 @@ public final class PropertiesTask extends AbstractContainerTask {
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
 					+ "is relative.  The default is a URL representing the filesystem location from which "
 					+ "Java is executing.", new CurrentDirectoryUrlPhrase());
@@ -65,33 +67,44 @@ public final class PropertiesTask extends AbstractContainerTask {
 		super.init(config);
 
 		// Instance Members.
-		this.context = (Phrase) config.getValue(CONTEXT); 
-		this.location = (Phrase) config.getValue(LOCATION); 
-		
+		this.context = (Phrase) config.getValue(CONTEXT);
+		this.location = (Phrase) config.getValue(LOCATION);
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		String loc = (String) location.evaluate(req, res);
 
+		InputStream inpt = null;
 		try {
 
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL u = new URL(ctx, loc);
+			inpt = u.openStream();
+
 			Properties p = new Properties();
-			p.load(u.openStream());
+			p.load(inpt);
 
 			for (Entry e : p.entrySet()) {
 				res.setAttribute((String) e.getKey(), e.getValue());
 			}
-			
+
 			super.performSubtasks(req, res);
-			
+
 		} catch (Throwable t) {
 			String msg = "Unable to invoke the specified script:  " + loc;
 			throw new RuntimeException(msg, t);
+		} finally {
+			if (inpt != null) {
+				try {
+					inpt.close();
+				} catch (IOException ioe) {
+					throw new RuntimeException(ioe);
+				}
+			}
 		}
-		
+
 	}
-	
+
 }

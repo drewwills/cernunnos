@@ -16,6 +16,8 @@
 
 package org.danann.cernunnos.io;
 
+import java.io.InputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -44,13 +46,13 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 				"Optional context from which missing elements of the LOCATION will be inferred if it is "
 				+ "relative.  If omitted, this task will use either: (1) the value of the 'Attributes.CONTEXT' "
-				+ "request attribute if present; or (2) the directory within which Java is executing.", 
+				+ "request attribute if present; or (2) the directory within which Java is executing.",
 				new AttributePhrase(Attributes.CONTEXT, new CurrentDirectoryUrlPhrase()));
 
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class, 
+	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
 				"Optional location of the archive that will be iterated over.  It may be a filesystem path or "
 				+ "a URL, and may be absolute or relative.  If relative, the location will be evaluated "
 				+ "from the CONTEXT.  If omitted, the value of the 'Attributes.LOCATION' request "
@@ -64,30 +66,34 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 
 	public void init(EntityConfig config) {
 
-		super.init(config);		
+		super.init(config);
 
 		// Instance Members.
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
-		
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		String loc = (String) location.evaluate(req, res);
-		
+
+		InputStream inpt = null;
+		ZipInputStream zip = null;
 		try {
-			
+
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL url = new URL(ctx, loc);
-			ZipInputStream zip = new ZipInputStream(url.openStream());
-			
+
+			inpt = url.openStream();
+			zip = new ZipInputStream(inpt);
+
 			// Set the default CONTEXT for subtasks...
 			res.setAttribute(Attributes.CONTEXT, "jar:" + url.toString() + "!/");
 
 			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
 				if (entry.isDirectory()) {
-					// We need to skip these b/c many possible subtasks will 
+					// We need to skip these b/c many possible subtasks will
 					// choke on them.  Hope that doesn't become a problem.
 					continue;
 				}
@@ -95,14 +101,29 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 				super.performSubtasks(req, res);
 				zip.closeEntry();
 			}
-			
+
 			zip.close();
 
 		} catch (Throwable t) {
 			String msg = "Unable to read the specified archive:  " + loc;
 			throw new RuntimeException(msg, t);
+		} finally {
+			if (zip != null) {
+				try {
+					zip.close();
+				} catch (IOException ioe) {
+					throw new RuntimeException(ioe);
+				}
+			}
+			if (inpt != null) {
+				try {
+					inpt.close();
+				} catch (IOException ioe) {
+					throw new RuntimeException(ioe);
+				}
+			}
 		}
 
 	}
-	
+
 }

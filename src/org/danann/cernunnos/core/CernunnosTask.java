@@ -47,7 +47,7 @@ public final class CernunnosTask implements Task {
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class, 
+	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
 					+ "is relative.  The default is a URL representing the filesystem location from which "
 					+ "Java is executing.", new CurrentDirectoryUrlPhrase());
@@ -67,9 +67,9 @@ public final class CernunnosTask implements Task {
 
 		// Instance Members.
 		this.grammar = config.getGrammar();
-		this.context = (Phrase) config.getValue(CONTEXT); 
-		this.location = (Phrase) config.getValue(LOCATION); 
-		
+		this.context = (Phrase) config.getValue(CONTEXT);
+		this.location = (Phrase) config.getValue(LOCATION);
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
@@ -77,20 +77,21 @@ public final class CernunnosTask implements Task {
 		String loc = (String) location.evaluate(req, res);
 
 		try {
-			
+
 			// Choose a script...
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL crn = new URL(ctx, loc);
 
-			Document doc = new SAXReader().read(crn.openStream());
+			// Read by passing a URL -- don't manage the URLConnection yourself...
+			Document doc = new SAXReader().read(crn);
 			Task k = grammar.newTask(doc.getRootElement(), this);
 			k.perform(req, res);
-			
+
 		} catch (Throwable t) {
 			String msg = "Unable to invoke the specified script:  " + loc;
 			throw new RuntimeException(msg, t);
 		}
-		
+
 	}
-	
+
 }
