@@ -17,6 +17,7 @@
 package org.danann.cernunnos.xml;
 
 import java.net.URL;
+import org.xml.sax.EntityResolver;
 
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -37,12 +38,17 @@ import org.danann.cernunnos.TaskResponse;
 public final class ReadDocumentPhrase implements Phrase {
 
 	// Instance Members.
+	private Phrase entityResolver;
 	private Phrase context;
 	private Phrase location;
 
 	/*
 	 * Public API.
 	 */
+
+	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
+					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in document parsing.",
+					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, null));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
@@ -55,13 +61,14 @@ public final class ReadDocumentPhrase implements Phrase {
 					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};
+		Reagent[] reagents = new Reagent[] {ENTITY_RESOLVER, CONTEXT, LOCATION};
 		return new SimpleFormula(ReadDocumentPhrase.class, reagents);
 	}
 
 	public void init(EntityConfig config) {
 
 		// Instance Members.
+		this.entityResolver = (Phrase) config.getValue(ENTITY_RESOLVER);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
 
@@ -74,10 +81,20 @@ public final class ReadDocumentPhrase implements Phrase {
 		String ctx_str = (String) context.evaluate(req, res);
 		String loc_str = (String) location.evaluate(req, res);
 		try {
+
 			URL ctx = new URL(ctx_str);
 			URL doc = new URL(ctx, loc_str);
+
+			// Use an EntityResolver if provided...
+			SAXReader rdr = new SAXReader();
+			EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
+			if (resolver != null) {
+				rdr.setEntityResolver(resolver);
+			}
+
 			// Read by passing a URL -- don't manage the URLConnection yourself...
-			rslt = new SAXReader().read(doc).getRootElement();
+			rslt = rdr.read(doc).getRootElement();
+
 		} catch (Throwable t) {
 			String msg = "Unable to read the specified document:"
 						+ "\n\tCONTEXT=" + ctx_str

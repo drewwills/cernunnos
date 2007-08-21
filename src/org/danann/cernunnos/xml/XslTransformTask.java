@@ -33,6 +33,7 @@ import org.dom4j.io.DOMWriter;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.xml.sax.EntityResolver;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
@@ -57,6 +58,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private TransformerFactory fac;
+	private Phrase entityResolver;
 	private Phrase context;
 	private Phrase stylesheet;
 	private Phrase node;
@@ -66,6 +68,10 @@ public final class XslTransformTask extends AbstractContainerTask {
 	/*
 	 * Public API.
 	 */
+
+	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
+					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in parsing LOCATION.",
+					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, null));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the STYLESHEET and LOCATION may be inferred in "
@@ -96,8 +102,8 @@ public final class XslTransformTask extends AbstractContainerTask {
 					+ "'Attributes.NODE' on the task request for subtasks.", null);
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, STYLESHEET, NODE, LOCATION,
-									TO_FILE, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {ENTITY_RESOLVER, CONTEXT, STYLESHEET,
+					NODE, LOCATION, TO_FILE, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(XslTransformTask.class, reagents);
 		return rslt;
 	}
@@ -108,6 +114,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 		// Instance Members.
 		this.fac = TransformerFactory.newInstance();
+		this.entityResolver = (Phrase) config.getValue(ENTITY_RESOLVER);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.stylesheet = (Phrase) config.getValue(STYLESHEET);
 		this.node = (Phrase) config.getValue(NODE);
@@ -131,7 +138,15 @@ public final class XslTransformTask extends AbstractContainerTask {
 			} else {
 				// But read from LOCATION if NODE isn't set...
 				URL loc = new URL(ctx, (String) location.evaluate(req, res));
-				srcElement = new SAXReader().read(loc).getRootElement();
+
+				// Use an EntityResolver if provided...
+				SAXReader rdr = new SAXReader();
+				EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
+				if (resolver != null) {
+					rdr.setEntityResolver(resolver);
+				}
+
+				srcElement = rdr.read(loc).getRootElement();
 			}
 
 			DocumentFactory dfac = new DocumentFactory();
