@@ -16,7 +16,7 @@
 
 <grammar>
 
-	<!-- 
+	<!--
 	  | Package:  [root]
 	  +-->
 
@@ -28,7 +28,7 @@
 		</example>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  runtime
 	  +-->
 
@@ -60,7 +60,7 @@
 		</example>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  core
 	  +-->
 
@@ -90,6 +90,11 @@
 	<phrase name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase"/>
 	<doc entry="isNull">
 		<description>Returns Boolean.TRUE if the specified VALUE is nulll, otherwise Boolean.FALSE.</description>
+	</doc>
+
+	<phrase name="newInstance" impl="org.danann.cernunnos.core.NewInstancePhrase"/>
+	<doc entry="newInstance">
+		<description>Attempts to create an instance of the specified class name using the default constructor.</description>
 	</doc>
 
 	<phrase name="parseInt" impl="org.danann.cernunnos.core.ParseIntegerPhrase"/>
@@ -175,7 +180,7 @@
 		<description>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</description>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  flow
 	  +-->
 
@@ -189,7 +194,7 @@
 		<description>Performs the subtasks within the first WHEN element (&lt;when&gt;) whose 'test' attribute returns true.  You may optionally provide an OTHERWISE (&lt;otherwise&gt;) element whose subtasks will be performed if none of the WHEN conditions are met.</description>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  io
 	  +-->
 
@@ -256,7 +261,7 @@
 		<description>Extracts the contents of the specified archive and writes them to the specified directory.</description>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  net
 	  +-->
 
@@ -270,7 +275,7 @@
 		</example>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  sql
 	  +-->
 
@@ -326,7 +331,7 @@
 		<description>Iterates over the columns in a ResultSet, placing each column name under the request attribute 'SqlAttributes.COLUMN_NAME'.</description>
 	</doc>
 
-	<!-- 
+	<!--
 	  | Package:  xml
 	  +-->
 
