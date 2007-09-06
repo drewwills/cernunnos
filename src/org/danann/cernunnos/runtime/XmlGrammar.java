@@ -69,7 +69,7 @@ public final class XmlGrammar implements Grammar {
 	public static synchronized Grammar getMainGrammar() {
 
 		try {
-			InputStream inpt = ClassLoader.getSystemResourceAsStream(MAIN_GRAMMAR_LOCATION);
+			InputStream inpt = XmlGrammar.class.getClassLoader().getResourceAsStream(MAIN_GRAMMAR_LOCATION);
 			Document doc = new SAXReader().read(inpt);
 			mainGrammar = XmlGrammar.parse(doc.getRootElement());
 		} catch (Throwable t) {
@@ -82,11 +82,11 @@ public final class XmlGrammar implements Grammar {
 	}
 
 	public static Grammar parse(Element e) {
-		return parse(e, null, ClassLoader.getSystemClassLoader());
+		return parse(e, null, XmlGrammar.class.getClassLoader());
 	}
 
 	public static Grammar parse(Element e, Grammar parent) {
-		return parse(e, parent, ClassLoader.getSystemClassLoader());
+		return parse(e, parent, XmlGrammar.class.getClassLoader());
 	}
 
 	public static Grammar parse(Element e, ClassLoader loader) {
