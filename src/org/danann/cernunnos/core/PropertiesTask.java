@@ -93,7 +93,7 @@ public final class PropertiesTask extends AbstractContainerTask {
 			super.performSubtasks(req, res);
 
 		} catch (Throwable t) {
-			String msg = "Unable to invoke the specified script:  " + loc;
+			String msg = "Unable to read the specified properties file:  " + loc;
 			throw new RuntimeException(msg, t);
 		} finally {
 			if (inpt != null) {
