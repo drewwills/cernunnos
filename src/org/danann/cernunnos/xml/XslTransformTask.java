@@ -125,10 +125,12 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
+		URL transUrl = null;
+
 		try {
 
 			URL ctx = new URL((String) context.evaluate(req, res));
-			URL transUrl = new URL(ctx, (String) stylesheet.evaluate(req, res));
+			transUrl = new URL(ctx, (String) stylesheet.evaluate(req, res));
 			Transformer trans = fac.newTransformer(new StreamSource(transUrl.toExternalForm()));
 
 			Element srcElement = null;
@@ -171,8 +173,11 @@ public final class XslTransformTask extends AbstractContainerTask {
 			}
 
 		} catch (Throwable t) {
-			String msg = "Unable to perform the requested transformation.";
-			throw new RuntimeException(msg, t);
+			StringBuffer msg = new StringBuffer("Unable to perform the requested transformation.");
+			if (transUrl != null) {
+				msg.append("\n\t\tstylesheet=").append(transUrl.toExternalForm());
+			}
+			throw new RuntimeException(msg.toString(), t);
 		}
 
 		super.performSubtasks(req, res);
