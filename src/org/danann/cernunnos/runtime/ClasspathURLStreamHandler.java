@@ -35,34 +35,34 @@ public final class ClasspathURLStreamHandler extends URLStreamHandler {
 	/*
 	 * Nested Types.
 	 */
-	
+
 	private static final class URLConnectionImpl extends URLConnection {
-		
+
 		/*
 		 * Public API.
 		 */
-		
+
 		public URLConnectionImpl(URL url) {
-			super(url);			
+			super(url);
 		}
-		
+
 		public void connect() {}
-		
+
 		public InputStream getInputStream() {
-			
+
 			String s = url.toExternalForm();
 			s = s.substring((url.getProtocol() + "://").length(), s.length());
-			
-			InputStream rslt = ClassLoader.getSystemResourceAsStream(s);
+
+			InputStream rslt = ClasspathURLStreamHandler.class.getClassLoader().getResourceAsStream(s);
 			if (rslt == null) {
 				String msg = "Unable to read the specified resource from the classpath:  " + s;
 				throw new RuntimeException(msg);
 			}
 
 			return rslt;
-			
+
 		}
-		
+
 		public OutputStream getOutputStream() {
 			throw new UnsupportedOperationException();
 		}
