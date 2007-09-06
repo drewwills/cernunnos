@@ -19,19 +19,25 @@ package org.danann.cernunnos.sql;
 public final class SqlAttributes {
 
 	/**
-	 * The default name under which the new connection will be registered as a 
+	 * The default name under which a <code>javax.sql.DataSource</code> may be
+	 * registered as a request attribute.
+	 */
+	public static final String DATA_SOURCE = "SqlAttributes.DATA_SOURCE";
+
+	/**
+	 * The default name under which the new connection will be registered as a
 	 * request attribute.
 	 */
 	public static final String CONNECTION = "SqlAttributes.CONNECTION";
 
 	/**
-	 * The name under which the ResultSetMetadata object will be registered as a 
+	 * The name under which the ResultSetMetadata object will be registered as a
 	 * request attribute while iterating the results of a query.
 	 */
 	public static final String RESULT_SET_METADATA = "SqlAttributes.RESULT_SET_METADATA";
 
 	/**
-	 * The name of the current column when iterating over the columns in a 
+	 * The name of the current column when iterating over the columns in a
 	 * result set.
 	 */
 	public static final String COLUMN_NAME = "SqlAttributes.COLUMN_NAME";
