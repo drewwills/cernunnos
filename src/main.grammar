@@ -77,6 +77,11 @@
 		<description>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</description>
 	</doc>
 
+	<phrase name="jndi" impl="org.danann.cernunnos.core.JndiLookupPhrase"/>
+	<doc entry="jndi">
+		<description>Returns the named object from JNDI.</description>
+	</doc>
+
 	<phrase name="not" impl="org.danann.cernunnos.core.NotPhrase"/>
 	<doc entry="not">
 		<description>Returns the opposite of the specified Boolean value.</description>
@@ -95,6 +100,11 @@
 	<phrase name="newInstance" impl="org.danann.cernunnos.core.NewInstancePhrase"/>
 	<doc entry="newInstance">
 		<description>Attempts to create an instance of the specified class name using the default constructor.</description>
+	</doc>
+
+	<phrase name="const" impl="org.danann.cernunnos.core.ConstantPhrase"/>
+	<doc entry="const">
+		<description>Returns the value of the specified Java constant (viz. static field).</description>
 	</doc>
 
 	<phrase name="parseInt" impl="org.danann.cernunnos.core.ParseIntegerPhrase"/>
