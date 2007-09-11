@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
@@ -103,6 +104,20 @@ public final class ExtractArchiveTask implements Task {
 
 				zip.closeEntry();
 
+			}
+
+			Manifest m = zip.getManifest();
+			if (m != null) {
+				File f = new File(new File(dir, "META-INF"), "MANIFEST.MF");
+
+				if (f.getParentFile() != null) {
+					// Make sure the necessary directories are in place...
+					f.getParentFile().mkdirs();
+				}
+
+				OutputStream os = new FileOutputStream(f);
+				m.write(os);
+				os.close();
 			}
 
 		} catch (Throwable t) {
