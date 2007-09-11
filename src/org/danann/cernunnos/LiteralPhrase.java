@@ -17,38 +17,32 @@
 package org.danann.cernunnos;
 
 /**
- * Wraps the <code>Phrase</code> contract around a specific, literal 
- * <code>Object</code>.  <code>LiteralPhrase</code> does not provide a 
- * zero-argument constructor, and therefore cannot be used in grammar 
- * definitions.  Instances of <code>LiteralPhrase</code> are created directly by 
+ * Wraps the <code>Phrase</code> contract around a specific, literal
+ * <code>Object</code>.  <code>LiteralPhrase</code> does not provide a
+ * zero-argument constructor, and therefore cannot be used in grammar
+ * definitions.  Instances of <code>LiteralPhrase</code> are created directly by
  * code.
  */
 public final class LiteralPhrase implements Phrase {
 
 	// Instance Members.
 	private final Object value;
-	
+
 	/*
 	 * Public API.
 	 */
 
 	/**
-	 * Creates a new <code>LiteralPhrase</code> surrounding the specified 
+	 * Creates a new <code>LiteralPhrase</code> surrounding the specified
 	 * object.
-	 * 
-	 * @param value A valid, non-null <code>Object</code> reference.
+	 *
+	 * @param value An <code>Object</code> reference.
 	 */
 	public LiteralPhrase(Object value) {
 
-		// Assertions...
-		if (value == null) {
-			String msg = "Argument 'value' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
-
 		// Instance Members.
-		this.value = value;
-		
+		this.value = value;	// May be null... is this ok?
+
 	}
 
 	public Formula getFormula() {
@@ -61,10 +55,10 @@ public final class LiteralPhrase implements Phrase {
 
 	/**
 	 * Always returns the object that was specified at creation.
-	 * 
+	 *
 	 * @param req Representations the input to the current task.
 	 * @param res Representations the output of the current task.
-	 * @return The final, actual value of this <code>Phrase</code>. 
+	 * @return The final, actual value of this <code>Phrase</code>.
 	 */
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 		return value;
