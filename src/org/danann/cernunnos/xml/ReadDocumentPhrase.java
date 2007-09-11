@@ -27,6 +27,7 @@ import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -48,7 +49,7 @@ public final class ReadDocumentPhrase implements Phrase {
 
 	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
 					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in document parsing.",
-					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, null));
+					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "

@@ -28,6 +28,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.DocumentResult;
 import org.dom4j.io.DOMWriter;
 import org.dom4j.io.OutputFormat;
@@ -40,6 +41,7 @@ import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -71,7 +73,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
 					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in parsing LOCATION.",
-					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, null));
+					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the STYLESHEET and LOCATION may be inferred in "
@@ -86,7 +88,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 					"Optional XML node to act as the source of the transformation.  If not explicitly "
 					+ "specified, this task will attempt to use the 'Attributes.NODE' request attribute.  "
 					+ "If that attribute is not present, the LOCATION reagent will be used.",
-					new AttributePhrase(Attributes.NODE, null));
+					new AttributePhrase(Attributes.NODE, new LiteralPhrase(null)));
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
 					"Optional location of an XML resource that will be transformed (assuming the NODE reagent is not "
@@ -134,9 +136,10 @@ public final class XslTransformTask extends AbstractContainerTask {
 			Transformer trans = fac.newTransformer(new StreamSource(transUrl.toExternalForm()));
 
 			Element srcElement = null;
-			if (node != null) {
+			Node nodeReagentEvaluated = node != null ? (Node) node.evaluate(req, res) : null;
+			if (nodeReagentEvaluated != null) {
 				// Reading from the NODE reagent is preferred...
-				srcElement = (Element) node.evaluate(req, res);
+				srcElement = (Element) nodeReagentEvaluated;
 			} else {
 				// But read from LOCATION if NODE isn't set...
 				URL loc = new URL(ctx, (String) location.evaluate(req, res));
