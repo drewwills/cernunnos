@@ -102,8 +102,6 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 				zip.closeEntry();
 			}
 
-			zip.close();
-
 		} catch (Throwable t) {
 			String msg = "Unable to read the specified archive:  " + loc;
 			throw new RuntimeException(msg, t);
