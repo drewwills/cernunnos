@@ -49,16 +49,16 @@ public class StatementTask implements Task {
 	 */
 
 	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-										"Optional name of a request attribute containing a dgatabase connection.  If omitted, "
-										+ "the name 'SqlAttributes.CONNECTION' will be used.", 
+										"Optional database connection object.  If omitted, the request attribute under "
+										+ "the name 'SqlAttributes.CONNECTION' will be used.",
 										new AttributePhrase(SqlAttributes.CONNECTION));
 
-	public static final Reagent SQL = new SimpleReagent("SQL", "@sql", ReagentType.PHRASE, String.class, 
+	public static final Reagent SQL = new SimpleReagent("SQL", "@sql", ReagentType.PHRASE, String.class,
 										"The SQL statement that will be executed.");
 
-	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class, 
+	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class,
 										"The parameters (if any) for the PreparedStatement that will execute the SQL.  "
-										+ "WARNING:  Parameters must appear in the same order in both update and insert statements.", 
+										+ "WARNING:  Parameters must appear in the same order in both update and insert statements.",
 										Collections.emptyList());
 
 	public Formula getFormula() {
@@ -66,22 +66,22 @@ public class StatementTask implements Task {
 		final Formula rslt = new SimpleFormula(StatementTask.class, reagents);
 		return rslt;
 	}
-	
+
 	public void init(EntityConfig config) {
 
-		this.connection = (Phrase) config.getValue(CONNECTION); 
-		this.sql = (Phrase) config.getValue(SQL); 
+		this.connection = (Phrase) config.getValue(CONNECTION);
+		this.sql = (Phrase) config.getValue(SQL);
 		this.parameters = new LinkedList<Phrase>();
-		List nodes = (List) config.getValue(PARAMETERS);		
+		List nodes = (List) config.getValue(PARAMETERS);
 		for (Iterator it = nodes.iterator(); it.hasNext();) {
 			Node n = (Node) it.next();
 			parameters.add(config.getGrammar().newPhrase(n.getText()));
 		}
-		
+
 	}
-	
+
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		String fSql = (String) sql.evaluate(req, res);
 		PreparedStatement pstmt = null;
 		try {
@@ -94,12 +94,12 @@ public class StatementTask implements Task {
 				pstmt.setObject(++i, p.evaluate(req, res));
 			}
 			pstmt.execute();
-			
+
 		} catch (Throwable t) {
 			String msg = "Unable to execute the specified sql:  " + fSql;
 			throw new RuntimeException(msg, t);
 		} finally {
-			
+
 			// Cleanup...
 			if (pstmt != null) {
 				try {
@@ -109,9 +109,9 @@ public class StatementTask implements Task {
 					throw new RuntimeException(msg, t);
 				}
 			}
-			
+
 		}
-		
+
 	}
 
 }
