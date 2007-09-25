@@ -65,8 +65,8 @@ public final class PrependNodeTask implements Task {
 	public static final Reagent CONTENT = new SimpleReagent("CONTENT", "*", ReagentType.NODE_LIST, List.class,
 					"Optional XML nodes to prepend.  Use this reagent to specify content in-line.  If "
 					+ "CONTENT is present, it will be prefered over NODE.", null);
-			
-			
+
+
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, CONTENT};
 		final Formula rslt = new SimpleFormula(PrependNodeTask.class, reagents);
@@ -76,16 +76,17 @@ public final class PrependNodeTask implements Task {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.node = (Phrase) config.getValue(NODE); 
-		this.parent = (Phrase) config.getValue(PARENT); 
-		this.sibling = (Phrase) config.getValue(SIBLING); 
-		this.content = (List) config.getValue(CONTENT); 
+		this.node = (Phrase) config.getValue(NODE);
+		this.parent = (Phrase) config.getValue(PARENT);
+		this.sibling = (Phrase) config.getValue(SIBLING);
+		this.content = (List) config.getValue(CONTENT);
 		this.grammar = config.getGrammar();
-		
+
 	}
 
+	@SuppressWarnings("unchecked")
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 
 		// Figure out where to put the content...
 		Branch p = null;
@@ -99,7 +100,7 @@ public final class PrependNodeTask implements Task {
 			p = (Branch) parent.evaluate(req, res);
 			index = 0;
 		}
-		
+
 		// Figure out what content to add...
 		List list = null;
 		if (content != null && content.size() > 0) {
@@ -108,14 +109,14 @@ public final class PrependNodeTask implements Task {
 			list = new LinkedList();
 			list.add(node.evaluate(req, res));
 		}
-		
+
 		// Evaluate phrases & add...
 		for (Object o : list) {
 			Node n = (Node) ((Node) o).clone();
 			NodeProcessor.evaluatePhrases(n, grammar, req, res);
 			p.content().add(index++, n);
 		}
-				
+
 	}
 
 }
