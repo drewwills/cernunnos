@@ -47,31 +47,37 @@ public class InvokeMethodTask extends AbstractContainerTask {
 	private Phrase clazz;
 	private Phrase method;
 	private List<Phrase> parameters;
+	private List<Phrase> parameter_types;
 	private Phrase attribute_name;
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent OBJECT = new SimpleReagent("OBJECT", "@object", ReagentType.PHRASE, Object.class, 
+	public static final Reagent OBJECT = new SimpleReagent("OBJECT", "@object", ReagentType.PHRASE, Object.class,
 							"Optional object instance upon which the specified METHOD will be invoked.  "
 							+ "Provide either OBJECT or CLASS, but not both.", null);
 
-	public static final Reagent CLASS = new SimpleReagent("CLASS", "@class", ReagentType.PHRASE, String.class, 
+	public static final Reagent CLASS = new SimpleReagent("CLASS", "@class", ReagentType.PHRASE, String.class,
 							"Optional name (fully-qualified) of a class that contains static member METHOD.  "
 							+ "Provide either OBJECT or CLASS, but not both.", null);
 
-	public static final Reagent METHOD = new SimpleReagent("METHOD", "@method", ReagentType.PHRASE, String.class, 
+	public static final Reagent METHOD = new SimpleReagent("METHOD", "@method", ReagentType.PHRASE, String.class,
 							"Name of a method that exists on CLASS.");
 
-	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class, 
+	public static final Reagent PARAMETERS = new SimpleReagent("PARAMETERS", "parameter/@value", ReagentType.NODE_LIST, List.class,
 							"The parameters (if any) of METHOD.", Collections.emptyList());
 
-	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class, 
+	public static final Reagent PARAMETER_TYPES = new SimpleReagent("PARAMETER_TYPES", "parameter/@type", ReagentType.NODE_LIST, List.class,
+							"Optional class name of a PARAMETERS item.  InvokeMethodTask doesn't normally handle null parameters because " +
+							"null references can't tell you their type.  Specify PARAMETER_TYPES explicitly for any parameters that may " +
+							"contain null values.", null);
+
+	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
 							"The set of tasks that are children of this task.", new LinkedList<Task>());
 
 	public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", ReagentType.PHRASE, String.class,
-							"Optional name under which the result of invoking METHOD will be registered as a request attribute.", 
+							"Optional name under which the result of invoking METHOD will be registered as a request attribute.",
 							new LiteralPhrase(Attributes.OBJECT));
 
 	public Formula getFormula() {
@@ -82,37 +88,55 @@ public class InvokeMethodTask extends AbstractContainerTask {
 
 	public void init(EntityConfig config) {
 
-		super.init(config);		
+		super.init(config);
 
 		// Instance Members.
-		this.object = (Phrase) config.getValue(OBJECT); 
-		this.clazz = (Phrase) config.getValue(CLASS); 
-		this.method = (Phrase) config.getValue(METHOD); 
+		this.object = (Phrase) config.getValue(OBJECT);
+		this.clazz = (Phrase) config.getValue(CLASS);
+		this.method = (Phrase) config.getValue(METHOD);
 		this.parameters = new LinkedList<Phrase>();
-		List nodes = (List) config.getValue(PARAMETERS);		
+		this.parameter_types = new LinkedList<Phrase>();
+		List nodes = (List) config.getValue(PARAMETERS);
 		for (Iterator it = nodes.iterator(); it.hasNext();) {
 			Node n = (Node) it.next();
 			parameters.add(config.getGrammar().newPhrase(n.getText()));
+			// See if a type was explicitly specified...
+			Node y = n.selectSingleNode("../@type");
+			if (y != null) {
+				parameter_types.add(config.getGrammar().newPhrase(y.getText()));
+			} else {
+				// We need to order this list in parity w/ the other list...
+				parameter_types.add(null);
+			}
 		}
 		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
-		
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		String m = (String) method.evaluate(req, res);
 
 		try {
-						
+
 			// Evaluate the parameters...
 			Class[] argTypes = new Class[parameters.size()];
 			Object[] argValues = new Object[parameters.size()];
-			for (int i=0; i < parameters.size(); i++) {
-				argValues[i] = parameters.get(i).evaluate(req, res);
-				// NB: NPE if one or more args is null...
-				argTypes[i] = argValues[i].getClass();
+			try {
+				for (int i=0; i < parameters.size(); i++) {
+					argValues[i] = parameters.get(i).evaluate(req, res);
+					if (parameter_types.get(i) != null) {
+						argTypes[i] = Class.forName((String) parameter_types.get(i).evaluate(req, res));
+					} else {
+						// Infer the type from the object at hand...
+						argTypes[i] = argValues[i].getClass();	// NB: NPE if one or more args is null...
+					}
+				}
+			} catch (NullPointerException npe) {
+				String msg = "Arguments to InvokeMethodTask may not be null.";
+				throw new RuntimeException(msg, npe);
 			}
-			
+
 			// Find the method & target...
 			Method[] methods = null;
 			Object target = null;
@@ -127,7 +151,7 @@ public class InvokeMethodTask extends AbstractContainerTask {
 			Method myMethod = null;
 			for (Method d : methods) {
 				if (d.getName().equals(m)) {
-					Class[] params = d.getParameterTypes(); 
+					Class[] params = d.getParameterTypes();
 					if (params.length == argTypes.length) {
 						boolean matches = true;
 						for (int i=0; i < params.length; i++) {
@@ -157,18 +181,18 @@ public class InvokeMethodTask extends AbstractContainerTask {
 				}
 				throw new RuntimeException(msg);
 			}
-			
+
 			Object rslt = myMethod.invoke(target, argValues);
 			String attr = (String) attribute_name.evaluate(req, res);
 			res.setAttribute(attr, rslt);
 
 			super.performSubtasks(req, res);
-			
+
 		} catch (Throwable t) {
 			String msg = "Error invoking the specified method:  " + m;
 			throw new RuntimeException(msg, t);
 		}
-		
+
 	}
-	
+
 }
