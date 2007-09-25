@@ -30,19 +30,19 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 	// Instance Members.
 	private TaskRequest parent;
 	private Map<String,Object> attributes;
-	
+
 	/*
 	 * Public API.
 	 */
-	
+
 	public RuntimeRequestResponse() {
-		
+
 		// Instance members.
 		this.parent = null;
 		this.attributes = new HashMap<String,Object>();
-		
+
 	}
-	
+
 	public void setAttribute(String name, Object value) {
 		attributes.put(name, value);
 	}
@@ -54,13 +54,13 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 			String msg = "Argument 'name' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
-		
+
 		return getAttributeNames().contains(name);
 
 	}
-	
+
 	public Object getAttribute(String name) {
-		
+
 		// Assertions...
 		if (name == null) {
 			String msg = "Argument 'name' cannot be null.";
@@ -80,7 +80,7 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		} else {
 			return attributes.get(name);
 		}
-				
+
 	}
 
 	public Set<String> getAttributeNames() {
@@ -91,7 +91,7 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		}
 		return Collections.unmodifiableSet(rslt);
 	}
-	
+
 	public Map<String,Object> getAttributes() {
 		Map<String,Object> rslt = new HashMap<String,Object>();
 		for (String s : getAttributeNames()) {
@@ -99,12 +99,12 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		}
 		return Collections.unmodifiableMap(rslt);
 	}
-	
+
 	/*
 	 * Package API.
 	 */
 
-	public void enclose(TaskRequest req) {
+	void enclose(TaskRequest req) {
 		parent = req;
 	}
 
