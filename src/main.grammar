@@ -77,6 +77,11 @@
 		<description>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</description>
 	</doc>
 
+	<phrase name="sysprop" impl="org.danann.cernunnos.core.SystemPropertyPhrase"/>
+	<doc entry="sysprop">
+		<description>Returns the value of the specified System property.</description>
+	</doc>
+
 	<phrase name="jndi" impl="org.danann.cernunnos.core.JndiLookupPhrase"/>
 	<doc entry="jndi">
 		<description>Returns the named object from JNDI.</description>
