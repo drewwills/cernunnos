@@ -21,6 +21,7 @@ import java.sql.DriverManager;
 import javax.sql.DataSource;
 
 import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
@@ -56,8 +57,9 @@ public final class OpenConnectionTask extends AbstractContainerTask {
 								"the name 'SqlAttributes.CONNECTION' will be used.", new LiteralPhrase(SqlAttributes.CONNECTION));
 
 	public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
-								"Optional DataSource object from which the connection may be opened.  You must provide either " +
-								"DATA_SOURCE or DRIVER, URL, USERNAME, and PASSWORD.", null);
+								"Optional DataSource object from which the connection may be opened.  This phrase will be evaluated only if " +
+								"DRIVER, URL, USERNAME, and PASSWORD are not provided.  The default is a request attribute under the name " +
+								"'SqlAttributes.DATA_SOURCE'.", new AttributePhrase(SqlAttributes.DATA_SOURCE));
 
 	public static final Reagent DRIVER = new SimpleReagent("DRIVER", "@driver", ReagentType.PHRASE, String.class,
 								"Optional JDBC driver class name to use when opening the connection.  You must " +
@@ -108,7 +110,7 @@ public final class OpenConnectionTask extends AbstractContainerTask {
 									(String) username.evaluate(req, res),
 									(String) password.evaluate(req, res));
 			} else {
-				// Try the DataSource...
+				// Use the DataSource...
 				DataSource ds = (DataSource) data_source.evaluate(req, res);
 				conn = ds.getConnection();
 			}
