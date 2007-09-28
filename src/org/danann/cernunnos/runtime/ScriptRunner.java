@@ -21,6 +21,9 @@ import java.net.URL;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -42,16 +45,16 @@ public class ScriptRunner {
 		try {
 			URL.setURLStreamHandlerFactory(new URLStreamHandlerFactoryImpl());
 		} catch (Throwable t) {
-			// ToDo:  We *must* get commons-logging going...
-			System.out.println("WARNING:  Cernunnos was unable to register a " +
-					"URLStreamHandlerFactory.  Custom URL protocols may not work " +
-					"properly (e.g. classpath://, c:/).  See stack trace below.");
-			t.printStackTrace(System.out);
+			Log log = LogFactory.getLog(ScriptRunner.class);
+			log.warn("Cernunnos was unable to register a URLStreamHandlerFactory.  " +
+					"Custom URL protocols may not work properly (e.g. classpath://, c:/).  " +
+					"See stack trace below.", t);
 		}
 	}
 
 	// Instance Members.
 	private final Grammar grammar;
+	private final Log log;	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -79,6 +82,7 @@ public class ScriptRunner {
 
 		// Instance Members.
 		this.grammar = g;
+		this.log = LogFactory.getLog(ScriptRunner.class);
 
 	}
 
@@ -108,6 +112,8 @@ public class ScriptRunner {
 			String msg = "Argument 'location' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
+
+		log.trace("ScriptRunner.run():  location="+location);
 
 		Document doc = null;
 		try {
@@ -184,6 +190,19 @@ public class ScriptRunner {
 		if (req == null) {
 			String msg = "Argument 'req' cannot be null.";
 			throw new IllegalArgumentException(msg);
+		}
+
+		if (log.isTraceEnabled()) {
+			StringBuffer msg = new StringBuffer();
+			msg.append("\n");
+			msg.append("**************************************************\n");
+			msg.append("** Invoking ScriptRunner.run(Task, TaskRequest)\n");
+			msg.append("** TaskRequest contains ").append(req.getAttributeNames().size()).append(" elements\n");
+			for (String name : req.getAttributeNames()) {
+				msg.append("**   - ").append(name).append("=").append(req.getAttribute(name).toString()).append("\n");
+			}
+			msg.append("**************************************************\n");
+			log.trace(msg.toString());
 		}
 
 		TaskResponse res = new RuntimeRequestResponse();
