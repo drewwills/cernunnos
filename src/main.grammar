@@ -166,6 +166,11 @@
 		</example>
 	</doc>
 
+	<task name="log" impl="org.danann.cernunnos.core.LogTask"/>
+	<doc entry="log">
+		<description>Writes the specified MESSAGE to the log with commons-logging.</description>
+	</doc>
+
 	<!-- Adds Carriage Return + Line Feed (Windows style) to the end of each message -->
 	<task name="echo-ln" impl="org.danann.cernunnos.core.EchoTask" suffix="&#13;&#10;"/>
 	<doc entry="echo-ln">
