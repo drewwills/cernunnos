@@ -19,7 +19,11 @@ package org.danann.cernunnos.xml;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Branch;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
 import org.dom4j.Node;
 
 import org.danann.cernunnos.AttributePhrase;
@@ -27,6 +31,7 @@ import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -43,7 +48,9 @@ public final class PrependNodeTask implements Task {
 	private Phrase parent;
 	private Phrase sibling;
 	private List content;
+	private Phrase apply_namespace;
 	private Grammar grammar;
+	private final Log log = LogFactory.getLog(PrependNodeTask.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -66,9 +73,14 @@ public final class PrependNodeTask implements Task {
 					"Optional XML nodes to prepend.  Use this reagent to specify content in-line.  If "
 					+ "CONTENT is present, it will be prefered over NODE.", null);
 
+	public static final Reagent APPLY_NAMESPACE = new SimpleReagent("APPLY_NAMESPACE", "@apply-namespace", ReagentType.NODE_LIST, List.class,
+					"Tells this task whether to reconstruct the QNames of added elements to include the namespace of " +
+					"the parent element if:  (1) the parent contains a namespace;  and (2) the intended child does not.  " +
+					"The default is Boolean.TRUE.", new LiteralPhrase(Boolean.TRUE));
+
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, CONTENT};
+		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, CONTENT, APPLY_NAMESPACE};
 		final Formula rslt = new SimpleFormula(PrependNodeTask.class, reagents);
 		return rslt;
 	}
@@ -80,6 +92,7 @@ public final class PrependNodeTask implements Task {
 		this.parent = (Phrase) config.getValue(PARENT);
 		this.sibling = (Phrase) config.getValue(SIBLING);
 		this.content = (List) config.getValue(CONTENT);
+		this.apply_namespace = (Phrase) config.getValue(APPLY_NAMESPACE);
 		this.grammar = config.getGrammar();
 
 	}
@@ -112,9 +125,32 @@ public final class PrependNodeTask implements Task {
 
 		// Evaluate phrases & add...
 		for (Object o : list) {
+
 			Node n = (Node) ((Node) o).clone();
 			NodeProcessor.evaluatePhrases(n, grammar, req, res);
+
+			// If the parent is an element, check if we should
+			// cary the parent namespace over to the child...
+			if ((Boolean) apply_namespace.evaluate(req, res) &&
+							p.getNodeType() == Node.ELEMENT_NODE &&
+							!((Element) p).getNamespace().equals(Namespace.NO_NAMESPACE)) {
+				// We know the parent is an Element w/ a namespace,
+				// is the child (also) an Element w/ none?
+				if (n.getNodeType() == Node.ELEMENT_NODE && ((Element) n).getNamespace().equals(Namespace.NO_NAMESPACE)) {
+					// Yes -- we need to port the namespace forward...
+					Namespace nsp = ((Element) p).getNamespace();
+					if (log.isTraceEnabled()) {
+						StringBuffer msg = new StringBuffer();
+						msg.append("Adding the following namespace to <").append(n.getName())
+															.append(">:  ").append(nsp);
+						log.trace(msg.toString());
+					}
+					NodeProcessor.applyNamespace(nsp, (Element) n);
+				}
+			}
+
 			p.content().add(index++, n);
+
 		}
 
 	}
