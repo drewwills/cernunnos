@@ -37,7 +37,12 @@ import org.danann.cernunnos.TaskResponse;
  * Simplifies the process of invoking Cernunnos tasks from within Java code.
  * <code>ScriptRunner</code> allows you to run a script in the form of a
  * <code>Task</code>, <code>Element</code>, or location (file system or URL),
- * with or without providing a <code>TaskRequest</code>.
+ * with or without providing a <code>TaskRequest</code> or <code>Grammar</code>.
+ *
+ * <p><strong>NOTE:<strong>  when a <code>Task</code> is expected to be used
+ * more than once in the lifetime of the application, use
+ * <code>compileTask</code> and reuse the same <code>Task</code> object to save
+ * resources.
  */
 public class ScriptRunner {
 
@@ -87,6 +92,47 @@ public class ScriptRunner {
 	}
 
 	/**
+	 * Prepares a <code>Task</code> for (subsequent) execution.
+	 *
+	 * @param location Absolute or relative location of a Cernunnos script file.
+	 */
+	public Task compileTask(String location) {
+
+		// Assertions.
+		if (location == null) {
+			String msg = "Argument 'location' cannot be null.";
+			throw new IllegalArgumentException(msg);
+		}
+
+		Document doc = null;
+		try {
+			doc = new SAXReader().read(new URL(new File(".").toURL(), location));
+		} catch (Throwable t) {
+			String msg = "Error reading a script from the specified location:  " + location;
+			throw new RuntimeException(msg, t);
+		}
+		return compileTask(doc.getRootElement());
+
+	}
+
+	/**
+	 * Prepares a <code>Task</code> for (subsequent) execution.
+	 *
+	 * @param m A pre-parsed Cernunnos script file.
+	 */
+	public Task compileTask(Element m) {
+
+		// Assertions.
+		if (m == null) {
+			String msg = "Argument 'm [Element]' cannot be null.";
+			throw new IllegalArgumentException(msg);
+		}
+
+		return grammar.newTask(m, null);
+
+	}
+
+	/**
 	 * Invokes the script found at the specified location (file system or URL).
 	 *
 	 * @param location A file on the file system or a URL.
@@ -113,16 +159,7 @@ public class ScriptRunner {
 			throw new IllegalArgumentException(msg);
 		}
 
-		log.trace("ScriptRunner.run():  location="+location);
-
-		Document doc = null;
-		try {
-			doc = new SAXReader().read(new URL(new File(".").toURL(), location));
-		} catch (Throwable t) {
-			String msg = "Error reading a script from the specified location:  " + location;
-			throw new RuntimeException(msg, t);
-		}
-		return run(doc.getRootElement(), req);
+		return run(compileTask(location), req);
 
 	}
 
@@ -154,7 +191,7 @@ public class ScriptRunner {
 			throw new IllegalArgumentException(msg);
 		}
 
-		return run(grammar.newTask(m, null), req);
+		return run(compileTask(m), req);
 
 	}
 
