@@ -229,7 +229,7 @@ public class ScriptRunner {
 			throw new IllegalArgumentException(msg);
 		}
 
-		if (log.isTraceEnabled()) {
+		if (log.isInfoEnabled()) {
 			StringBuffer msg = new StringBuffer();
 			msg.append("\n");
 			msg.append("**************************************************\n");
@@ -239,7 +239,7 @@ public class ScriptRunner {
 				msg.append("**   - ").append(name).append("=").append(req.getAttribute(name).toString()).append("\n");
 			}
 			msg.append("**************************************************\n");
-			log.trace(msg.toString());
+			log.info(msg.toString());
 		}
 
 		TaskResponse res = new RuntimeRequestResponse();
