@@ -23,6 +23,9 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
@@ -44,6 +47,7 @@ public final class CopyFileTask implements Task {
 	private Phrase location;
 	private Phrase to_dir;
 	private Phrase to_file;
+	private final Log log = LogFactory.getLog(CopyFileTask.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -104,6 +108,14 @@ public final class CopyFileTask implements Task {
 			conn.connect();
 			InputStream is = conn.getInputStream();
 
+			if (log.isTraceEnabled()) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("\n\turl=").append(loc.toString())
+							.append("\n\tcontent-length=")
+							.append(conn.getContentLength());
+				log.trace(msg);
+			}
+
 			File f = new File(dir, destination);
 			if (f.getParentFile() != null) {
 				// Make sure the necessary directories are in place...
@@ -112,12 +124,12 @@ public final class CopyFileTask implements Task {
 			OutputStream os = new FileOutputStream(f);
 
 			int bytesRead = 0;
-			for (int avail = is.available(); avail > 0 || bytesRead < conn.getContentLength(); avail = is.available()) {
-				byte[] b = new byte[avail];
-				is.read(b);
-				os.write(b);
-				bytesRead = bytesRead + avail;
+			byte[] buf = new byte[4096];
+			for (int len = is.read(buf); len > 0 || bytesRead < conn.getContentLength(); len = is.read(buf)) {
+				os.write(buf, 0, len);
+				bytesRead = bytesRead + len;
 			}
+
 			is.close();
 			os.close();
 
