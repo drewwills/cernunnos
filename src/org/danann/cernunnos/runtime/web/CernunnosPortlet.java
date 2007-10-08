@@ -187,7 +187,7 @@ public class CernunnosPortlet extends GenericPortlet {
         rrr.setAttribute(WebAttributes.RESPONSE, res);
 
         // Anything that should be included from the spring_context?
-        if (spring_context != null) {
+        if (spring_context != null && spring_context.containsBean("requestAttributes")) {
         	Map<String,Object> requestAttributes = (Map<String,Object>) spring_context.getBean("requestAttributes");
         	for (Map.Entry entry : requestAttributes.entrySet()) {
         		rrr.setAttribute((String) entry.getKey(), entry.getValue());
