@@ -95,6 +95,10 @@ public class CernunnosPortlet extends GenericPortlet {
 				spring_context = new FileSystemXmlApplicationContext(u.toExternalForm());
 			}
 
+			if (log.isTraceEnabled()) {
+				log.trace("Loaction of spring context (null means none):  " + u);
+			}
+
 			// Load the Settings...
 			Map<String,String> settingsMap = new HashMap<String,String>();	// default...
 			if (spring_context != null && spring_context.containsBean("settings")) {
