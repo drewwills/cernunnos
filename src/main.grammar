@@ -299,6 +299,11 @@
 	  | Package:  sql
 	  +-->
 
+	<phrase name="sql" impl="org.danann.cernunnos.sql.SqlPhrase"/>
+	<doc entry="sql">
+		<description>Executes the specified SQL statement and returns the result.</description>
+	</doc>
+
 	<task name="sql-connection" impl="org.danann.cernunnos.sql.OpenConnectionTask"/>
 	<doc entry="sql-connection">
 		<description>Opens the specified RDBMS connection and registers it as a request attribute.  By default, it will be registered under OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.  Cernunnos SQL tasks will look for a connection under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the Connection object.</description>
