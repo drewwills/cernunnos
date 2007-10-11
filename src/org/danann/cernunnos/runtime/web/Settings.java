@@ -3,6 +3,9 @@ package org.danann.cernunnos.runtime.web;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class Settings {
 
 	// Instance Members.
@@ -13,14 +16,34 @@ public class Settings {
 	 */
 
 	public static Settings load(Map<String,String> config) {
-		Map<Entry,String> entries = new HashMap<Entry,String>();
+
+		Map<Entry,String> rslt = new HashMap<Entry,String>();
+
+		Log log = null;
 		for (Entry y : Entry.values()) {
+
 			// Explicitly defined values trump defaults...
-			String specValue = config.get(y.name());
-			String useValue = specValue != null ? specValue : y.getDefaultValue();
-			entries.put(y, useValue);
+			String specValue = config.get(y.getName());
+
+			if (specValue != null) {
+				if (log == null) {
+					log = LogFactory.getLog(Settings.class);	// Don't declare as static in general libraries
+				}
+				if (log.isTraceEnabled()) {
+					StringBuffer msg = new StringBuffer();
+					msg.append("Default value for setting '").append(y.name())
+								.append("' was overridden with value '")
+								.append(specValue).append("'");
+					log.trace(msg.toString());
+				}
+			}
+
+			rslt.put(y, specValue != null ? specValue : y.getDefaultValue());
+
 		}
-		return new Settings(entries);
+
+		return new Settings(rslt);
+
 	}
 
 	public String getValue(Entry y) {
