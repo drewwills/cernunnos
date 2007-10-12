@@ -36,15 +36,15 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ExecuteProcessTask implements Task {
-	
+
 	// Instance Members.
 	private Phrase cmd;
 	private Phrase from;
-	
+
 	/*
 	 * Public API.
 	 */
-	
+
 	public static final Reagent CMD = new SimpleReagent("COMMAND", "text()", ReagentType.PHRASE, String.class,
 											"The command to execute within a new process.");
 
@@ -57,13 +57,13 @@ public final class ExecuteProcessTask implements Task {
 		final Formula rslt = new SimpleFormula(ExecuteProcessTask.class, reagents);
 		return rslt;
 	}
-	
+
 	public void init(EntityConfig config) {
 
 		// Instance Members.
 		this.cmd = (Phrase) config.getValue(CMD);
 		this.from = (Phrase) config.getValue(FROM);
-		
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
@@ -72,24 +72,28 @@ public final class ExecuteProcessTask implements Task {
 		InputStream inpt = null;
 		String fullCmd = (String) cmd.evaluate(req, res);
 		try {
-			
+
 			// Prepare the command.
 			String[] tokens = fullCmd.split("\\s");
 			List<String> list = Arrays.asList(tokens);
-			
+
 			ProcessBuilder pb = new ProcessBuilder(list);
 			pb.redirectErrorStream(true);
 			pb.directory(new File((String) from.evaluate(req, res)));
-			
+
 			Process p = pb.start();
 			value = p.waitFor();
-			
+
 			inpt = new BufferedInputStream(p.getInputStream());
-			int size = inpt.available();
-			byte[] bytes = new byte[size];
-			inpt.read(bytes, 0, size);
-			System.out.write(bytes);
-			
+
+			StringBuffer buff = new StringBuffer();
+			byte[] bytes = new byte[1024];
+			for (int len = inpt.read(bytes); len > 0; len = inpt.read(bytes)) {
+				buff.append(new String(bytes, 0, len));
+			}
+
+			System.out.println(buff.toString());
+
 		} catch (Throwable t) {
 			String msg = "ExecuteProcessTask encountered a problem invoking the specified command:  " + fullCmd;
 			throw new RuntimeException(msg, t);
@@ -103,12 +107,12 @@ public final class ExecuteProcessTask implements Task {
 				}
 			}
 		}
-		
+
 		if (value != 0) {
 			String msg = "The process terminated abnormally.  Exit value was:  " + value;
 			throw new RuntimeException(msg);
 		}
-		
+
 	}
 
 }

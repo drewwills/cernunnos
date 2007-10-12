@@ -78,9 +78,15 @@ public final class UrlPhrase implements Phrase {
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL u = new URL(ctx, loc);
 			inpt = u.openStream();
-			byte[] bytes = new byte[inpt.available()];
-			inpt.read(bytes);
-			Phrase text = grammar.newPhrase(new String(bytes));
+
+
+			StringBuffer buff = new StringBuffer();
+			byte[] bytes = new byte[1024];
+			for (int len = inpt.read(bytes); len > 0; len = inpt.read(bytes)) {
+				buff.append(new String(bytes, 0, len));
+			}
+
+			Phrase text = grammar.newPhrase(buff.toString());
 			rslt = text.evaluate(req, res);
 
 		} catch (Throwable t) {
