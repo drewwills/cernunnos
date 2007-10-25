@@ -175,11 +175,18 @@ public class InvokeMethodTask extends AbstractContainerTask {
 				}
 			}
 			if (myMethod == null) {
-				String msg = "Unable to locate the specified method:  " + m;
-				for (Class z : argTypes) {
-					msg = msg + "\n\targ.getClass()=" + z.getName();
+				StringBuffer msg = new StringBuffer();
+				msg.append("Unable to locate method '").append(m).append("' on ");
+				if (object != null) {
+					msg.append("object of class '").append(object.getClass().getName()).append("' ");
+				} else {
+					msg.append("class '").append(clazz.evaluate(req, res)).append("' ");
 				}
-				throw new RuntimeException(msg);
+				msg.append("(argument types follow):");
+				for (Class z : argTypes) {
+					msg.append("\n\t\targ type=").append(z.getName());
+				}
+				throw new RuntimeException(msg.toString());
 			}
 
 			Object rslt = myMethod.invoke(target, argValues);
