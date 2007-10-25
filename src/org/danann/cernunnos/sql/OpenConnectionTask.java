@@ -22,6 +22,7 @@ import javax.sql.DataSource;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
@@ -29,7 +30,6 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
-import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
