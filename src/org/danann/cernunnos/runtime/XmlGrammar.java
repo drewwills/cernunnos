@@ -379,7 +379,7 @@ public final class XmlGrammar implements Grammar {
 				throw new IllegalArgumentException(msg);
 			} catch (Throwable t) {
 				String msg = "Error preparing the specified entry:  " + name;
-				throw new RuntimeException(msg);
+				throw new RuntimeException(msg, t);
 			}
 		}
 		return rslt;
