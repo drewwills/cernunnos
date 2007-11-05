@@ -295,6 +295,11 @@
 		</example>
 	</doc>
 
+	<phrase name="contentsOf" impl="org.danann.cernunnos.net.ContentsOfPhrase"/>
+	<doc entry="contentsOf">
+		<description>Reads the resource at the specified location and returns the contents.</description>
+	</doc>
+
 	<!--
 	  | Package:  sql
 	  +-->
