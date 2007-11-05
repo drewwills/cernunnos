@@ -233,6 +233,11 @@
 		</example>
 	</doc>
 
+	<task name="line-iterator" impl="org.danann.cernunnos.io.LineIteratorTask"/>
+	<doc entry="line-iterator">
+		<description>Iterates over each line in the specified STRING.  The contents of each line will be registered as the Attributes.STRING request attribute.</description>
+	</doc>
+
 	<task name="mkdirs" impl="org.danann.cernunnos.io.MakeDirectoriesTask"/>
 	<doc entry="mkdirs">
 		<description>Creates any missing directories in the specified path on the local filesystem.</description>
