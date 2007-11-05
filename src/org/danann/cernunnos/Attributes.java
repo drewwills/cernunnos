@@ -17,47 +17,47 @@
 package org.danann.cernunnos;
 
 /**
- * Provides static access to some very common attribute names that facilitate 
+ * Provides static access to some very common attribute names that facilitate
  * elegant cooperation between <code>Task</code> implementations.
  */
 public final class Attributes {
 
 	/**
-	 * Use this name to create a request attribute containing a 
-	 * <code>java.lang.String</code> that describes a valid URL.  Many 
-	 * <code>Task</code> implementations will use this URL to resolve relative 
+	 * Use this name to create a request attribute containing a
+	 * <code>java.lang.String</code> that describes a valid URL.  Many
+	 * <code>Task</code> implementations will use this URL to resolve relative
 	 * paths.
 	 */
 	public static final String CONTEXT = "Attributes.CONTEXT";
-	
+
 	/**
-	 * Use this name to create a request attribute containing a 
+	 * Use this name to create a request attribute containing a
 	 * <code>java.lang.String</code> that represents the location of a resource.
 	 */
 	public static final String LOCATION = "Attributes.LOCATION";
-	
+
 	/**
-	 * Use this name to create a request attribute containing an 
+	 * Use this name to create a request attribute containing an
 	 * <code>org.dom4j.Node</code>.
 	 */
 	public static final String NODE = "Attributes.NODE";
-	
+
 	/**
-	 * Use this name to create a request attribute containing a 
+	 * Use this name to create a request attribute containing a
 	 * <code>java.io.PrintStream</code>.
 	 */
 	public static final String STREAM = "Attributes.STREAM";
-	
+
 	/**
-	 * Use this name to create a request attribute containing a 
+	 * Use this name to create a request attribute containing a
 	 * <code>java.lang.String</code>.
 	 */
-	public static final String STRING = "Attributes.STREAM";
-	
+	public static final String STRING = "Attributes.STRING";
+
 	/**
-	 * Use this name to create a request attribute containing a 
+	 * Use this name to create a request attribute containing a
 	 * <code>java.lang.Object</code>.
 	 */
 	public static final String OBJECT = "Attributes.OBJECT";
-	
+
 }
