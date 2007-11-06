@@ -200,6 +200,16 @@
 		<description>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</description>
 	</doc>
 
+	<task name="token-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask"/>
+	<doc entry="token-iterator">
+		<description>Splits the specified STRING into tokens and iterates over them, performing SUBTASKS once for each token in the collection.</description>
+	</doc>
+
+	<task name="line-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask" regex="&#10;"/>
+	<doc entry="line-iterator">
+		<description>Splits the specified STRING into lines (based on line feed character ASCII 10) and iterates over them, performing SUBTASKS once for each line in the collection.</description>
+	</doc>
+
 	<!--
 	  | Package:  flow
 	  +-->
@@ -231,11 +241,6 @@
   <copy-file to-dir="another_folder"/>
 </file-iterator></xmp></pre>
 		</example>
-	</doc>
-
-	<task name="line-iterator" impl="org.danann.cernunnos.io.LineIteratorTask"/>
-	<doc entry="line-iterator">
-		<description>Iterates over each line in the specified STRING.  The contents of each line will be registered as the Attributes.STRING request attribute.</description>
 	</doc>
 
 	<task name="mkdirs" impl="org.danann.cernunnos.io.MakeDirectoriesTask"/>
