@@ -414,7 +414,12 @@
 	<doc entry="textNode">
 		<description>Creates a new XML text node from the specified VALUE.</description>
 	</doc>
-
+	
+	<phrase name="commentNode" impl="org.danann.cernunnos.xml.CommentNodePhrase"/>
+	<doc entry="commentNode">
+		<description>Creates a new XML comment node from the specified VALUE.</description>
+	</doc>
+	
 	<task name="xslt" impl="org.danann.cernunnos.xml.XslTransformTask"/>
 	<doc entry="xslt">
 		<description>Executes the specified XSL Transformation.  By default, this task uses the value of the 'Attributes.NODE' request attribute as the XML source, and places the result of the trasformation under the same request attribute for subtasks.</description>
