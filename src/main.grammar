@@ -60,6 +60,11 @@
 		</example>
 	</doc>
 
+	<task name="argument-iterator" impl="org.danann.cernunnos.runtime.ArgumentIteratorTask"/>
+	<doc entry="argument-iterator">
+		<description>Iterates over the command line arguments.  For each argument, this task sets the request attribute under ATTRIBUTE_NAME to the current argument, then invokes SUBTASKS.</description>
+	</doc>
+
 	<!--
 	  | Package:  core
 	  +-->
@@ -346,7 +351,7 @@
 
 	<task name="sql-query" impl="org.danann.cernunnos.sql.QueryTask"/>
 	<doc entry="sql-query">
-		<description>Performs a specified query, then invokes child tasks once for each row in the result set.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</description>
+		<description>Performs a specified query, then invokes SUBTASKS once for each row in the result set.  For each iteration of SUBTASKS, column values will be registered as request attributes both under (1) the column name (all uppercase), and (2) the column index (starting with 1).</description>
 		<example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
 			<pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
     <sql-connection driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
