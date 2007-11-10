@@ -38,7 +38,7 @@ public final class MakeDirectoriesTask implements Task {
 	 * Public API.
 	 */
 
-	public static final Reagent PATH = new SimpleReagent("LOCATION", "@path", ReagentType.PHRASE, String.class, 
+	public static final Reagent PATH = new SimpleReagent("PATH", "@path", ReagentType.PHRASE, String.class,
 								"Path expression describing the directories to make on the "
 								+ "filesystem.  May be absolute or relative.");
 
@@ -47,9 +47,9 @@ public final class MakeDirectoriesTask implements Task {
 		final Formula rslt = new SimpleFormula(MakeDirectoriesTask.class, reagents);
 		return rslt;
 	}
-	
+
 	public void init(EntityConfig config) {
-		
+
 		// Instance Members.
 		this.path = (Phrase) config.getValue(PATH);
 
@@ -57,7 +57,7 @@ public final class MakeDirectoriesTask implements Task {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		File dir = new File((String) path.evaluate(req, res));		
+		File dir = new File((String) path.evaluate(req, res));
 		dir.mkdirs();
 
 	}
