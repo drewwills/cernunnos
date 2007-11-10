@@ -202,6 +202,11 @@ public class CernunnosPortlet extends GenericPortlet {
 
     }
 
+	public void doEdit(RenderRequest req, RenderResponse res) throws PortletException {
+		// This is probably not a permanent approach, but atm all we need is...
+		doView(req, res);
+	}
+
     /*
 	 * Private Stuff.
 	 */
