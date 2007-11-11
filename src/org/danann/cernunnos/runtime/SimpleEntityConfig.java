@@ -21,16 +21,22 @@ import java.util.Map;
 
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
+import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.EntityConfig;
 
+/**
+ * Implements the contract of <code>EntityConfig</code> and also runtime type
+ * checking (with warning messages) of <code>Phrase</code> evaluations.
+ */
 public final class SimpleEntityConfig implements EntityConfig {
 
 	// Instance Members.
 	private final Grammar grammar;
 	private final Formula formula;
 	private final Map<Reagent,Object> mappings;
-	
+
 	/*
 	 * Public API.
 	 */
@@ -55,17 +61,17 @@ public final class SimpleEntityConfig implements EntityConfig {
 		this.grammar = grammar;
 		this.formula = f;
 		this.mappings = (Map<Reagent,Object>) Collections.unmodifiableMap(mappings);
-		
+
 	}
-	
+
 	public Grammar getGrammar() {
 		return grammar;
 	}
-	
+
 	public Formula getFormula() {
 		return formula;
 	}
-	
+
 	public Object getValue(Reagent r) {
 
 		// Assertions...
@@ -74,7 +80,7 @@ public final class SimpleEntityConfig implements EntityConfig {
 			throw new IllegalArgumentException(msg);
 		}
 		if (!formula.getReagents().contains(r)) {
-			String msg = "This task does not define the specified reagent:  " 
+			String msg = "This task does not define the specified reagent:  "
 														+ r.getXpath();
 			throw new IllegalArgumentException(msg);
 		}
@@ -84,12 +90,21 @@ public final class SimpleEntityConfig implements EntityConfig {
 			throw new IllegalArgumentException(msg);
 		}
 
-		return mappings.get(r);
-		
+		Object rslt = mappings.get(r);
+		// Must not get in the way if the mapping value is
+		// 'null' -- downstream code will become confused
+		if (rslt != null && r.getReagentType().equals(ReagentType.PHRASE)) {
+			// This decorator will provide a very useful warning if there's likely
+			// trouble and allow the developer to find the problem very quickly...
+			rslt = new RuntimePhraseDecorator((Phrase) rslt, r);
+		}
+
+		return rslt;
+
 	}
-	
+
 	public Map<Reagent,Object> getValues() {
 		return mappings;
 	}
-	
+
 }
