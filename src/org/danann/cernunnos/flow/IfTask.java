@@ -36,7 +36,7 @@ public final class IfTask extends AbstractContainerTask {
 	 * Public API.
 	 */
 
-	public static final Reagent TEST = new SimpleReagent("TEST", "@test", ReagentType.PHRASE, String.class, 
+	public static final Reagent TEST = new SimpleReagent("TEST", "@test", ReagentType.PHRASE, Boolean.class,
 				"Boolean value indicating whether SUBTASKS should be executed.");
 
 	public Formula getFormula() {
@@ -47,27 +47,27 @@ public final class IfTask extends AbstractContainerTask {
 
 	public void init(EntityConfig config) {
 
-		super.init(config);		
+		super.init(config);
 
 		// Instance Members.
 		this.test = (Phrase) config.getValue(TEST);
-		
+
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-		
+
 		Boolean b = (Boolean) test.evaluate(req, res);
-		
+
 		if (b.equals(Boolean.TRUE)) {
 			super.performSubtasks(req, res);
 		}
-		
+
 	}
-	
+
 	public boolean isApplicable(TaskRequest req, TaskResponse res) {
-		
+
 		return ((Boolean) test.evaluate(req, res)).booleanValue();
-				
+
 	}
-	
+
 }
