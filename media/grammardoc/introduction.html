@@ -22,10 +22,202 @@
 </head>
 
 <body>
-<div align="center"> 
-  <h1>Cernunnos Task &amp; Phrase Reference</h1>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
 </div>
-<hr>
+
+<hr/>
+
+<h2>Introduction</h2>
+
+<p>The Cernunnos Project makes Java professionals more effective by helping
+them reuse their work extensively.  Reused code has three very significant
+advantages:  (1) it takes less time to write;  (2) it's already been tested;
+and (3) there are more projects in which to discover and fix subtle bugs that
+make it through testing.</p>
+
+<h3>How It Works</h3>
+
+<p>Contemporary software systems are mostly built like jigsaw puzzles:  although
+they are made up of components, the components only really combine in one way.
+The reason for this condition is that industry-normal progamming practices
+include designing the <em>shape</em> of components (i.e. the way in which they
+connect to other components) together and in accordance with their
+<em>function</em>.  The result is components that look a lot like what they do.
+Components that collaborate with other components must be coded to fit them
+explicitly.  New collaborations require refactoring, forking, or simply
+rewriting one or more participants.</p>
+
+<p>Cernunnos seeks to define the shape of software components independant of
+their function.  Put another way, Cernunnos makes software less like puzzle
+pieces and more like Lego bricks.  Since all the components have the same shape,
+the number of possible combinations is open-ended.</p>
+
+<h3>Tasks &amp; Phrases</h3>
+
+<p>Cernunnos organizes software components into two categories:  <em>Tasks</em>
+and <em>Phrases</em>.  Developers tell these components how to combine using a
+seperate, succinct document of XML.  This approach is conceptually similar to
+<a href="http://www.springframework.org" target="_top">Spring Dependancy Injection</a>.</p>
+
+<h4>Tasks</h4>
+
+<p>A <em>task</em> is a unit of work.  Tasks are like verbs;  they describe
+<em>what operations will be performed</em>.  Cernunnos represents tasks using
+XML elements, as in the following example:</p>
+
+<blockquote><code><pre><xmp><file-iterator>
+  <copy-file/>
+</file-iterator></xmp></pre></code></blockquote>
+
+<p>Both <code>&lt;file-iterator&gt;</code> and <code>&lt;copy-file&gt;</code>
+are tasks.  All together, this XML structure tells Java to iterate over a set of
+files, copying each one in turn.</p>
+
+<h4>Phrases</h4>
+
+<p>A <em>phrase</em> is an expression that evaluates to a value.  Phrases are
+like nouns;  they describe <em>who performs operations</em> and <em>to, for, or
+upon whom they will be performed</em>.  Cernunnos uses phrases to parameterize
+tasks, and <em>usually</em> represents them as XML attributes.  Here is the same
+example (as above) with phrases:</p>
+
+<blockquote><code><pre><xmp><file-iterator dir="some_folder">
+  <copy-file to-dir="another_folder"/>
+</file-iterator></xmp></pre></code></blockquote>
+
+<p>Both <code>dir</code> and <code>to-dir</code> have phrases as their values.
+This updated XML structure tells Java code to iterate over the files in
+'some_folder', copying each one to 'another_folder' in turn.</p>
+
+<p>The examples 'some_folder' and 'another_folder' are both literal expressions;
+they always evaluate to themselves.  Frequently the value needed from a phrase
+is static and known at design-time, but not always.  Phrase expressions can be
+dynamic, for example:</p>
+
+<blockquote><code>
+  ${req(Attributes.NODE)}<br/>
+  ${valueOf(channel/title)}<br/>
+  ${sysprop(user.dir)}
+</code></blockquote>
+
+<p>Dynamic phrase expressions always start with '<code>${phrase-impl(</code>'
+and end with '<code>)}</code>', where <em>phrase-impl</em> is the name or
+fully-qualified Java class of a phrase implementation.</p>
+
+<p>Phrase expressions may also be concatenated:</p>
+
+<blockquote><code>
+  /WEB-INF/jsp/MyPortlet/${req(pageName)}.jsp<br/>
+  ${req(TARGET_DIR)}/${req(Attributes.LOCATION)}
+</code></blockquote>
+
+<p>And/or nested:</p>
+
+<blockquote><code>
+  ${url(${req(HTTP_ROOT)}${req(TARGET_DIR)}${req(Attributes.LOCATION)})}
+</code></blockquote>
+
+<h3>Example</h3>
+
+<p>Here's a short example that combines tasks and phrases to do something useful:</p>
+
+<blockquote><code><pre><xmp><file-iterator includes="**/*.jar">
+  <echo-ln>${req(Attributes.LOCATION)}:</echo-ln>
+  <archive-iterator>
+    <if test="${jexl(Attributes.LOCATION.contains('${req($1)}'))}">
+      <echo-ln prefix="&#009;">${req(Attributes.LOCATION)}</echo-ln>
+    </if>
+  </archive-iterator>
+  <echo-ln/>
+</file-iterator></xmp></pre></code></blockquote>
+
+<p>This configuration looks for JAR file entries that match a specified pattern
+(provided on the command line), starting with the current directory and including all
+subdirectories recursively.</p>
+
+<p>If you save this XML to a file named 'find-class-in-jar.crn', you can invoke
+it from the command line like this:</p>
+
+<blockquote><code>
+  crn find-class-in-jar.crn SAX
+</code></blockquote>
+
+<p>And you might get results like these:</p>
+
+<blockquote><code><pre>
+ INFO [main] runtime.ScriptRunner.[] Nov/16 15:48:46 -
+**************************************************
+** Invoking ScriptRunner.run(Task, TaskRequest)
+** TaskRequest contains 1 elements
+**   - $1=SAX
+**************************************************
+
+activation.jar:
+
+ant-launcher.jar:
+
+ant.jar:
+
+commons-jexl-1.1.jar:
+
+commons-logging-1.1.jar:
+
+dom4j.jar:
+        org/dom4j/io/SAXContentHandler.class
+        org/dom4j/io/SAXEventRecorder$SAXEvent.class
+        org/dom4j/io/SAXEventRecorder.class
+        org/dom4j/io/SAXHelper.class
+        org/dom4j/io/SAXModifier.class
+        org/dom4j/io/SAXModifyContentHandler.class
+        org/dom4j/io/SAXModifyElementHandler.class
+        org/dom4j/io/SAXModifyException.class
+        org/dom4j/io/SAXModifyReader.class
+        org/dom4j/io/SAXReader$SAXEntityResolver.class
+        org/dom4j/io/SAXReader.class
+        org/dom4j/io/SAXValidator.class
+        org/dom4j/io/SAXWriter.class
+
+hsqldb.jar:
+
+jaxen.jar:
+        org/jaxen/saxpath/SAXPathEventSource.class
+        org/jaxen/saxpath/SAXPathException.class
+
+log4j-1.2.15.jar:
+        org/apache/log4j/xml/SAXErrorHandler.class
+
+mail.jar:
+
+nekohtml.jar:
+        org/cyberneko/html/parsers/SAXParser.class
+
+ojdbc14.jar:
+
+portlet.jar:
+
+spring.jar:
+
+xercesImpl.jar:
+        META-INF/services/javax.xml.parsers.SAXParserFactory
+        org/apache/xerces/impl/msg/SAXMessages.properties
+        org/apache/xerces/jaxp/JAXPValidatorComponent$SAX2XNI.class
+        org/apache/xerces/jaxp/JAXPValidatorComponent$XNI2SAX.class
+        org/apache/xerces/jaxp/SAXParserFactoryImpl.class
+        org/apache/xerces/jaxp/SAXParserImpl$JAXPSAXParser.class
+        org/apache/xerces/jaxp/SAXParserImpl.class
+        org/apache/xerces/parsers/AbstractSAXParser$1.class
+        org/apache/xerces/parsers/AbstractSAXParser$2.class
+        org/apache/xerces/parsers/AbstractSAXParser$AttributesProxy.class
+        org/apache/xerces/parsers/AbstractSAXParser$LocatorProxy.class
+        org/apache/xerces/parsers/AbstractSAXParser.class
+        org/apache/xerces/parsers/SAXParser.class
+        org/apache/xerces/util/SAXInputSource.class
+        org/apache/xerces/util/SAXLocatorWrapper.class
+        org/apache/xerces/util/SAXMessageFormatter.class
+</pre></code></blockquote>
+
+<hr/>
 
 </body>
 </html>

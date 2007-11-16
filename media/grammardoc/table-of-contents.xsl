@@ -26,6 +26,7 @@
       <body>
         <h1><img height="96" width="96" src="Cernunnos.jpg"/>Cernunnos</h1>
         <h2>Table of Contents</h2>
+        <a href="introduction.html">Introduction</a>
         <h3>Phrases</h3>
         <xsl:apply-templates select="entry[@type = 'PHRASE']"><xsl:sort select="name"/></xsl:apply-templates>
         <br/>

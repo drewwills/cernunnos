@@ -16,29 +16,36 @@
 
 h1 {
   color:  #003366;
-  font-size:  20pt;
-  margin-top:  12px;
-  margin-bottom:  12px;
+  font-size:  22pt;
+  margin-top:  16px;
+  margin-bottom:  16px;
 }
 
 h2 {
   color:  #003366;
-  font-size:  16pt;
-  margin-top:  8px;
-  margin-bottom:  8px;
+  font-size:  18pt;
+  margin-top:  12px;
+  margin-bottom:  12px;
 }
 
 h3 {
   color:  #FFFFFF;
   background-color:  #003366;
   font-size:  14pt;
+  margin-top:  8px;
+  margin-bottom:  8px;
+}
+
+h4 {
+  color:  #003366;
+  font-size:  14pt;
   margin-top:  6px;
   margin-bottom:  6px;
 }
 
 p {
-  margin-top:  4px;
-  margin-bottom:  4px;
+  margin-top:  6px;
+  margin-bottom:  6px;
 }
 
 table {
