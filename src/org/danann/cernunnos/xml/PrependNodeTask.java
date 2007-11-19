@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dom4j.Attribute;
 import org.dom4j.Branch;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
@@ -149,7 +150,15 @@ public final class PrependNodeTask implements Task {
 				}
 			}
 
-			p.content().add(index++, n);
+			// Although they *are* nodes, attributes are not technically
+			// content, and therefore they must have special treatment...
+			if (p.getNodeType() == Node.ELEMENT_NODE && n.getNodeType() == Node.ATTRIBUTE_NODE) {
+				// Add attributes by calling addAttribute on the Element contract...
+				((Element) p).add((Attribute) n);
+			} else {
+				// Add everything else as 'content'...
+				p.content().add(index++, n);
+			}
 
 		}
 
