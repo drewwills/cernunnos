@@ -23,10 +23,21 @@
                 <link rel="stylesheet" type="text/css" href="../styles.css"/>
       </head>
       <body>
-        <h1><xsl:value-of select="@type"/>: <xsl:value-of select="name"/></h1>
-        <h2>Description:</h2>
+		<div align="center">
+			<h1>Cernunnos Manual</h1>
+		</div>
+		<hr/>
+		<xsl:choose>
+		  <xsl:when test="@type = 'PHRASE'">
+			<xsl:apply-templates select="name" mode="Phrase"/>
+		  </xsl:when>
+		  <xsl:when test="@type = 'TASK'">
+			<xsl:apply-templates select="name" mode="Task"/>
+		  </xsl:when>
+		</xsl:choose>
+        <h3>Description:</h3>
         <p><xsl:value-of select="description"/></p>
-        <h2>Reagents:</h2>
+        <h3>Reagents:</h3>
         <table with="100%" border="1" cellspacing="0" cellpadding="0">
           <tr>
             <th>Name</th>
@@ -38,10 +49,18 @@
           </tr>
           <xsl:apply-templates select="formula/reagents/reagent"/>
         </table>
-        <h2>Examples:</h2>
+        <h3>Examples:</h3>
 		<xsl:apply-templates select="example"/>
       </body>
     </html>
+  </xsl:template>
+
+  <xsl:template match="name" mode="Phrase">
+	<h2><code>${<xsl:value-of select="."/>()}</code></h2>
+  </xsl:template>
+
+  <xsl:template match="name" mode="Task">
+	<h2><code>&lt;<xsl:value-of select="."/>&gt;</code></h2>
   </xsl:template>
 
   <xsl:template match="reagent">
