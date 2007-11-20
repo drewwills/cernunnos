@@ -1,5 +1,8 @@
 package org.danann.cernunnos.core;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -14,6 +17,7 @@ public final class NewInstancePhrase implements Phrase {
 
 	// Instance Members.
 	private Phrase clazz;
+	private final Log log = LogFactory.getLog(NewInstancePhrase.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -39,6 +43,14 @@ public final class NewInstancePhrase implements Phrase {
 		String s = (String) clazz.evaluate(req, res);
 		try {
 			return Class.forName(s).newInstance();
+		} catch (ClassNotFoundException cfne) {
+			if (log.isErrorEnabled()) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Unable to instantiate the specified class (").append(s)
+						.append(");  Check to be sure the class is present in the classpath.");
+				log.error(msg.toString());
+			}
+			throw new RuntimeException(cfne);
 		} catch (Throwable t) {
 			String msg = "Unable to instantiate the specified class:  " + s;
 			throw new RuntimeException(msg, t);
