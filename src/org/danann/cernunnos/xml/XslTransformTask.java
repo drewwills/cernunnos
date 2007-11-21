@@ -73,7 +73,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 
 	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
 					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in parsing LOCATION.  By default, " +
-					"this task looks for an EntityResolver under the request attribute 'XmlAttributes.ENTITY_RESOLVER' " +
+					"this task looks for an EntityResolver instance under the request attribute 'XmlAttributes.ENTITY_RESOLVER' " +
 					"and will use it if present.", new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
