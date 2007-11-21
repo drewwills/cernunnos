@@ -48,8 +48,9 @@ public final class ReadDocumentPhrase implements Phrase {
 	 */
 
 	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
-					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in document parsing.",
-					new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
+					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in document parsing.  By default, " +
+					"this phrase looks for an EntityResolver under the request attribute 'XmlAttributes.ENTITY_RESOLVER' " +
+					"and will use it if present.", new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
