@@ -47,7 +47,7 @@ public final class ReadDocumentPhrase implements Phrase {
 	 * Public API.
 	 */
 
-	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entityResolver", ReagentType.PHRASE,
+	public static final Reagent ENTITY_RESOLVER = new SimpleReagent("ENTITY_RESOLVER", "@entity-resolver", ReagentType.PHRASE,
 					EntityResolver.class, "Optional org.xml.sax.EntityResolver to use in document parsing.  By default, " +
 					"this phrase looks for an EntityResolver instance under the request attribute 'XmlAttributes.ENTITY_RESOLVER' " +
 					"and will use it if present.", new AttributePhrase(XmlAttributes.ENTITY_RESOLVER, new LiteralPhrase(null)));
