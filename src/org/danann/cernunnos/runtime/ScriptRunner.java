@@ -28,6 +28,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.EntityConfig;
+import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
@@ -96,24 +99,28 @@ public class ScriptRunner {
 	 *
 	 * @param location Absolute or relative location of a Cernunnos script file.
 	 */
-	public Task compileTask(String location) {
+    public Task compileTask(String location) {
 
-		// Assertions.
-		if (location == null) {
-			String msg = "Argument 'location' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (location == null) {
+            String msg = "Argument 'location' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		Document doc = null;
-		try {
-			doc = new SAXReader().read(new URL(new File(".").toURL(), location));
-		} catch (Throwable t) {
-			String msg = "Error reading a script from the specified location:  " + location;
-			throw new RuntimeException(msg, t);
-		}
-		return compileTask(doc.getRootElement());
+        Document doc = null;
+        URL origin = null;
+        try {
+            origin = new URL(new File(".").toURL(), location);
+            doc = new SAXReader().read(origin);
+        } catch (Throwable t) {
+            String msg = "Error reading a script from the specified location:  " + location;
+            throw new RuntimeException(msg, t);
+        }
 
-	}
+        return new TaskDecorator(grammar.newTask(doc.getRootElement(), null),
+                                                origin.toExternalForm());
+
+    }
 
 	/**
 	 * Prepares a <code>Task</code> for (subsequent) execution.
@@ -164,17 +171,6 @@ public class ScriptRunner {
 	}
 
 	/**
-	 * Invokes the script defined by the specified element.
-	 *
-	 * @param m An <code>Element</code> that defines a task.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
-	 */
-	public TaskResponse run(Element m) {
-		return run(m, new RuntimeRequestResponse());
-	}
-
-	/**
 	 * Invokes the script defined by the specified element with the specified
 	 * <code>TaskRequest</code>.
 	 *
@@ -217,43 +213,107 @@ public class ScriptRunner {
 	 * @return The <code>TaskResponse</code> that results from invoking the
 	 * specified script.
 	 */
-	public TaskResponse run(Task k, TaskRequest req) {
+    public TaskResponse run(Task k, TaskRequest req) {
 
-		// Assertions.
-		if (k == null) {
-			String msg = "Argument 'k [Task]' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
-		if (req == null) {
-			String msg = "Argument 'req' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (k == null) {
+            String msg = "Argument 'k [Task]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (req == null) {
+            String msg = "Argument 'req' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		if (log.isInfoEnabled()) {
-			StringBuffer msg = new StringBuffer();
-			msg.append("\n");
-			msg.append("**************************************************\n");
-			msg.append("** Invoking ScriptRunner.run(Task, TaskRequest)\n");
-			msg.append("** TaskRequest contains ").append(req.getAttributeNames().size()).append(" elements\n");
-			for (String name : req.getAttributeNames()) {
-				msg.append("**   - ").append(name).append("=").append(req.getAttribute(name).toString()).append("\n");
-			}
-			msg.append("**************************************************\n");
-			log.info(msg.toString());
-		}
+        // Set up Attributes.ORIGIN if possible...
+        TaskRequest tr = req;   // default...
+        if (k instanceof TaskDecorator) {
+            String origin = ((TaskDecorator) k).getOrigin();
+            RuntimeRequestResponse wrapper = new RuntimeRequestResponse();
+            wrapper.setAttribute(Attributes.ORIGIN, origin);
+            wrapper.enclose(req);
+            tr = wrapper;
+        }
 
-		TaskResponse res = new RuntimeRequestResponse();
-		k.perform(req, res);
+        // Provide a warning if there's no Attributes.ORIGIN at this point...
+        if (!tr.hasAttribute(Attributes.ORIGIN)) {
+        	log.warn("Request attribute 'Attributes.ORIGIN' is not present.  " +
+        			"Cernunnos may not be able to access resources relative " +
+        			"to the script.");
+        }
 
-		return res;
+        // Write the initial contents of the TaskRequest to the logs...
+        if (log.isInfoEnabled()) {
+            StringBuffer msg = new StringBuffer();
+            msg.append("\n");
+            msg.append("**************************************************\n");
+            msg.append("** Invoking ScriptRunner.run(Task, TaskRequest)\n");
+            msg.append("** TaskRequest contains ").append(tr.getAttributeNames().size()).append(" elements\n");
+            for (String name : tr.getAttributeNames()) {
+                msg.append("**   - ").append(name).append("=").append(tr.getAttribute(name).toString()).append("\n");
+            }
+            msg.append("**************************************************\n");
+            log.info(msg.toString());
+        }
 
-	}
+        // Invoke the task...
+        TaskResponse res = new RuntimeRequestResponse();
+        k.perform(tr, res);
+        return res;
+
+    }
 
 	/*
 	 * Nested Types.
 	 */
 
-	private static final class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
+    private static final class TaskDecorator implements Task {
+
+        // Instance Members.
+        private final Task enclosed;
+        private final String origin;
+
+        /*
+         * Public API.
+         */
+
+        public TaskDecorator(Task enclosed, String origin) {
+
+            // Assertions.
+            if (enclosed == null) {
+                String msg = "Argument 'enclosed' cannot be null.";
+                throw new IllegalArgumentException(msg);
+            }
+            if (origin == null) {
+                String msg = "Argument 'origin' cannot be null.";
+                throw new IllegalArgumentException(msg);
+            }
+
+            // Instance Members.
+            this.enclosed = enclosed;
+            this.origin = origin;
+
+        }
+
+        public Formula getFormula() {
+            throw new UnsupportedOperationException();
+        }
+
+        public void init(EntityConfig config) {
+            throw new UnsupportedOperationException();
+        }
+
+        public void perform(TaskRequest req, TaskResponse res) {
+            enclosed.perform(req, res);
+        }
+
+        public String getOrigin() {
+            return origin;
+        }
+
+    }
+
+    private static final class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
 
 		public URLStreamHandler createURLStreamHandler(String protocol) {
 

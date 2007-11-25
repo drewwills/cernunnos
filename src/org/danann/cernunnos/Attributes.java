@@ -23,6 +23,13 @@ package org.danann.cernunnos;
 public final class Attributes {
 
 	/**
+	 * Specifies the actual URL of the current script.  This attribute should be
+	 * set either by the Cernunnos runtime (most commonly) or by the invoker of
+	 * Cernunnos.  In either case, it should be available by default.
+	 */
+	public static final String ORIGIN = "Attributes.ORIGIN";
+
+	/**
 	 * Use this name to create a request attribute containing a
 	 * <code>java.lang.String</code> that describes a valid URL.  Many
 	 * <code>Task</code> implementations will use this URL to resolve relative
