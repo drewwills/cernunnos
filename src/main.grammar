@@ -32,6 +32,11 @@
 	  | Package:  runtime
 	  +-->
 
+	<task name="crn" impl="org.danann.cernunnos.runtime.CernunnosTask"/>
+	<doc entry="crn">
+		<description>Reads, bootstrapps, and exececutes the specified Cernunnos script.</description>
+	</doc>
+
 	<task name="add-grammar" impl="org.danann.cernunnos.runtime.AddGrammarTask"/>
 	<doc entry="add-grammar">
 		<description>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</description>
@@ -147,11 +152,6 @@
     </sql-connection>
 </properties></xmp></pre>
 		</example>
-	</doc>
-
-	<task name="crn" impl="org.danann.cernunnos.core.CernunnosTask"/>
-	<doc entry="crn">
-		<description>Reads, bootstrapps, and exececutes the specified Cernunnos script.</description>
 	</doc>
 
 	<task name="echo" impl="org.danann.cernunnos.core.EchoTask"/>

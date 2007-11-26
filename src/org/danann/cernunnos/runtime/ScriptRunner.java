@@ -18,8 +18,6 @@ package org.danann.cernunnos.runtime;
 
 import java.io.File;
 import java.net.URL;
-import java.net.URLStreamHandler;
-import java.net.URLStreamHandlerFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,17 +46,6 @@ import org.danann.cernunnos.TaskResponse;
  * resources.
  */
 public class ScriptRunner {
-
-	static {
-		try {
-			URL.setURLStreamHandlerFactory(new URLStreamHandlerFactoryImpl());
-		} catch (Throwable t) {
-			Log log = LogFactory.getLog(ScriptRunner.class);
-			log.warn("Cernunnos was unable to register a URLStreamHandlerFactory.  " +
-					"Custom URL protocols may not work properly (e.g. classpath://, c:/).  " +
-					"See stack trace below.", t);
-		}
-	}
 
 	// Instance Members.
 	private final Grammar grammar;
@@ -312,29 +299,5 @@ public class ScriptRunner {
         }
 
     }
-
-    private static final class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
-
-		public URLStreamHandler createURLStreamHandler(String protocol) {
-
-			// Assertions.
-			if (protocol == null) {
-				String msg = "Argument 'protocol' cannot be null.";
-				throw new IllegalArgumentException(msg);
-			}
-
-			URLStreamHandler rslt = null;
-
-			if (protocol.equals("classpath")) {
-				rslt = new ClasspathURLStreamHandler();
-			} else if (protocol.matches("\\A[a-zA-Z]\\z")) {
-				rslt = new WindowsDriveURLStreamHandler();
-			}
-
-			return rslt;
-
-		}
-
-	}
 
 }

@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package org.danann.cernunnos.core;
+package org.danann.cernunnos.runtime;
 
 import java.net.URL;
 
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
-
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
@@ -49,8 +45,8 @@ public final class CernunnosTask implements Task {
 
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
-					+ "is relative.  The default is a URL representing the filesystem location from which "
-					+ "Java is executing.", new CurrentDirectoryUrlPhrase());
+					+ "is relative.  The default is the value of the 'Attributes.ORIGIN' request attribute.",
+					new AttributePhrase(Attributes.ORIGIN));
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
 					"Location of a Cernunnos script.  May be a filesystem path (absolute or relative), or a URL.  If "
@@ -82,10 +78,12 @@ public final class CernunnosTask implements Task {
 			URL ctx = new URL((String) context.evaluate(req, res));
 			URL crn = new URL(ctx, loc);
 
-			// Read by passing a URL -- don't manage the URLConnection yourself...
-			Document doc = new SAXReader().read(crn);
-			Task k = grammar.newTask(doc.getRootElement(), this);
-			k.perform(req, res);
+			// Compile the task...
+			ScriptRunner runner = new ScriptRunner(grammar);
+			Task k = runner.compileTask(crn.toExternalForm());
+
+			// Run it...
+			runner.run(k, req);
 
 		} catch (Throwable t) {
 			String msg = "Unable to invoke the specified script:  " + loc;
