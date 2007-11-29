@@ -1,0 +1,212 @@
+<html>
+
+<head>
+<title>Cernunnos Manual - Request Attributes</title>
+<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+
+<body>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
+</div>
+
+<hr/>
+
+<h2>Request Attributes</h2>
+
+<p>In Cernunnos, tasks and phrases use <em>Request Attributes</em> as a common
+means of collaborating with one another.  Request attributes are a collection of
+contextual information organized as a <code>Map</code>:  attribute values may be
+any type of <code>Object</code>, but keys are always <code>String</code>s.</p>
+
+<h3>Setting Request Attributes</h3>
+
+<p>You can create request attributes in several ways;  perhaps the most common
+(and most broadly applicable) method is the
+<a href="entries/with-attribute.html"><code>&lt;with-attribute&gt;</code>
+task</a>.  This task registers any <code>Object</code> (specified by the
+<code>VALUE</code> reagent) under any name (specified by the <code>KEY</code>).
+The resulting name/value pair will be visible to all subtasks:  this is the role
+and the entire purpose of the <code>&lt;with-attribute&gt;</code> task.</p>
+
+<p>Conversely, some tasks that set request attributes have other duties.  The
+<a href="entries/sql-connection.html"><code>&lt;sql-connection&gt;</code>
+task</a> is a great example.  <code>&lt;sql-connection&gt;</code> is responsible
+for opening a JDBC connection to an SQL data source.  This connection is then
+made available to subtasks of <code>&lt;sql-connection&gt;</code>, which use it
+to execute SQL statements.  Once all subtasks have completed,
+<code>&lt;sql-connection&gt;</code> closes the SQL connection in accordance with
+JDBC best practices.</p>
+
+<p>You can optionally designate the name of the request attribute that will
+contain the SQL connection through the <code>ATTRIBUTE_NAME</code> reagent.  If
+you don't specify a name, a default name will be used (more on this topic
+below).  Tasks that open or establish resources for the benefit of subtasks
+commonly support the <code>ATTRIBUTE_NAME</code> reagent.  These include
+<a href="entries/invoke-method.html"><code>&lt;invoke-method&gt;</code></a>,
+<a href="entries/node-iterator.html"><code>&lt;node-iterator&gt;</code></a>, and
+<a href="entries/print-stream.html"><code>&lt;print-stream&gt;</code></a>.</p>
+
+<h3>Getting Request Attributes</h3>
+
+<p>The usual way to access the value of a request attribute is through the
+<a href="entries/req.html"><code>${req()}</code> phrase</a>.  Just put the name
+of the desired request attribute between the parentheses, like so:</p>
+
+<blockquote><code>$req(Attributes.LOCATION)</code></blockquote>
+
+<p>Just like tasks, phrases use reagents to accept inputs;  the expression
+'<code>Attributes.LOCATION</code>' above is associated with the <code>KEY</code>
+reagent of <code>${req()}</code>.  Unlike tasks, typically phrases may only have
+one reagent.</p>
+
+<h3>Other Important Considerations</h3>
+
+<p>Request attributes exhibit some characteristics that may catch unwary
+programmers off guard;  don't worry, they will make complete sense one you get
+used to them (we hope).  Be aware of the following considerations when dealing
+with request attributes.</p>
+
+<h4>Last In, First Out (LIFO)</h4>
+
+<p>Request attributes have a lifecycle:  they exist only within the scope of the
+task that creates them.  In other words, they are visible to descendants, but
+not to ancestors or siblings.</p>
+
+<p>Request attributes may also <em>cover</em> other request attributes.  This
+process occurs whenever a task registers an attribute with the same name as an
+existing attribute.  In this case, the new attribute will be visible within the
+scope of the task that (re)registered it;  the covered attribute will be
+inaccessible.</p>
+
+<h4>Default Reagent Values</h4>
+
+<p>Many tasks and phrases provide default values for some or all of their
+reagents through standard, well-known request attributes.  Consider this
+example:</p>
+
+<blockquote><code><pre><xmp><with-attribute key="SqlAttributes.DATA_SOURCE" value="${jndi(java:comp/env/jdbc/PortalDb)}">
+  <sql-connection>
+    <sql-statement sql="DELETE FROM up_layout_struct WHERE user_id = ?">
+      <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = '${req(username)}')}"/>
+    </sql-statement>
+  </sql-connection>
+</with-attribute></xmp></pre></code></blockquote>
+
+<p>Who told <code>&lt;sql-connection&gt;</code> how to connect to the database?
+Who told <code>&lt;sql-statement&gt;</code> or <code>${sql()}</code> what JDBC
+connection to use?</p>
+
+<p>No one did -- at least, not explicitly.  This information is communicated
+through a system of conventional request attributes.  Since
+<code>&lt;sql-connection&gt;</code>, <code>&lt;sql-statement&gt;</code>, and
+<code>${sql()}</code> each agree on the convention, you can leave these mundane
+details out of your scripts in 99% of cases.  For the remaining 1% of cases, you
+have the opportunity to specify a <code>DataSource</code> or
+<code>Connection</code> object explicitly.</p>
+
+<h4>Naming Schemes for Common Attributes</h4>
+
+<p>Request attributes that serve as default values for reagents are given names
+according to a convention:  first a name like "Attributes" or "SqlAttributes"
+(roughly corresponding to Java package names), followed by a period '.'
+character, followed by a noun in uppercase (multi-word nouns are separated by
+underscore '_' characters).  For example:</p>
+
+<ul>
+	<li><code>Attributes.CONTEXT</code></li>
+	<li><code>Attributes.LOCATION</code></li>
+	<li><code>SqlAttributes.DATA_SOURCE</code></li>
+	<li><code>XmlAttributes.ENTITY_RESOLVER</code></li>
+</ul>
+
+<p><i>Ad-hoc</i> request attributes need not (and probably <em>should not</em>) adhere to this convention.</p>
+
+<h3>Request Attributes at Startup</h3>
+
+<p>Depending on how you use Cernunnos, one or more request attributes may be
+present in the collection even before the first task is invoked.</p>
+
+<h4><code>Attributes.ORIGIN</code></h4>
+
+<p>The value of this attribute is a URL (in <code>String</code> form)
+representing the absolute location of the current script.  It set by the
+Cernunnos runtime whenever a <code>Task</code> object is created from a file --
+whether read over HTTP, over FTP, from the classpath, from the local file
+system, <i>etc</i>.</p>
+
+<p><code>Attributes.ORIGIN</code> is tremendously useful because it allows you
+to reference additional resources -- XSLT stylesheets, properties files, other
+Cernunnos scripts, <i>etc</i>. -- using relative path expressions.  Thanks to
+this attribute, you don't have to know where resources will be when they are
+ultimately deployed;  you only have to know where they are <i>relative to the
+script that uses them</i>.  Pass <code>Attributes.ORIGIN</code> to the
+<code>CONTEXT</code> reagent of a task that uses an external resource;  it will
+then evaluate the <code>LOCATION</code> of that resource relative to the current
+script.</p>
+
+<p>There are, moreover, several tasks that use <code>Attributes.ORIGIN</code> as
+the default value for their <code>CONTEXT</code> reagent.  Some examples are
+<a href="entries/properties.html"><code>&lt;properties&gt;</code></a> and
+<a href="entries/crn.html"><code>&lt;crn&gt;</code></a>.  These tasks will
+evaluate <code>LOCATION</code> relative to the current script if
+<code>CONTEXT</code> is omitted.</p>
+
+<h4>Command Line Attributes</h4>
+
+<p>When you invoke Cernunnos from the command line, you may optionally specify
+request attributes as command line parameters.  Take a look at this example:</p>
+
+<blockquote><code><pre>
+> crn good-advice.crn many hands make light work
+
+ INFO [main] runtime.ScriptRunner.[] Nov/28 21:00:14 -
+**************************************************
+** Invoking ScriptRunner.run(Task, TaskRequest)
+** TaskRequest contains 6 elements
+**   - $3=make
+**   - $1=many
+**   - Attributes.ORIGIN=file:/C:/HOME/danann/cernunnos/good-advice.crn
+**   - $5=work
+**   - $2=hands
+**   - $4=light
+**************************************************
+</pre></code></blockquote>
+
+<p>The first parameter is always the location of the script (can be relative,
+absolute, or a URL).  Subsequent parameters are added to the collection of
+request attributes as <code>$1</code>, <code>$2</code>, and so on.</p>
+
+<h4>Web Application Attributes</h4>
+
+<p>Cernunnos has been used to develop several
+<a href="http://jcp.org/en/jsr/detail?id=168">Java Portlets</a>.  For detailed
+instructions on how to create portlets with Cernunnos, refer to
+<a href="http://www.unicon.net/node/822">this article</a>.</p>
+
+<p>The Cernunnos portlet class
+(<code>org.danann.cernunnos.runtime.web.CernunnosPortlet</code>) can pre-load
+the request with useful attributes whenever it invokes a script. For starters,
+it creates request attributes for the two objects provided by the portlet
+container in each action or render cycle:</p>
+
+<ul>
+	<li><code>WebAttributes.REQUEST</code></li>
+	<li><code>WebAttributes.RESPONSE</code></li>
+</ul>
+
+<p>These will be set to instances of
+<code>ActionRequest</code>/<code>ActionResponse</code> or
+<code>RenderRequest</code>/<code>RenderResponse</code> in the
+<code>processAction</code> and <code>render</code> methods, respectively.</p>
+
+<p>In addition, you may optionally define a collection of request attributes for
+your portlet using <a href="http://www.springframework.org/" target="_top">spring
+dependency injection</a>.  These attributes my be of any type, and will be
+accessible to all scripts in both <code>processAction</code> and
+<code>render</code>.</p>
+
+<hr/>
+
+</body>
+</html>
