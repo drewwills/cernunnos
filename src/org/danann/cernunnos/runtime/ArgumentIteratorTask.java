@@ -50,10 +50,10 @@ public class ArgumentIteratorTask extends AbstractContainerTask {
 
 	public void init(EntityConfig config) {
 
+		super.init(config);
+
 		// Instance Members.
 		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
-
-		super.init(config);
 
 	}
 
@@ -66,4 +66,5 @@ public class ArgumentIteratorTask extends AbstractContainerTask {
 			super.performSubtasks(req, res);
 		}
 	}
+
 }
