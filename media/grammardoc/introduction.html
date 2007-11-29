@@ -17,7 +17,7 @@
 <html>
 
 <head>
-<title>Cernunnos Task &amp; Phrase Reference</title>
+<title>Cernunnos Manual - Introduction</title>
 <link rel="stylesheet" type="text/css" href="styles.css"/>
 </head>
 
@@ -40,7 +40,7 @@ make it through testing.</p>
 
 <p>Contemporary software systems are mostly built like jigsaw puzzles:  although
 they are made up of components, the components only really combine in one way.
-The reason for this condition is that industry-normal progamming practices
+The reason for this condition is that industry-normal programming practices
 include designing the <em>shape</em> of components (i.e. the way in which they
 connect to other components) together and in accordance with their
 <em>function</em>.  The result is components that look a lot like what they do.
@@ -48,7 +48,7 @@ Components that collaborate with other components must be coded to fit them
 explicitly.  New collaborations require refactoring, forking, or simply
 rewriting one or more participants.</p>
 
-<p>Cernunnos seeks to define the shape of software components independant of
+<p>Cernunnos seeks to define the shape of software components independent of
 their function.  Put another way, Cernunnos makes software less like puzzle
 pieces and more like Lego bricks.  Since all the components have the same shape,
 the number of possible combinations is open-ended.</p>
@@ -57,8 +57,9 @@ the number of possible combinations is open-ended.</p>
 
 <p>Cernunnos organizes software components into two categories:  <em>Tasks</em>
 and <em>Phrases</em>.  Developers tell these components how to combine using a
-seperate, succinct document of XML.  This approach is conceptually similar to
-<a href="http://www.springframework.org" target="_top">Spring Dependancy Injection</a>.</p>
+separate, succinct, XML document.  This approach is conceptually similar to
+<a href="http://www.springframework.org" target="_top">Spring Dependency
+Injection</a>.</p>
 
 <h4>Tasks</h4>
 
@@ -140,17 +141,18 @@ subdirectories recursively.</p>
 it from the command line like this:</p>
 
 <blockquote><code>
-  crn find-class-in-jar.crn SAX
+> crn find-class-in-jar.crn SAX
 </code></blockquote>
 
 <p>And you might get results like these:</p>
 
 <blockquote><code><pre>
- INFO [main] runtime.ScriptRunner.[] Nov/16 15:48:46 -
+ INFO [main] runtime.ScriptRunner.[] Nov/28 22:06:50 -
 **************************************************
 ** Invoking ScriptRunner.run(Task, TaskRequest)
-** TaskRequest contains 1 elements
+** TaskRequest contains 2 elements
 **   - $1=SAX
+**   - Attributes.ORIGIN=file:/C:/HOME/danann/cernunnos/find-class-in-jar.crn
 **************************************************
 
 activation.jar:
