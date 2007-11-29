@@ -229,6 +229,11 @@
 		<description>Performs the subtasks within the first WHEN element (&lt;when&gt;) whose 'test' attribute returns true.  You may optionally provide an OTHERWISE (&lt;otherwise&gt;) element whose subtasks will be performed if none of the WHEN conditions are met.</description>
 	</doc>
 
+	<task name="for-each" impl="org.danann.cernunnos.flow.ForEachTask"/>
+	<doc entry="for-each">
+		<description>Iterates over the elements in ITEMS, performing SUBTASKS once for each item.</description>
+	</doc>
+
 	<!--
 	  | Package:  io
 	  +-->
