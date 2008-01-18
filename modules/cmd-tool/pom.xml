@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>com.googlecode.cernunnos</groupId>
+		<artifactId>cernunnos-parent</artifactId>
+		<version>M5</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.googlecode.cernunnos</groupId>
+	<artifactId>cernunnos-cmd-tool</artifactId>
+	<packaging>pom</packaging>
+	<version>M5</version>
+
+	<name>Cernunnos - Command Tool</name>
+	<description>Cernunnos - Command Tool.</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.googlecode.cernunnos</groupId>
+			<artifactId>cernunnos-core</artifactId>
+			<version>M5</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!--
+                     | Copies all dependencies of this main module, along with 
+                     | all transitive dependencies to a directory for the 
+                     | purpose of including in Tomcat shared/lib
+                     +-->
+                    <execution>
+                        <id>copy-shared-dependencies</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>false</stripVersion>
+                            <outputDirectory>${project.build.directory}/working/lib-dependencies</outputDirectory>
+                            <excludeTransitive>false</excludeTransitive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/assembly/zip.xml</descriptor>
+					</descriptors>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>assembly</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

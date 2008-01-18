@@ -1,0 +1,3 @@
+<!--
+	BOGUS web.xml required for a "valid" WAR artifact build...otherwise mvn complains...
+-->

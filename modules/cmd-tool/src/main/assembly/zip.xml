@@ -1,0 +1,31 @@
+<assembly>
+	<id>bin</id>
+	<formats>
+		<format>tar.gz</format>
+		<format>zip</format>
+	</formats>
+	<fileSets>
+		<fileSet>
+		  <includes>
+			<include>../../README*</include>
+			<include>../../LICENSE*</include>
+			<include>../../NOTICE*</include>
+		  </includes>
+		  <outputDirectory></outputDirectory>
+		</fileSet>
+		<fileSet>
+		  <directory>src/main/resources</directory>
+		  <includes>
+			<include>**/*</include>
+		  </includes>
+		  <outputDirectory></outputDirectory>
+		</fileSet>
+		<fileSet>
+		  <directory>target/working/lib-dependencies</directory>
+		  <includes>
+			<include>*.jar</include>
+		  </includes>
+		  <outputDirectory>lib</outputDirectory>
+		</fileSet>
+	</fileSets>
+</assembly>
