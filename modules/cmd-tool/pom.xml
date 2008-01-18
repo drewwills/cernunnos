@@ -3,14 +3,14 @@
 	<parent>
 		<groupId>com.googlecode.cernunnos</groupId>
 		<artifactId>cernunnos-parent</artifactId>
-		<version>M5</version>
+		<version>SNAPSHOT</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cernunnos</groupId>
 	<artifactId>cernunnos-cmd-tool</artifactId>
 	<packaging>pom</packaging>
-	<version>M5</version>
+	<version>SNAPSHOT</version>
 
 	<name>Cernunnos - Command Tool</name>
 	<description>Cernunnos - Command Tool.</description>
@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>com.googlecode.cernunnos</groupId>
 			<artifactId>cernunnos-core</artifactId>
-			<version>M5</version>
+			<version>SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
