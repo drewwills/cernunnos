@@ -16,7 +16,7 @@
 
 package org.danann.cernunnos.runtime.web;
 
-public class WebAttributes {
+public final class WebAttributes {
 
 	/**
 	 * The name under which the request object (<code>ActionRequest</code> for
