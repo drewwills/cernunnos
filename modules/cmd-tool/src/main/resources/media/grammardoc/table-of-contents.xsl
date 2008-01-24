@@ -40,7 +40,7 @@
   </xsl:template>
 
   <xsl:template match="entry">
-    <a href="entries/{name}.html"><xsl:value-of select="name"/></a><br/>
+    <a href="entries/{name}-{@type}.html"><xsl:value-of select="name"/></a><br/>
   </xsl:template>
 
 </xsl:transform>

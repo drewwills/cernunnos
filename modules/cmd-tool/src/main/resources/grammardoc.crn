@@ -23,7 +23,7 @@
     <xslt stylesheet="media/grammardoc/table-of-contents.xsl" to-file="docs/grammardoc/table-of-contents.html"/>
     
     <node-iterator xpath="entry">
-        <xslt stylesheet="media/grammardoc/entry.xsl" to-file="docs/grammardoc/entries/${valueOf(name)}.html"/>
+        <xslt stylesheet="media/grammardoc/entry.xsl" to-file="docs/grammardoc/entries/${valueOf(name)}-${valueOf(@type)}.html"/>
     </node-iterator>
 
 </serialize-grammar>
