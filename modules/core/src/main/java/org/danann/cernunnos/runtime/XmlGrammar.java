@@ -296,9 +296,9 @@ public final class XmlGrammar implements Grammar {
 
 				// Get the description, if present...
 				String description = null;	// default...
-				Element desc = (Element) e.selectSingleNode("//doc[@entry = '" + name + "']/description");
-				if (desc != null) {
-					description = desc.getText();
+				Element doc = (Element) e.selectSingleNode("following-sibling::doc[@entry = '" + name + "']");
+				if (doc != null) {
+					description = doc.selectSingleNode("description").getText();
 				}
 
 				// Obtain the Formula...
