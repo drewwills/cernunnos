@@ -321,6 +321,20 @@
 	</doc>
 
 	<!--
+	  | Package:  script
+	  +-->
+
+	<phrase name="groovy" engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}" impl="org.danann.cernunnos.script.ScriptPhrase"/>
+	<doc entry="groovy">
+		<description>Returns the value of the specified Groovy EXPRESSION.</description>
+	</doc>
+
+	<task name="groovy" engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}" impl="org.danann.cernunnos.script.ScriptTask"/>
+	<doc entry="groovy">
+		<description>Invokes operations specified by SCRIPT using the groovy engine.</description>
+	</doc>
+
+	<!--
 	  | Package:  sql
 	  +-->
 
