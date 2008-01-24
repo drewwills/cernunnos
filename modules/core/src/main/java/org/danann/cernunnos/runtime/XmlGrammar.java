@@ -60,7 +60,8 @@ public final class XmlGrammar implements Grammar {
 	// Instance Members.
 	private final Grammar parent;
 	private final ClassLoader loader;
-	private Map<String,Entry> entries;
+	private Map<String,Entry> taskEntries;
+	private Map<String,Entry> phraseEntries;
 
 	/*
 	 * Public API.
@@ -112,11 +113,14 @@ public final class XmlGrammar implements Grammar {
 
 		XmlGrammar rslt = new XmlGrammar(parent, loader);	// Chicken-egg problem...
 
-		// Create the entries collection...
-		Map<String,Entry> entries = new HashMap<String,Entry>();
-		entries.putAll(parseEntries(e.selectNodes("task"), rslt));
-		entries.putAll(parseEntries(e.selectNodes("phrase"), rslt));
-		rslt.setEntries(entries);
+		// Create the entries collections...
+		Map<String,Entry> phraseEntries = new HashMap<String,Entry>();
+		phraseEntries.putAll(parseEntries(e.selectNodes("phrase"), rslt));
+		rslt.setPhraseEntries(phraseEntries);
+
+		Map<String,Entry> taskEntries = new HashMap<String,Entry>();
+		taskEntries.putAll(parseEntries(e.selectNodes("task"), rslt));
+		rslt.setTaskEntries(taskEntries);
 
 		return rslt;
 
@@ -135,11 +139,7 @@ public final class XmlGrammar implements Grammar {
 		e.normalize();
 
 		String name = e.getName();
-		Entry n = getEntry(name);
-		if (!n.getType().equals(EntryType.TASK)) {
-			String msg = "The specified name does not define a task:  " + name;
-			throw new IllegalArgumentException(msg);
-		}
+		Entry n = getEntry(name, EntryType.TASK);
 
 		Task rslt = null;
 		try {
@@ -223,12 +223,7 @@ public final class XmlGrammar implements Grammar {
 								nested = expression;
 							}
 
-							Entry n = getEntry(name);
-							if (n.getType() != EntryType.PHRASE) {
-								String msg = "The specified name does not define a phrase:  " + name;
-								throw new IllegalArgumentException(msg);
-							}
-
+							Entry n = getEntry(name, EntryType.PHRASE);
 							Phrase p = null;
 							try {
 
@@ -366,24 +361,37 @@ public final class XmlGrammar implements Grammar {
 
 	}
 
-	private Entry getEntry(String name) {
+	private Entry getEntry(String name, EntryType type) {
 		Entry rslt = null;
-		if (entries.containsKey(name)) {
-			return entries.get(name);
+
+		// Choose which entry Map...
+		Map<String,Entry> m = null;
+		if (type.equals(EntryType.TASK)) {
+			m = taskEntries;
+		} else if (type.equals(EntryType.PHRASE)) {
+			m = phraseEntries;
+		}
+		
+		// Might be a null Map if we're currently bootstrapping a Grammar...
+		if (m != null && m.containsKey(name)) {
+			// If there's a matching entry w/in this Grammar it trumps all...
+			return m.get(name);
 		} else if (parent != null && parent instanceof XmlGrammar) {
 			// This is a little hokey... perhaps Entry should be a first-class type?
-			rslt = ((XmlGrammar) parent).getEntry(name);
+			rslt = ((XmlGrammar) parent).getEntry(name, type);
 		} else {
+			// See if the name is a class that implements...
 			try {
 				Class c = Class.forName(name);
 				Bootstrappable b = (Bootstrappable) c.newInstance();
 				EntryType y = null;
-				if (b instanceof Phrase) {
+				if (type.equals(EntryType.PHRASE) && b instanceof Phrase) {
 					y = EntryType.PHRASE;
-				} else if (b instanceof Task) {
+				} else if (type.equals(EntryType.TASK) && b instanceof Task) {
 					y = EntryType.TASK;
 				} else {
-					String msg = "The specified class is neither a Phrase nor a Task:  " + name;
+					String msg = "The specified class is either not a Phrase or " +
+							"a Task, or it doesn't match the specified type:  " + name;
 					throw new RuntimeException(msg);
 				}
 				rslt = new Entry(name, y, null, b.getFormula(), new HashMap<Reagent,Object>(), new LinkedList<Node>());
@@ -398,19 +406,35 @@ public final class XmlGrammar implements Grammar {
 		return rslt;
 	}
 
-	private void setEntries(Map<String,Entry> entries) {
+	private void setTaskEntries(Map<String,Entry> m) {
 
 		// Assertions...
-		if (entries == null) {
-			String msg = "Argument 'tasks' cannot be null.";
+		if (m == null) {
+			String msg = "Argument 'm [Map<String,Entry>]' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
-		if (this.entries != null) {
-			String msg = "The entries collection has already been assigned.";
-			throw new IllegalArgumentException(msg);
+		if (this.taskEntries != null) {
+			String msg = "The task entries collection has already been assigned.";
+			throw new IllegalStateException(msg);
 		}
 
-		this.entries = (Map<String,Entry>) Collections.unmodifiableMap(entries);
+		this.taskEntries = (Map<String,Entry>) Collections.unmodifiableMap(m);
+
+	}
+
+	private void setPhraseEntries(Map<String,Entry> m) {
+
+		// Assertions...
+		if (m == null) {
+			String msg = "Argument 'm [Map<String,Entry>]' cannot be null.";
+			throw new IllegalArgumentException(msg);
+		}
+		if (this.phraseEntries != null) {
+			String msg = "The phrase entries collection has already been assigned.";
+			throw new IllegalStateException(msg);
+		}
+
+		this.phraseEntries = (Map<String,Entry>) Collections.unmodifiableMap(m);
 
 	}
 
@@ -563,7 +587,10 @@ public final class XmlGrammar implements Grammar {
 
 			Element rslt = fac.createElement("grammar");
 
-			for (Entry e : grammar.entries.values()) {
+			for (Entry e : grammar.taskEntries.values()) {
+				rslt.add(serializeEntry(e, fac));
+			}
+			for (Entry e : grammar.phraseEntries.values()) {
 				rslt.add(serializeEntry(e, fac));
 			}
 
