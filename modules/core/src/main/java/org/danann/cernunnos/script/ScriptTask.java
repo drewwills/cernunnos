@@ -52,8 +52,7 @@ public class ScriptTask extends AbstractContainerTask {
 					"request attribute, if present.");
 
 	public static final Reagent SCRIPT = new SimpleReagent("SCRIPT", "script/text()", ReagentType.PHRASE, String.class,
-					"Script content to execute.  Should be placed within a child element named for the script engine " +
-					"(e.g. <groovy>, <js>).");
+					"Script content to execute.  Must be placed within a child <script> element.");
 
 	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
 					"The set of tasks that are children of this task.", new LinkedList<Task>());
@@ -84,17 +83,6 @@ public class ScriptTask extends AbstractContainerTask {
 			n.putAll(req.getAttributes());
 
 			eng.eval(s, n);
-
-// stuff...
-ScriptContext ctx = eng.getContext();
-List<Integer> scopes = ctx.getScopes();
-for (Integer p : scopes) {
-	Bindings b = ctx.getBindings(p);
-	System.out.println("Bindings:  " + p);
-	for (java.util.Map.Entry y : b.entrySet()) {
-		System.out.println("\t" + y.getKey() + "=" + y.getValue());
-	}
-}
 
 			// Add the engine to the request attributes and invoke subtasks...
 			StringBuffer key = new StringBuffer();
