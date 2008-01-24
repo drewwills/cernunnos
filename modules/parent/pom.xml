@@ -130,19 +130,19 @@
 			<name>Java.net Repository for Maven 2</name>
 			<url>http://download.java.net/maven/2</url>	
 		</repository>
-<!--
 		<repository>
 			<id>dist.codehaus.org/mule</id>
 			<name>Mule Repository for Maven 2</name>
 			<url>http://dist.codehaus.org/mule/dependencies/maven2/</url>
 		</repository>
--->
+<!--
 		<repository>
 			<id>repo.logicblaze.com</id>
 			<name>IONA Open Source Community Repository for Maven 2</name>
 			<url>http://repo.logicblaze.com/maven2-all</url>
 		</repository>
-	</repositories>
+-->
+    </repositories>
 
 	<pluginRepositories>
 		<pluginRepository>

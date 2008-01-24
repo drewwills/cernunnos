@@ -18,11 +18,7 @@ package org.danann.cernunnos.script;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -37,23 +33,23 @@ import org.danann.cernunnos.TaskResponse;
 public class ScriptPhrase implements Phrase {
 
 	// Instance Members.
-	private Phrase engineName;
+	private Phrase engine;
 	private Phrase expression;
-	private final ScriptEngineManager mgr = new ScriptEngineManager();
-	private final Log log = LogFactory.getLog(ScriptPhrase.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent ENGINE_NAME = new SimpleReagent("ENGINE_NAME", "@engine-name", ReagentType.PHRASE, String.class,
-					"Name of the scripting engine to use -- e.g. 'groovy', 'jruby', 'javascript', etc.");
+	public static final Reagent ENGINE = new SimpleReagent("ENGINE", "@engine", ReagentType.PHRASE, ScriptEngine.class,
+					"Optional instance of ScriptEngine that will be used to invoke SCRIPT.  If one is not provided, " +
+					"a new one will be created.  The default is the value of the 'ScriptAttributes.ENGINE.{ENGINE_NAME}' " +
+					"request attribute, if present.");
 
 	public static final Reagent EXPRESSION = new SimpleReagent("EXPRESSION", "descendant-or-self::text()", ReagentType.PHRASE,
 					String.class, "Script expression to evaluate.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENGINE_NAME, EXPRESSION};
+		Reagent[] reagents = new Reagent[] {ENGINE, EXPRESSION};
 		final Formula rslt = new SimpleFormula(ScriptPhrase.class, reagents);
 		return rslt;
 	}
@@ -61,27 +57,16 @@ public class ScriptPhrase implements Phrase {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.engineName = (Phrase) config.getValue(ENGINE_NAME);
+		this.engine = (Phrase) config.getValue(ENGINE);
 		this.expression = (Phrase) config.getValue(EXPRESSION);
 
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 
+		ScriptEngine eng = (ScriptEngine) engine.evaluate(req, res);
 		String x = (String) expression.evaluate(req, res);
-		String eName = (String) engineName.evaluate(req, res);
-
 		try {
-
-			ScriptEngine eng = mgr.getEngineByName(eName);
-
-			// ScriptEngineManager will return null if there's
-			// no provider for the named platform...
-			if (eng == null) {
-				String msg = "Unable to locate the specified scripting engine:  " + eName;
-				log.error(msg);
-				throw new RuntimeException(msg);
-			}
 
 			Bindings n = new SimpleBindings();
 			n.putAll(req.getAttributes());
@@ -90,7 +75,7 @@ public class ScriptPhrase implements Phrase {
 
 		} catch (Throwable t) {
 			String msg = "Error while evaluating the specified script expression.  " +
-							"\n\t\tENGINE_NAME:  " + eName +
+							"\n\t\tENGINE_NAME:  " + eng.getFactory().getEngineName() +
 							"\n\t\tEXPRESSION:  " + x;
 			throw new RuntimeException(msg, t);
 		}
