@@ -132,6 +132,21 @@
 		<description>Returns Boolean.FALSE.</description>
 	</doc>
 
+	<task name="with" impl="org.danann.cernunnos.core.WithTask"/>
+	<doc entry="with">
+		<description>Establishes one or more request attributes using KEYS and VALUES, then invokes subtasks.</description>
+		<example caption="Creates request attributes named 'foo' and 'myPath' then displays the value of each.">
+			<pre><xmp><with>
+	<attribute key="foo">bar</attribute>
+	<attribute key="myPath">${Attributes.ORIGIN}</attribute>
+	<subtasks>
+		<echo-ln>foo=${foo}</echo-ln>
+		<echo-ln>myPath=${myPath}</echo-ln>
+	</subtasks>
+</with></xmp></pre>
+		</example>
+	</doc>
+
 	<task name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask"/>
 	<doc entry="with-attribute">
 		<description>Creates a request attribute with the specified name and value, then invokes subtasks.</description>
