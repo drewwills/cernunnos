@@ -77,8 +77,8 @@ public class InvokeMethodTask extends AbstractContainerTask {
 							"The set of tasks that are children of this task.", new LinkedList<Task>());
 
 	public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", ReagentType.PHRASE, String.class,
-							"Optional name under which the result of invoking METHOD will be registered as a request attribute.",
-							new LiteralPhrase(Attributes.OBJECT));
+							"Optional name under which the result of invoking METHOD will be registered as a request attribute.  If " +
+							"omitted, the name 'Attributes.OBJECT' will be used.", new LiteralPhrase(Attributes.OBJECT));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {OBJECT, CLASS, METHOD, PARAMETERS, ATTRIBUTE_NAME, SUBTASKS};
