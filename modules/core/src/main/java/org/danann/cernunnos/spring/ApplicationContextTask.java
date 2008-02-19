@@ -26,6 +26,7 @@ import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -34,11 +35,14 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public final class BeanContainerTask extends AbstractContainerTask {
+public final class ApplicationContextTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase context;
 	private Phrase location;
+	private Phrase cache;
+	private URL prevUrl = null;
+	private ApplicationContext prevBeans = null;
 
 	/*
 	 * Public API.
@@ -54,9 +58,14 @@ public final class BeanContainerTask extends AbstractContainerTask {
 					"a URL.  If relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the " +
 					"'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
+	public static final Reagent CACHE = new SimpleReagent("CACHE", "@cache", ReagentType.PHRASE, Boolean.class,
+					"If true (the default), this task will retain and reuse an existing ApplicationContext " +
+					"unless/until either:  (1) a different XML file is specified;  or (2) this reagent " +
+					"becomes false.", new LiteralPhrase(Boolean.TRUE));
+
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
-		final Formula rslt = new SimpleFormula(BeanContainerTask.class, reagents);
+		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, CACHE, AbstractContainerTask.SUBTASKS};
+		final Formula rslt = new SimpleFormula(ApplicationContextTask.class, reagents);
 		return rslt;
 	}
 
@@ -67,6 +76,7 @@ public final class BeanContainerTask extends AbstractContainerTask {
 		// Instance Members.
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
+		this.cache = (Phrase) config.getValue(CACHE);
 		
 	}
 
@@ -78,9 +88,10 @@ public final class BeanContainerTask extends AbstractContainerTask {
 		try {
 			
 			URL ctx = new URL(ctx_str);
-			URL doc = new URL(ctx, loc_str);
+			URL config = new URL(ctx, loc_str);
 
-			ApplicationContext beans = new FileSystemXmlApplicationContext(doc.toExternalForm());
+			ApplicationContext beans = getApplicationContext(config, 
+							(Boolean) cache.evaluate(req, res));
 			for (String name : beans.getBeanDefinitionNames()) {
 				res.setAttribute(name, beans.getBean(name));
 			}
@@ -94,6 +105,21 @@ public final class BeanContainerTask extends AbstractContainerTask {
 
 		super.performSubtasks(req, res);
 		
+	}
+	
+	/*
+	 * Implementation.
+	 */
+	
+	private synchronized ApplicationContext getApplicationContext(URL config, boolean useCache) {
+		
+		if (!useCache || !config.equals(prevUrl)) {
+			prevBeans = new FileSystemXmlApplicationContext(config.toExternalForm());
+			prevUrl = config;
+		}
+		
+		return prevBeans;		
+
 	}
 	
 }

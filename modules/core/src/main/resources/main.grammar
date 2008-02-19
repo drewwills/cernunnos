@@ -353,7 +353,7 @@
 	  | Package:  spring
 	  +-->
 
-	<task name="spring-beans" impl="org.danann.cernunnos.spring.BeanContainerTask"/>
+	<task name="spring-beans" impl="org.danann.cernunnos.spring.ApplicationContextTask"/>
 	<doc entry="spring-beans">
 		<description>Creates a spring context from the specified XML bean definition file, registers all the beans contained therein as request attributes, then invokes SUBTASKS.</description>
 	</doc>
