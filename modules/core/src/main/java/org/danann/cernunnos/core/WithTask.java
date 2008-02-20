@@ -86,7 +86,6 @@ public final class WithTask extends AbstractContainerTask {
 			res.setAttribute((String) y.getKey().evaluate(req, res), 
 								y.getValue().evaluate(req, res));
 		}
-
 		
 		super.performSubtasks(req, res);
 		
