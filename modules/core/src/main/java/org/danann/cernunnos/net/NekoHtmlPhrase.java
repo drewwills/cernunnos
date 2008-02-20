@@ -26,7 +26,6 @@ import org.cyberneko.html.parsers.DOMParser;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -50,7 +49,7 @@ public final class NekoHtmlPhrase implements Phrase {
 	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
 					"The context from which missing elements of the LOCATION can be inferred if it "
 					+ "is relative.  The default is a URL representing the filesystem location from which "
-						+ "Java is executing.", new CurrentDirectoryUrlPhrase());
+						+ "Java is executing.", new AttributePhrase(Attributes.ORIGIN));
 
 	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "descendant-or-self::text()", ReagentType.PHRASE, String.class,
 					"Location of a resource from which a document may be read.  May be a filesystem path (absolute or relative), "
