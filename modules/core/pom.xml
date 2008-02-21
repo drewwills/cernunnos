@@ -3,14 +3,14 @@
 	<parent>
 		<groupId>com.googlecode.cernunnos</groupId>
 		<artifactId>cernunnos-parent</artifactId>
-		<version>1.0</version>
+		<version>M6</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.googlecode.cernunnos</groupId>
 	<artifactId>cernunnos-core</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0</version>
+	<version>M6</version>
 
 	<name>Cernunnos - Core</name>
 	<description>Cernunnos - Core.</description>
