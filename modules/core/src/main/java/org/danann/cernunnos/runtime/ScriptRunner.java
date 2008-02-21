@@ -201,6 +201,23 @@ public class ScriptRunner {
 	 * specified script.
 	 */
     public TaskResponse run(Task k, TaskRequest req) {
+    	return run(k, req, new RuntimeRequestResponse());
+    }
+    
+	/**
+	 * Invokes the specified <code>Task</code> with the specified
+	 * <code>TaskRequest</code> and <code>TaskResponse</code>.  Use this 
+	 * overload of the <code>run</code> method when you may need to 
+	 * pre-load information into both the <code>TaskRequest</code> and 
+	 * the <code>TaskResponse</code>.
+	 *
+	 * @param k A bootstrapped <code>Task</code> object.
+	 * @param req A <code>TaskRequest</code> prepared externally.
+	 * @param req A <code>TaskResponse</code> prepared externally.
+	 * @return The <code>TaskResponse</code> that results from invoking the
+	 * specified script.
+	 */
+    public TaskResponse run(Task k, TaskRequest req, TaskResponse res) {
 
         // Assertions.
         if (k == null) {
@@ -244,7 +261,6 @@ public class ScriptRunner {
         }
 
         // Invoke the task...
-        TaskResponse res = new RuntimeRequestResponse();
         k.perform(tr, res);
         return res;
 

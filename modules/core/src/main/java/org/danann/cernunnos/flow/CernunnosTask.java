@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.danann.cernunnos.runtime;
+package org.danann.cernunnos.flow;
 
 import java.net.URL;
 
@@ -31,6 +31,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.danann.cernunnos.runtime.ScriptRunner;
 
 public final class CernunnosTask implements Task {
 
@@ -83,7 +84,7 @@ public final class CernunnosTask implements Task {
 			Task k = runner.compileTask(crn.toExternalForm());
 
 			// Run it...
-			runner.run(k, req);
+			runner.run(k, req, res);
 
 		} catch (Throwable t) {
 			String msg = "Unable to invoke the specified script:  " + loc;

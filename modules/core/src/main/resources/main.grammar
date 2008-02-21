@@ -32,11 +32,6 @@
 	  | Package:  runtime
 	  +-->
 
-	<task name="crn" impl="org.danann.cernunnos.runtime.CernunnosTask"/>
-	<doc entry="crn">
-		<description>Reads, bootstrapps, and exececutes the specified Cernunnos script.</description>
-	</doc>
-
 	<task name="add-grammar" impl="org.danann.cernunnos.runtime.AddGrammarTask"/>
 	<doc entry="add-grammar">
 		<description>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</description>
@@ -234,6 +229,21 @@
 	  | Package:  flow
 	  +-->
 
+	<phrase name="crn" impl="org.danann.cernunnos.flow.CernunnosPhrase"/>
+	<doc entry="crn">
+		<description>Returns the value of the specified Cernunnos script;  use the &lt;return&gt; task to set the return value within the specified script.</description>
+	</doc>
+
+	<task name="return" impl="org.danann.cernunnos.flow.ReturnTask"/>
+	<doc entry="return">
+		<description>Sets the return value of the current Cernunnos operation to the specified VALUE.</description>
+	</doc>
+
+	<task name="crn" impl="org.danann.cernunnos.flow.CernunnosTask"/>
+	<doc entry="crn">
+		<description>Reads, bootstrapps, and exececutes the specified Cernunnos script.</description>
+	</doc>
+
 	<task name="if" impl="org.danann.cernunnos.flow.IfTask"/>
 	<doc entry="if">
 		<description>Execustes SUBTASKS if the conditions of TEST are met.</description>
@@ -255,7 +265,7 @@
 
 	<phrase name="file" impl="org.danann.cernunnos.io.FilePhrase"/>
 	<doc entry="file">
-		<description>Creates a java.io.File object from thbe specified LOCATION and returns it.</description>
+		<description>Creates a java.io.File object from the specified LOCATION and returns it.</description>
 	</doc>
 
 	<task name="file-iterator" impl="org.danann.cernunnos.io.FileIteratorTask"/>
