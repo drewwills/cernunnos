@@ -177,8 +177,8 @@ public class InvokeMethodTask extends AbstractContainerTask {
 			if (myMethod == null) {
 				StringBuffer msg = new StringBuffer();
 				msg.append("Unable to locate method '").append(m).append("' on ");
-				if (object != null) {
-					msg.append("object of class '").append(object.getClass().getName()).append("' ");
+				if (target != null) {
+					msg.append("object of class '").append(target.getClass().getName()).append("' ");
 				} else {
 					msg.append("class '").append(clazz.evaluate(req, res)).append("' ");
 				}
