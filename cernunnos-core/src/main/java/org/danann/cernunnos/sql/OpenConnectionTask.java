@@ -17,7 +17,7 @@
 package org.danann.cernunnos.sql;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
+
 import javax.sql.DataSource;
 
 import org.danann.cernunnos.AbstractContainerTask;
@@ -32,21 +32,26 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 
 /**
  * <code>Task</code> implementation that opens a JDBC connection and makes it
  * available to subtasks.  The new connection will automatically be closed when
  * execution of this task concludes.
+ * @deprecated TODO put message here
  */
+@Deprecated
 public final class OpenConnectionTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase attribute_name;
 	private Phrase data_source;
-	private Phrase driver;
-	private Phrase url;
-	private Phrase username;
-	private Phrase password;
+	
+	private Phrase driverPhrase;
+    private Phrase urlPhrase;
+    private Phrase usernamePhrase;
+    private Phrase passwordPhrase;
+    private BasicDataSourceTemplate basicDataSourceTemplate;
 
 	/*
 	 * Public API.
@@ -60,6 +65,10 @@ public final class OpenConnectionTask extends AbstractContainerTask {
 								"Optional DataSource object from which the connection may be opened.  This phrase will be evaluated only if " +
 								"DRIVER, URL, USERNAME, and PASSWORD are not provided.  The default is a request attribute under the name " +
 								"'SqlAttributes.DATA_SOURCE'.", new AttributePhrase(SqlAttributes.DATA_SOURCE));
+	
+    public static final Reagent DATA_SOURCE_ATTRIBUTE_NAME = new SimpleReagent("DATA_SOURCE_ATTRIBUTE_NAME", "@data-source-attribute-name", ReagentType.PHRASE, String.class,
+                                "Optional name under which the new DataSource will be registered as a request attribute.  If omitted, " +
+                                "the name 'SqlAttributes.DATA_SOURCE' will be used.", new LiteralPhrase(SqlAttributes.DATA_SOURCE));
 
 	public static final Reagent DRIVER = new SimpleReagent("DRIVER", "@driver", ReagentType.PHRASE, String.class,
 								"Optional JDBC driver class name to use when opening the connection.  You must " +
@@ -79,65 +88,66 @@ public final class OpenConnectionTask extends AbstractContainerTask {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, DATA_SOURCE, DRIVER, URL,
-							USERNAME, PASSWORD, AbstractContainerTask.SUBTASKS};
+							USERNAME, PASSWORD, DATA_SOURCE_ATTRIBUTE_NAME, AbstractContainerTask.SUBTASKS};
 		return new SimpleFormula(OpenConnectionTask.class, reagents);
 	}
 
-	public void init(EntityConfig config) {
-
+	@Override
+    public void init(EntityConfig config) {
 		super.init(config);
 
 		// Instance Members.
 		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
 		this.data_source = (Phrase) config.getValue(DATA_SOURCE);
-		this.driver = (Phrase) config.getValue(DRIVER);
-		this.url = (Phrase) config.getValue(URL);
-		this.username = (Phrase) config.getValue(USERNAME);
-		this.password = (Phrase) config.getValue(PASSWORD);
-
+		
+		final Phrase dataSourceAttributeName = (Phrase) config.getValue(DATA_SOURCE_ATTRIBUTE_NAME);
+		this.driverPhrase = (Phrase) config.getValue(DRIVER);
+		this.urlPhrase = (Phrase) config.getValue(URL);
+		this.usernamePhrase = (Phrase) config.getValue(USERNAME);
+		this.passwordPhrase = (Phrase) config.getValue(PASSWORD);
+		this.basicDataSourceTemplate = new BasicDataSourceTemplateImpl(dataSourceAttributeName, driverPhrase, urlPhrase, usernamePhrase, passwordPhrase);
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-
-		Connection conn = null;
-		try {
-
-			// Open the Connection...
-			if (driver != null && url != null && username != null && password != null) {
-				// Connect Manually...
-				Class.forName((String) driver.evaluate(req, res));
-				conn = DriverManager.getConnection((String) url.evaluate(req, res),
-									(String) username.evaluate(req, res),
-									(String) password.evaluate(req, res));
-			} else {
-				// Use the DataSource...
-				DataSource ds = (DataSource) data_source.evaluate(req, res);
-				conn = ds.getConnection();
-			}
-
-			// Make it available as a request attribute...
-			res.setAttribute((String) attribute_name.evaluate(req, res), conn);
-
-			// Invoke subtasks...
-			super.performSubtasks(req, res);
-
-		} catch (Throwable t) {
-			String msg = "Unable to connect to the specified database";
-			throw new RuntimeException(msg, t);
-		} finally {
-
-			// Cleanup...
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (Throwable t) {
-					String msg = "Unable to close the specified connection";
-					throw new RuntimeException(msg, t);
-				}
-			}
-
-		}
-
+	    final DataSource dataSource;
+	    if (this.driverPhrase != null && this.urlPhrase != null && this.usernamePhrase != null && this.passwordPhrase != null) {
+	        //Use the BasicDataSource template to create and bind the DataSource then call performCreateConnection
+	        this.basicDataSourceTemplate.perform(req, res);
+	    }
+	    else {
+	        //Use the existing DataSource to call performCreateConnection
+	        dataSource = (DataSource) data_source.evaluate(req, res);
+	        this.performCreateConnection(req, res, dataSource);
+	    }
 	}
 
+    protected void performCreateConnection(TaskRequest req, TaskResponse res, DataSource dataSource) {
+        final Connection connection = DataSourceUtils.getConnection(dataSource);
+	    try {
+    	    // Make it available as a request attribute...
+            final String connectionAttrName = (String) attribute_name.evaluate(req, res);
+            res.setAttribute(connectionAttrName, connection);
+            
+            // Invoke subtasks...
+            super.performSubtasks(req, res);
+	    }
+	    finally {
+	        DataSourceUtils.releaseConnection(connection, dataSource);
+	    }
+    }
+    
+    /**
+     * Local DataSource template that executes {@link OpenConnectionTask#performCreateConnection(TaskRequest, TaskResponse, DataSource)}
+     * in the call-back.
+     */
+    private final class BasicDataSourceTemplateImpl extends BasicDataSourceTemplate {
+        private BasicDataSourceTemplateImpl(Phrase attributeNamePhrase, Phrase driverPhrase, Phrase urlPhrase, Phrase usernamePhrase, Phrase passwordPhrase) {
+            super(attributeNamePhrase, driverPhrase, urlPhrase, usernamePhrase, passwordPhrase);
+        }
+
+        @Override
+        protected void performWithDataSource(TaskRequest req, TaskResponse res, DataSource dataSource) {
+            OpenConnectionTask.this.performCreateConnection(req, res, dataSource);
+        }
+    }
 }

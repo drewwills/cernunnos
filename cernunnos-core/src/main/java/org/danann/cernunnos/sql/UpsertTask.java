@@ -16,16 +16,14 @@
 
 package org.danann.cernunnos.sql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dom4j.Node;
+import javax.sql.DataSource;
 
 import org.danann.cernunnos.AttributePhrase;
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
@@ -33,14 +31,17 @@ import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
-import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 public final class UpsertTask implements Task {
 
 	// Instance Members.
-	private Phrase connection;
+	private Phrase dataSourcePhrase;
 	private Phrase update_sql;
 	private Phrase insert_sql;
 	private List<Phrase> parameters;
@@ -51,12 +52,11 @@ public final class UpsertTask implements Task {
 	 * Public API.
 	 */
 
-	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-										"Optional name of a request attribute containing a dgatabase connection.  If omitted, "
-										+ "the name 'SqlAttributes.CONNECTION' will be used.",
-										new AttributePhrase(SqlAttributes.CONNECTION));
+	public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
+            "The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
+            "'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
 
-	public static final Reagent UPDATE_SQL = new SimpleReagent("UPDATE_SQL", "update-statement", ReagentType.PHRASE, String.class,
+    public static final Reagent UPDATE_SQL = new SimpleReagent("UPDATE_SQL", "update-statement", ReagentType.PHRASE, String.class,
 										"The SQL statement that performs the Update portion of the 'Upsert' operation.");
 
 	public static final Reagent INSERT_SQL = new SimpleReagent("INSERT_SQL", "insert-statement", ReagentType.PHRASE, String.class,
@@ -78,34 +78,33 @@ public final class UpsertTask implements Task {
 										+ "differ in number or order.", null);
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONNECTION, UPDATE_SQL, INSERT_SQL,
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, UPDATE_SQL, INSERT_SQL,
 						PARAMETERS, UPDATE_PARAMETERS, INSERT_PARAMETERS};
 		final Formula rslt = new SimpleFormula(UpsertTask.class, reagents);
 		return rslt;
 	}
 
-	public void init(EntityConfig config) {
+	@SuppressWarnings("unchecked")
+    public void init(EntityConfig config) {
 
-		this.connection = (Phrase) config.getValue(CONNECTION);
+		this.dataSourcePhrase = (Phrase) config.getValue(DATA_SOURCE);
 		this.update_sql = (Phrase) config.getValue(UPDATE_SQL);
 		this.insert_sql = (Phrase) config.getValue(INSERT_SQL);
 
-		List nodes = null;
+		List<Node> nodes = null;
 
 		// PARAMETERS...
 		this.parameters = new LinkedList<Phrase>();
-		nodes = (List) config.getValue(PARAMETERS);
-		for (Iterator it = nodes.iterator(); it.hasNext();) {
-			Node n = (Node) it.next();
+		nodes = (List<Node>) config.getValue(PARAMETERS);
+		for (final Node n : nodes) {
 			parameters.add(config.getGrammar().newPhrase(n.getText()));
 		}
 
 		// UPDATE_PARAMETERS...
-		nodes = (List) config.getValue(UPDATE_PARAMETERS);
+		nodes = (List<Node>) config.getValue(UPDATE_PARAMETERS);
 		if (nodes != null) {
 			this.update_parameters = new LinkedList<Phrase>();
-			for (Iterator it = nodes.iterator(); it.hasNext();) {
-				Node n = (Node) it.next();
+			for (final Node n : nodes) {
 				update_parameters.add(config.getGrammar().newPhrase(n.getText()));
 			}
 		} else {
@@ -114,11 +113,10 @@ public final class UpsertTask implements Task {
 		}
 
 		// INSERT_PARAMETERS...
-		nodes = (List) config.getValue(INSERT_PARAMETERS);
+		nodes = (List<Node>) config.getValue(INSERT_PARAMETERS);
 		if (nodes != null) {
 			this.insert_parameters = new LinkedList<Phrase>();
-			for (Iterator it = nodes.iterator(); it.hasNext();) {
-				Node n = (Node) it.next();
+            for (final Node n : nodes) {
 				insert_parameters.add(config.getGrammar().newPhrase(n.getText()));
 			}
 		} else {
@@ -129,66 +127,46 @@ public final class UpsertTask implements Task {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-
-		PreparedStatement update = null;
-		PreparedStatement insert = null;
-		try {
-
-			Connection conn = (Connection) connection.evaluate(req, res);
-
-			// We will need to choose between PARAMETERS or UPDATE_PARAMETERS/INSERT_PARAMETERS...
-			List<Phrase> parametersInUse = null;
-
-			update = conn.prepareStatement((String) update_sql.evaluate(req, res));
-			parametersInUse = update_parameters != null ? update_parameters : parameters;
-			int i=0;
-			for (Phrase p : parametersInUse) {
-				update.setObject(++i, p.evaluate(req, res));
-			}
-			switch (update.executeUpdate()) {
-				case 1:
-					// This is nice -- row updated, nothing to do...
-					break;
-				case 0:
-					// No information present, add the row...
-					insert = conn.prepareStatement((String) insert_sql.evaluate(req, res));
-					parametersInUse = insert_parameters != null ? insert_parameters : parameters;
-					i=0;
-					for (Phrase p : parametersInUse) {
-						insert.setObject(++i, p.evaluate(req, res));
-					}
-					insert.executeUpdate();
-					break;
-				default:
-					// Problem???
-					break;
-			}
-
-		} catch (Throwable t) {
-			String msg = "Unable to perform the specified upsert operation.";
-			throw new RuntimeException(msg, t);
-		} finally {
-
-			// Cleanup...
-			if (update != null) {
-				try {
-					update.close();
-				} catch (Throwable t) {
-					String msg = "Unable to close the update statement.";
-					throw new RuntimeException(msg, t);
-				}
-			}
-			if (insert != null) {
-				try {
-					insert.close();
-				} catch (Throwable t) {
-					String msg = "Unable to close the insert statement.";
-					throw new RuntimeException(msg, t);
-				}
-			}
-
-		}
-
+        //Get the DataSource from the request and create a JdbcTemplate to use.
+        final DataSource dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+        final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
+        
+        final int updateResult = this.doUpdate(jdbcOperations, req, res);
+        
+        // No information present, add the row...
+        if (updateResult == 0) {
+            this.doInsert(jdbcOperations, req, res);
+        }
 	}
 
+    /**
+     * Executes the update and returns the affected row count
+     * 
+     * Moved to its own method to reduce possibility for variable name confusion
+     */
+    protected int doUpdate(JdbcOperations jdbcOperations, TaskRequest req, TaskResponse res) {
+        //Setup the update parameters and setter
+        final List<Phrase> parametersInUse = update_parameters != null ? update_parameters : parameters;
+        final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(parametersInUse, req, res);
+        
+        //Get the update sql and execute the update.
+        final String fUpdateSql = (String) update_sql.evaluate(req, res);
+        return jdbcOperations.update(fUpdateSql, preparedStatementSetter);
+    }
+    
+    /**
+     * Executes the insert and returns the affected row count
+     * 
+     * Moved to its own method to reduce possibility for variable name confusion
+     */
+    protected int doInsert(JdbcOperations jdbcOperations, TaskRequest req, TaskResponse res) {
+        //Setup the insert parameters and setter
+        final List<Phrase> parametersInUse = insert_parameters != null ? insert_parameters : parameters;
+        final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(parametersInUse, req, res);
+        
+        //Get the insert sql and execute the insert
+        final String fInsertSql = (String) insert_sql.evaluate(req, res);
+        return jdbcOperations.update(fInsertSql, preparedStatementSetter);
+    }
 }

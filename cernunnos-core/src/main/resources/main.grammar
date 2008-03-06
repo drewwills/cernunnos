@@ -387,18 +387,28 @@
 		</example>
 	</doc>
 
+	<task name="sql-datasource" impl="org.danann.cernunnos.sql.DataSourceTask"/>
+	<doc entry="sql-datasource">
+		<description>Creates a pooled DataSource and registers it as a request attribute.  By default, it will be registered under SqlAttributes.DATA_SOURCE.  Cernunnos SQL tasks will look for a DataSource under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the DataSource object.</description>
+		<example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+			<pre><xmp><sql-datasource driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-datasource></xmp></pre>
+		</example>
+	</doc>
+
 	<task name="sql-transaction" impl="org.danann.cernunnos.sql.TransactionTask"/>
 	<doc entry="sql-transaction">
-		<description>Subtasks that operate on the specified CONNECTION will be transactional.</description>
+		<description>Subtasks that operate on the specified DataSource will be transactional if they use the Cernunnos sql tasks or the Spring JDBC APIs.</description>
 	</doc>
 
 	<task name="sql-statement" impl="org.danann.cernunnos.sql.StatementTask"/>
 	<doc entry="sql-statement">
 		<description>Executes the specified SQL statement.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</description>
 		<example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
-			<pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+			<pre><xmp><sql-datasource driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
   <sql-statement sql="${req($1)}"/>
-</sql-connection></xmp></pre>
+</sql-datasource></xmp></pre>
 		</example>
 	</doc>
 
@@ -407,14 +417,14 @@
 		<description>Performs a specified query, then invokes SUBTASKS once for each row in the result set.  For each iteration of SUBTASKS, column values will be registered as request attributes both under (1) the column name (all uppercase), and (2) the column index (starting with 1).</description>
 		<example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
 			<pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
-    <sql-connection driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
+    <sql-datasource driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
 		<sql-query>
         	<sql>SELECT user_name FROM users</sql>
             <subtasks>
             	<echo>${req(1)}, </echo>
 			</subtasks>
 		</sql-query>
-    </sql-connection>
+    </sql-datasource>
 </properties></xmp></pre>
 		</example>
 	</doc>

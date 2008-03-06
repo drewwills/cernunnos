@@ -38,7 +38,8 @@ public final class ColumnIteratorTask extends AbstractContainerTask {
 		return rslt;
 	}
 
-	public void init(EntityConfig config) {
+	@Override
+    public void init(EntityConfig config) {
 		super.init(config);		
 	}
 

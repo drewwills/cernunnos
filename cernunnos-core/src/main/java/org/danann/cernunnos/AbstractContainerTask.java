@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Element;
 
 /**
@@ -28,6 +30,7 @@ import org.dom4j.Element;
  * formulas.
  */
 public abstract class AbstractContainerTask implements Task {
+    protected final Log logger = LogFactory.getLog(this.getClass());
 
 	// NB:  We're using the subtasks reference as a que, so we want the concrete 
 	// reference type, not the interface.

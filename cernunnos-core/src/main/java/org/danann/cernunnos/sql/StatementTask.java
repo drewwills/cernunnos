@@ -16,14 +16,13 @@
 
 package org.danann.cernunnos.sql;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dom4j.Node;
+import javax.sql.DataSource;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
@@ -36,22 +35,25 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 public class StatementTask implements Task {
-
-	// Instance Members.
-	private Phrase connection;
-	private Phrase sql;
+    // Instance Members.
+    private Phrase dataSourcePhrase;
+    private Phrase sql;
 	private List<Phrase> parameters;
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-										"Optional database connection object.  If omitted, the request attribute under "
-										+ "the name 'SqlAttributes.CONNECTION' will be used.",
-										new AttributePhrase(SqlAttributes.CONNECTION));
+    public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
+            "The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
+            "'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
 
 	public static final Reagent SQL = new SimpleReagent("SQL", "@sql", ReagentType.PHRASE, String.class,
 										"The SQL statement that will be executed.");
@@ -62,56 +64,56 @@ public class StatementTask implements Task {
 										Collections.emptyList());
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONNECTION, SQL, PARAMETERS};
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, SQL, PARAMETERS};
 		final Formula rslt = new SimpleFormula(StatementTask.class, reagents);
 		return rslt;
 	}
 
-	public void init(EntityConfig config) {
-
-		this.connection = (Phrase) config.getValue(CONNECTION);
-		this.sql = (Phrase) config.getValue(SQL);
+	@SuppressWarnings("unchecked")
+    public void init(EntityConfig config) {
+	    this.dataSourcePhrase = (Phrase) config.getValue(DATA_SOURCE);
+        this.sql = (Phrase) config.getValue(SQL);
 		this.parameters = new LinkedList<Phrase>();
-		List nodes = (List) config.getValue(PARAMETERS);
-		for (Iterator it = nodes.iterator(); it.hasNext();) {
-			Node n = (Node) it.next();
+		
+		final List<Node> nodes = (List<Node>) config.getValue(PARAMETERS);
+		for (final Node n : nodes) {
 			parameters.add(config.getGrammar().newPhrase(n.getText()));
 		}
-
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
+        //Get the DataSource from the request and create a JdbcTemplate to use.
+        final DataSource dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+        final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
 
-		String fSql = (String) sql.evaluate(req, res);
-		PreparedStatement pstmt = null;
-		try {
-
-			Connection conn = (Connection) connection.evaluate(req, res);
-
-			pstmt = conn.prepareStatement(fSql);
-			int i=0;
-			for (Phrase p : parameters) {
-				pstmt.setObject(++i, p.evaluate(req, res));
-			}
-			pstmt.execute();
-
-		} catch (Throwable t) {
-			String msg = "Unable to execute the specified sql:  " + fSql;
-			throw new RuntimeException(msg, t);
-		} finally {
-
-			// Cleanup...
-			if (pstmt != null) {
-				try {
-					pstmt.close();
-				} catch (Throwable t) {
-					String msg = "Unable to close the statement.";
-					throw new RuntimeException(msg, t);
-				}
-			}
-
-		}
-
+        //Setup the callback class to do the PreparedStatement parameter binding and statement execution
+		final PreparedStatementCallback preparedStatementCallback = new PhraseParameterPreparedStatementCallback(this.parameters, req, res);
+        
+		//Get the SQL and execute it in a PreparedStatement
+		final String fSql = (String) sql.evaluate(req, res);
+        jdbcOperations.execute(fSql, preparedStatementCallback);
 	}
+	
 
+    /**
+     * Uses PhraseParameterPreparedStatementSetter to bind the parameters then executes the PreparedSetatement.
+     * 
+     * Always returns null.
+     */
+    private static final class PhraseParameterPreparedStatementCallback implements PreparedStatementCallback {
+        private final PhraseParameterPreparedStatementSetter preparedStatementSetter;
+
+        private PhraseParameterPreparedStatementCallback(List<Phrase> parameters, TaskRequest req, TaskResponse res) {
+            this.preparedStatementSetter = new PhraseParameterPreparedStatementSetter(parameters, req, res);
+        }
+
+        public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+            this.preparedStatementSetter.setValues(ps);
+            
+            ps.execute();
+            
+            return null;
+        }
+    }
 }

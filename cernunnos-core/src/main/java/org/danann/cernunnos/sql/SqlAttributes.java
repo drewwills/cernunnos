@@ -17,6 +17,12 @@
 package org.danann.cernunnos.sql;
 
 public final class SqlAttributes {
+    
+    /**
+     * The default name under which a {@link org.springframework.transaction.PlatformTransactionManager} may be
+     * registered as a request attribute.
+     */
+    public static final String TRANSACTION_MANAGER = "SqlAttributes.TRANSACTION_MANAGER";
 
 	/**
 	 * The default name under which a <code>javax.sql.DataSource</code> may be
@@ -27,7 +33,9 @@ public final class SqlAttributes {
 	/**
 	 * The default name under which the new connection will be registered as a
 	 * request attribute.
+	 * @deprecated TODO Put message here
 	 */
+	@Deprecated
 	public static final String CONNECTION = "SqlAttributes.CONNECTION";
 
 	/**
