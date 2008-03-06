@@ -44,7 +44,6 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  * Performs a specified query, then invokes child tasks once for each row in the
@@ -105,22 +104,7 @@ public final class QueryTask extends AbstractContainerTask {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-
-		//Get the DataSource from the request and create a JdbcTemplate to use.
-		DataSource dataSource = null;
-		Connection conn = (Connection) this.connectionPhrase.evaluate(req, res);
-		if (conn == null) {
-			// This is good... this is what we want...
-			dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
-		} else {
-			// This is *less* good... the Cernunnos XML should be updated...
-			if (log.isWarnEnabled()) {
-				String msg = "The CONNECTION reagent has been deprecated.  Please " +
-								"update the Cernunnos XML to use DATA_SOURCE.";
-				log.warn(msg);
-			}
-			dataSource = new SingleConnectionDataSource(conn, false);
-		}
+	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
         final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
         final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();

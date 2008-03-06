@@ -23,6 +23,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -35,14 +37,10 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.dom4j.Node;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class UpsertTask implements Task {
 
@@ -141,22 +139,7 @@ public final class UpsertTask implements Task {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-
-		//Get the DataSource from the request and create a JdbcTemplate to use.
-		DataSource dataSource = null;
-		Connection conn = (Connection) this.connectionPhrase.evaluate(req, res);
-		if (conn == null) {
-			// This is good... this is what we want...
-			dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
-		} else {
-			// This is *less* good... the Cernunnos XML should be updated...
-			if (log.isWarnEnabled()) {
-				String msg = "The CONNECTION reagent has been deprecated.  Please " +
-								"update the Cernunnos XML to use DATA_SOURCE.";
-				log.warn(msg);
-			}
-			dataSource = new SingleConnectionDataSource(conn, false);
-		}
+	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
         final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
         final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
