@@ -30,7 +30,7 @@ import org.dom4j.Element;
  * formulas.
  */
 public abstract class AbstractContainerTask implements Task {
-    protected final Log logger = LogFactory.getLog(this.getClass());
+    protected final Log log = LogFactory.getLog(this.getClass());
 
 	// NB:  We're using the subtasks reference as a que, so we want the concrete 
 	// reference type, not the interface.
@@ -49,12 +49,21 @@ public abstract class AbstractContainerTask implements Task {
 	 */
 	public void init(EntityConfig config) {
 
-		// The following fancy conversion is here to avoid type safety warnings..
-		List list = (List) config.getValue(SUBTASKS);
+		// The following fancy conversion is here to avoid type safety warnings...
+		final List<?> list = (List<?>) config.getValue(SUBTASKS);
 		this.subtasks = new LinkedList<Task>();
-		for (Iterator it = list.iterator(); it.hasNext();) {
+		for (Iterator<?> it = list.iterator(); it.hasNext();) {
 			Element e = (Element) it.next();
 			this.subtasks.add(config.getGrammar().newTask(e, this));
+		}
+		
+		// There's likely an error in the Cernunnos XML 
+		// if we don't have any subtasks, issue a warning...
+		if (subtasks.size() == 0 && log.isWarnEnabled()) {
+			String msg = "POSSIBLE PROGRAMMING ERROR:  Class '" 
+								+ getClass().getName() 
+								+ "' has an empty collection of SUBTASKS.";
+			log.warn(msg);
 		}
 		
 	}
@@ -86,7 +95,7 @@ public abstract class AbstractContainerTask implements Task {
 	 * method if child tasks are to be executed at all.  Naturally, subclasses 
 	 * may process their own operations before subtasks, after subtasks, or 
 	 * both.  Subclasses may also refrain from invoking child tasks if 
-	 * circumstances warrent (such as where there is an error).
+	 * circumstances warrant (such as where there is an error).
 	 * 
 	 * @param req Contains input information and operations. 
 	 * @param res Contains output information and operations.
@@ -109,7 +118,7 @@ public abstract class AbstractContainerTask implements Task {
 			throw new IllegalStateException(msg);
 		}
 		
-		// Invoke each of our childern...
+		// Invoke each of our children...
 		for (Task k : subtasks) {
 			k.perform(req, res);
 		}

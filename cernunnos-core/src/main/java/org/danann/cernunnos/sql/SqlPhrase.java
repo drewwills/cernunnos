@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos.sql;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -25,6 +26,7 @@ import javax.sql.DataSource;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -32,41 +34,68 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class SqlPhrase implements Phrase {
 
     // Instance Members.
 	private Phrase dataSourcePhrase;
+	private Phrase connectionPhrase;
 	private Phrase sql;
+	protected final Log log = LogFactory.getLog(this.getClass());
 
 	/*
 	 * Public API.
 	 */
 
     public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
-            "The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
-            "'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
+            		"The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
+            		"'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
+
+	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
+					"**DEPRECATED:  Use DATA_SOURCE instead.**  Optional Connection object.  The default is the value of the " +
+					"'SqlAttributes.CONNECTION' request attribute (if specified) or null.", 
+					new AttributePhrase(SqlAttributes.CONNECTION, new LiteralPhrase(null)));
 
 	public static final Reagent SQL = new SimpleReagent("SQL", "descendant-or-self::text()",
 					ReagentType.PHRASE, String.class, "The SQL expression to evaluate.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {DATA_SOURCE, SQL};
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, CONNECTION, SQL};
 		return new SimpleFormula(SqlPhrase.class, reagents);
 	}
 
 	public void init(EntityConfig config) {
 		// Instance Members.
 		this.dataSourcePhrase = (Phrase) config.getValue(DATA_SOURCE);
+		this.connectionPhrase = (Phrase) config.getValue(CONNECTION);
 		this.sql = (Phrase) config.getValue(SQL);
 
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
-	    //Get the DataSource from the request and create a JdbcTemplate to use.
-	    final DataSource dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+		
+		//Get the DataSource from the request and create a JdbcTemplate to use.
+		DataSource dataSource = null;
+		Connection conn = (Connection) this.connectionPhrase.evaluate(req, res);
+		if (conn == null) {
+			// This is good... this is what we want...
+			dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+		} else {
+			// This is *less* good... the Cernunnos XML should be updated...
+			if (log.isWarnEnabled()) {
+				String msg = "The CONNECTION reagent has been deprecated.  Please " +
+								"update the Cernunnos XML to use DATA_SOURCE.";
+				log.warn(msg);
+			}
+			dataSource = new SingleConnectionDataSource(conn, false);
+		}
+		
 	    final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
 	    
 	    //Get the SQL and execute it
@@ -78,6 +107,7 @@ public final class SqlPhrase implements Phrase {
 	        return results.get(0);
 	    }
 	    return null;
+
 	}
 
     /**

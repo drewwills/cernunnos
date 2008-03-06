@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos.sql;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -29,6 +30,7 @@ import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -42,6 +44,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 /**
  * Performs a specified query, then invokes child tasks once for each row in the
@@ -51,6 +54,7 @@ public final class QueryTask extends AbstractContainerTask {
 
 	// Instance Members.
 	private Phrase dataSourcePhrase;
+	private Phrase connectionPhrase;
 	private Phrase sql;
 	private List<Phrase> parameters;
 
@@ -59,9 +63,14 @@ public final class QueryTask extends AbstractContainerTask {
 	 */
 
     public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
-            "The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
-            "'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
+            		"The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
+            		"'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE, new LiteralPhrase(null)));
 
+	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
+					"**DEPRECATED:  Use DATA_SOURCE instead.**  Optional Connection object.  The default is the value of the " +
+					"'SqlAttributes.CONNECTION' request attribute (if specified) or null.", 
+					new AttributePhrase(SqlAttributes.CONNECTION, new LiteralPhrase(null)));
+	
 	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class,
 										"The SQL query statement that will be executed.");
 
@@ -73,7 +82,7 @@ public final class QueryTask extends AbstractContainerTask {
 									"The set of tasks that are children of this query task.", new LinkedList<Task>());
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {DATA_SOURCE, SQL, PARAMETERS, SUBTASKS};
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, CONNECTION, SQL, PARAMETERS, SUBTASKS};
 		final Formula rslt = new SimpleFormula(QueryTask.class, reagents);
 		return rslt;
 	}
@@ -86,6 +95,7 @@ public final class QueryTask extends AbstractContainerTask {
 
 		// Instance Members.
 		this.dataSourcePhrase = (Phrase) config.getValue(DATA_SOURCE);
+		this.connectionPhrase = (Phrase) config.getValue(CONNECTION);
 		this.sql = (Phrase) config.getValue(SQL);
 		this.parameters = new LinkedList<Phrase>();
         final List<Node> nodes = (List<Node>) config.getValue(PARAMETERS);
@@ -95,8 +105,23 @@ public final class QueryTask extends AbstractContainerTask {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-        //Get the DataSource from the request and create a JdbcTemplate to use.
-        final DataSource dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+
+		//Get the DataSource from the request and create a JdbcTemplate to use.
+		DataSource dataSource = null;
+		Connection conn = (Connection) this.connectionPhrase.evaluate(req, res);
+		if (conn == null) {
+			// This is good... this is what we want...
+			dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+		} else {
+			// This is *less* good... the Cernunnos XML should be updated...
+			if (log.isWarnEnabled()) {
+				String msg = "The CONNECTION reagent has been deprecated.  Please " +
+								"update the Cernunnos XML to use DATA_SOURCE.";
+				log.warn(msg);
+			}
+			dataSource = new SingleConnectionDataSource(conn, false);
+		}
+		
         final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
         final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
         

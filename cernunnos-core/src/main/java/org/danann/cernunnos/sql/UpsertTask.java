@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos.sql;
 
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +26,7 @@ import javax.sql.DataSource;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -33,30 +35,41 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Node;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 public final class UpsertTask implements Task {
 
 	// Instance Members.
 	private Phrase dataSourcePhrase;
+	private Phrase connectionPhrase;
 	private Phrase update_sql;
 	private Phrase insert_sql;
 	private List<Phrase> parameters;
 	private List<Phrase> update_parameters;
 	private List<Phrase> insert_parameters;
+	protected final Log log = LogFactory.getLog(this.getClass());
 
 	/*
 	 * Public API.
 	 */
 
 	public static final Reagent DATA_SOURCE = new SimpleReagent("DATA_SOURCE", "@data-source", ReagentType.PHRASE, DataSource.class,
-            "The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
-            "'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
+            		"The DataSource to use for executing the SQL. If omitted the request attribute under the name " +
+            		"'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE));
 
-    public static final Reagent UPDATE_SQL = new SimpleReagent("UPDATE_SQL", "update-statement", ReagentType.PHRASE, String.class,
+	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
+					"**DEPRECATED:  Use DATA_SOURCE instead.**  Optional Connection object.  The default is the value of the " +
+					"'SqlAttributes.CONNECTION' request attribute (if specified) or null.", 
+					new AttributePhrase(SqlAttributes.CONNECTION, new LiteralPhrase(null)));
+
+	public static final Reagent UPDATE_SQL = new SimpleReagent("UPDATE_SQL", "update-statement", ReagentType.PHRASE, String.class,
 										"The SQL statement that performs the Update portion of the 'Upsert' operation.");
 
 	public static final Reagent INSERT_SQL = new SimpleReagent("INSERT_SQL", "insert-statement", ReagentType.PHRASE, String.class,
@@ -78,7 +91,7 @@ public final class UpsertTask implements Task {
 										+ "differ in number or order.", null);
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {DATA_SOURCE, UPDATE_SQL, INSERT_SQL,
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, CONNECTION, UPDATE_SQL, INSERT_SQL,
 						PARAMETERS, UPDATE_PARAMETERS, INSERT_PARAMETERS};
 		final Formula rslt = new SimpleFormula(UpsertTask.class, reagents);
 		return rslt;
@@ -88,6 +101,7 @@ public final class UpsertTask implements Task {
     public void init(EntityConfig config) {
 
 		this.dataSourcePhrase = (Phrase) config.getValue(DATA_SOURCE);
+		this.connectionPhrase = (Phrase) config.getValue(CONNECTION);
 		this.update_sql = (Phrase) config.getValue(UPDATE_SQL);
 		this.insert_sql = (Phrase) config.getValue(INSERT_SQL);
 
@@ -127,8 +141,23 @@ public final class UpsertTask implements Task {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-        //Get the DataSource from the request and create a JdbcTemplate to use.
-        final DataSource dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+
+		//Get the DataSource from the request and create a JdbcTemplate to use.
+		DataSource dataSource = null;
+		Connection conn = (Connection) this.connectionPhrase.evaluate(req, res);
+		if (conn == null) {
+			// This is good... this is what we want...
+			dataSource = (DataSource) this.dataSourcePhrase.evaluate(req, res);
+		} else {
+			// This is *less* good... the Cernunnos XML should be updated...
+			if (log.isWarnEnabled()) {
+				String msg = "The CONNECTION reagent has been deprecated.  Please " +
+								"update the Cernunnos XML to use DATA_SOURCE.";
+				log.warn(msg);
+			}
+			dataSource = new SingleConnectionDataSource(conn, false);
+		}
+		
         final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
         final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
         

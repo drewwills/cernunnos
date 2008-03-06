@@ -91,10 +91,20 @@ public final class TransactionTask extends AbstractContainerTask {
             final String transactionManagerAttrName = (String) this.attributeNamePhrase.evaluate(req, res);
             res.setAttribute(transactionManagerAttrName, transactionManager);
             
-            this.logger.debug("Created PlatformTransactionManager '" + transactionManager + "' for DataSource '" + dataSource + "' and bound in response under attribute name '" + transactionManagerAttrName + "'.");
+            if (log.isDebugEnabled()) {
+            	String msg ="Created PlatformTransactionManager '" + transactionManager 
+            					+ "' for DataSource '" + dataSource 
+            					+ "' and bound in response under attribute name '" 
+            					+ transactionManagerAttrName + "'."; 
+                this.log.debug(msg);
+            }
         }
         else {
-            this.logger.debug("Found PlatformTransactionManager '" + transactionManager + "' in request.");
+            if (log.isDebugEnabled()) {
+            	String msg = "Found PlatformTransactionManager '" 
+            				+ transactionManager + "' in request.";
+                this.log.debug(msg);
+            }
         }
         
         //Create the tx template
@@ -122,7 +132,12 @@ public final class TransactionTask extends AbstractContainerTask {
 
         @Override
         protected void doInTransactionWithoutResult(TransactionStatus status) {
-            this.transactionTask.logger.debug("Executing subtasks in transaction with status '" + status + "'.");
+        	
+        	if (this.transactionTask.log.isDebugEnabled()) {
+        		String msg = "Executing subtasks in transaction with status '" 
+        												+ status + "'.";
+                this.transactionTask.log.debug(msg);
+        	}
             this.transactionTask.performSubtasks(this.req, this.res);
         }
     }
