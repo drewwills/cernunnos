@@ -16,7 +16,8 @@
 
 package org.danann.cernunnos.flow;
 
-import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
@@ -45,12 +46,13 @@ public class ForEachTask extends AbstractContainerTask {
 					"Optional name under which each item will be registered as a request attribute.  If omitted, " +
 					"the name 'Attributes.OBJECT' will be used.", new LiteralPhrase(Attributes.OBJECT));
 
-	public static final Reagent ITEMS = new SimpleReagent("ITEMS", "@items", ReagentType.PHRASE, Collection.class,
-					"Optional collection of items to iterate.  If omitted, this taks will use the value of the " +
-					"'Attributes.OBJECT' request attribute.", new LiteralPhrase(Attributes.OBJECT));
+	public static final Reagent ITEMS = new SimpleReagent("ITEMS", "@items", ReagentType.PHRASE, Object.class,
+					"Items that will be iterated over;  specify either an instance of java.lang.Iterable, " +
+					"java.util.Enumeration, java.util.Iterator, or an array.  If omitted, this task will use the " +
+					"value of the 'Attributes.OBJECT' request attribute.", new LiteralPhrase(Attributes.OBJECT));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, ITEMS, AbstractContainerTask.SUBTASKS};
+		final Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, ITEMS, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(ForEachTask.class, reagents);
 		return rslt;
 	}
@@ -67,11 +69,38 @@ public class ForEachTask extends AbstractContainerTask {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		String attr = (String) attribute_name.evaluate(req, res);
-		Collection c = (Collection) items.evaluate(req, res);
-		for (Object o : c) {
-			res.setAttribute(attr, o);
-			super.performSubtasks(req, res);
+		final String attr = (String) attribute_name.evaluate(req, res);
+
+		// Figure out what ITEMS is and how to traverse it...
+		Object itm = items.evaluate(req, res);
+		if (itm instanceof Iterable) {
+			final Iterable<?> it = (Iterable<?>) itm;
+			for (Object o : it) {
+				res.setAttribute(attr, o);
+				super.performSubtasks(req, res);
+			}
+		} else if (itm instanceof Object[]) {
+			final Object[] it = (Object[]) itm;
+			for (Object o : it) {
+				res.setAttribute(attr, o);
+				super.performSubtasks(req, res);
+			}
+		} else if (itm instanceof Iterator) {
+			final Iterator<?> it = (Iterator<?>) itm;
+			while (it.hasNext()) {
+				res.setAttribute(attr, it.next());
+				super.performSubtasks(req, res);
+			}
+		} else if (itm instanceof Enumeration) {
+			final Enumeration<?> it = (Enumeration<?>) itm;
+			while (it.hasMoreElements()) {
+				res.setAttribute(attr, it.nextElement());
+				super.performSubtasks(req, res);
+			}
+		} else {
+			final String msg = "Unsupported type for ITEMS reagent:  " 
+									+ itm.getClass().getName();
+			throw new RuntimeException(msg);
 		}
 
 	}
