@@ -19,7 +19,7 @@ package org.danann.cernunnos.xml;
 import java.net.URL;
 import org.xml.sax.EntityResolver;
 
-import org.dom4j.Node;
+import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.AttributePhrase;
@@ -78,7 +78,7 @@ public final class ReadDocumentPhrase implements Phrase {
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 
-		Node rslt = null;
+		Element rslt = null;
 
 		String ctx_str = (String) context.evaluate(req, res);
 		String loc_str = (String) location.evaluate(req, res);
@@ -96,6 +96,7 @@ public final class ReadDocumentPhrase implements Phrase {
 
 			// Read by passing a URL -- don't manage the URLConnection yourself...
 			rslt = rdr.read(doc).getRootElement();
+			rslt.normalize();
 
 		} catch (Throwable t) {
 			String msg = "Unable to read the specified document:"
