@@ -33,13 +33,16 @@ import javax.portlet.RenderResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
+import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.ReturnValue;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.runtime.XmlGrammar;
 import org.danann.cernunnos.runtime.RuntimeRequestResponse;
@@ -75,11 +78,17 @@ public class CernunnosPortlet extends GenericPortlet {
 
 		// Load the context, if present...
 		try {
-
-			// Bootstrap the Grammar instance...
-	    	InputStream inpt = CernunnosPortlet.class.getResourceAsStream("portlet.grammar");	// Can't rely on classpath:// protocol handler...
-	    	Element n = new SAXReader().read(inpt).getRootElement();
-	    	Grammar g = XmlGrammar.parse(n, XmlGrammar.getMainGrammar());
+	        
+			// Bootstrap the portlet Grammar instance...
+        	final Grammar root = XmlGrammar.getMainGrammar();
+	        final InputStream inpt = CernunnosPortlet.class.getResourceAsStream("portlet.grammar");	// Can't rely on classpath:// protocol handler...
+            final Document doc = new SAXReader().read(inpt);
+            final Task k = new ScriptRunner(root).compileTask(doc.getRootElement());
+    		final RuntimeRequestResponse req = new RuntimeRequestResponse();
+    		final ReturnValueImpl rslt = new ReturnValueImpl();
+    		req.setAttribute(Attributes.RETURN_VALUE, rslt);
+    		k.perform(req, new RuntimeRequestResponse());
+    		Grammar g = (Grammar) rslt.getValue();
 	        runner = new ScriptRunner(g);
 
 			// Choose a context location...
@@ -110,7 +119,6 @@ public class CernunnosPortlet extends GenericPortlet {
 			String msg = "Failure in CernunnosPortlet.init()";
 			throw new PortletException(msg, t);
 		}
-
 
 	}
 
@@ -239,6 +247,30 @@ public class CernunnosPortlet extends GenericPortlet {
         }
 
         return rslt;
+
+	}
+
+    /*
+     * Nested Types.
+     */
+
+    private static final class ReturnValueImpl implements ReturnValue {
+		
+		// Instance Members.
+		private Object value;
+		
+		
+		/*
+		 * Public API.
+		 */
+		
+		public Object getValue() {
+			return value;
+		}
+		
+		public void setValue(Object value) {
+			this.value = value;
+		}
 
 	}
 

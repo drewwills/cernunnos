@@ -23,6 +23,7 @@ import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.ReturnValue;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
@@ -60,7 +61,7 @@ public final class CernunnosPhrase implements Phrase {
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 
 		ReturnValueImpl rslt = new ReturnValueImpl();
-		res.setAttribute(FlowAttributes.RETURN_VALUE, rslt);
+		res.setAttribute(Attributes.RETURN_VALUE, rslt);
 		
 		// BEWARE:  we're relying on the underlying Task object to shift the 
 		// 'rslt' to the TaskRequest somehow;  currently this behavior will 

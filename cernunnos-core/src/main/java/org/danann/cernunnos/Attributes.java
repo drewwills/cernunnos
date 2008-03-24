@@ -67,4 +67,11 @@ public final class Attributes {
 	 */
 	public static final String OBJECT = "Attributes.OBJECT";
 
+	/**
+	 * The default name under which a <code>ReturnValue</code> object may be
+	 * registered as a request attribute.  The <code>ReturnValue</code> allows 
+	 * Cernunnos operations to return a value where appropriate.
+	 */
+	public static final String RETURN_VALUE = "FlowAttributes.RETURN_VALUE";
+
 }

@@ -1,0 +1,638 @@
+<!--
+   Copyright 2008 Andrew Wills
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+
+<org.danann.cernunnos.runtime.EncloseGrammarTask>
+
+    <!-- 
+     | First define the 'grammar' and 'entry' tasks, which we will use to bootstrap everything else... 
+     +-->
+    <org.danann.cernunnos.runtime.DefineEntryTask name="entry" impl="org.danann.cernunnos.runtime.DefineEntryTask">
+        <description>
+            <p>Defines a new grammar entry of class IMPL with the specified NAME.</p>
+            <p>NOTE:  <b>This task may only appear as a direct child of a &lt;grammar&gt; task</b>.</p>
+        </description>
+    </org.danann.cernunnos.runtime.DefineEntryTask>
+    <entry name="grammar" impl="org.danann.cernunnos.runtime.EncloseGrammarTask">
+        <description>
+            <p>Overlays a new, empty grammar on top of the current grammar.  Use his task in conjunction with &lt;entry&gt;.</p>
+        </description>
+    </entry>
+
+    <!--
+     | Package:  [root]
+     +-->
+
+    <entry name="req" impl="org.danann.cernunnos.AttributePhrase">
+        <description>
+            <p>Returns the value of the specified attribute from the TaskRequest.  An error will occur if the attribute is not present.</p>
+        </description>
+        <example caption="Copies the document at 'http://www.google.com' to the file system location identified by the first argument on the command line">
+            <pre><xmp><copy-file location="http://www.google.com" to-file="${req($1)}"/></xmp></pre>
+        </example>
+    </entry>
+
+    <!--
+      | Package:  core
+      +-->
+
+    <entry name="const" impl="org.danann.cernunnos.core.ConstantPhrase">
+        <description>
+            <p>Returns the value of the Java constant (<i>i.e.</i> static field) specified by FIELD.</p>
+        </description>
+    </entry>
+
+    <entry name="echo" impl="org.danann.cernunnos.core.EchoTask">
+        <description>
+            <p>Prints the specified MESSAGE to the PrintStream specified by STREAM.  You may optionally provide a PREFIX and/or SUFFIX.</p>
+        </description>
+        <example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
+            <pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
+    <sql-connection driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
+        <sql-query>
+            <sql>SELECT user_name FROM users</sql>
+            <subtasks>
+                <echo>${req(1)}, </echo>
+            </subtasks>
+        </sql-query>
+    </sql-connection>
+</properties></xmp></pre>
+        </example>
+    </entry>
+
+    <!-- Adds Carriage Return + Line Feed (Windows style) to the end of each message -->
+    <entry name="echo-ln" impl="org.danann.cernunnos.core.EchoTask">
+        <description>
+            <p>Prints the specified MESSAGE, followed by a line feed, to the PrintStream specified by STREAM.  You may optionally provide a PREFIX.</p>
+        </description>
+        <content-model suffix="&#13;&#10;"/>
+        <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
+            <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+  <echo-ln>${valueOf(.)}</echo-ln>
+</node-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="false" impl="org.danann.cernunnos.core.FalsePhrase">
+        <description>
+            <p>Returns <code>Boolean.FALSE</code>.</p>
+        </description>
+    </entry>
+
+    <entry name="jexl" impl="org.danann.cernunnos.core.JexlPhrase">
+        <description>
+            <p>Evaluates the specified JEXL expression and returns the result.  All current request attributes will be visible.</p>
+        </description>
+        <example caption="Writes 'Hello World!' to System.out">
+            <pre><xmp><echo>${jexl('Hello' + ' World!')}</echo></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="invoke-method" impl="org.danann.cernunnos.core.InvokeMethodTask">
+        <description>
+            <p>Invokes the specified METHOD on the specified OBJECT or CLASS.  If the specified method has a non-void return type, the returned object will be registered as a request attribute under ATTRIBUTE_NAME.</p>
+        </description>
+    </entry>
+
+    <entry name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase">
+        <description>
+            <p>Returns <code>Boolean.TRUE</code> if the specified VALUE is null, otherwise <code>Boolean.FALSE</code>.</p>
+        </description>
+    </entry>
+
+    <entry name="jndi" impl="org.danann.cernunnos.core.JndiLookupPhrase">
+        <description>
+            <p>Returns the JNDI object defined by EXPRESSION.</p>
+        </description>
+    </entry>
+
+    <entry name="line-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask">
+        <description>
+            <p>Splits the specified STRING into lines (based on line feed character ASCII 10) and iterates over them, performing SUBTASKS once for each line in the collection.</p>
+        </description>
+        <content-model regex="&#10;"/>
+    </entry>
+
+    <entry name="log" impl="org.danann.cernunnos.core.LogTask">
+        <description>
+            <p>Writes the specified MESSAGE to the log.</p>
+            <p>The &lt;log&gt; task uses <a href="http://commons.apache.org/logging/" target="_new">Apache commons-logging</a>.  Consult the <a href="http://commons.apache.org/logging/guide.html" target="_new">commons-logging User Guide</a> for comprehensive documentation.</p>
+        </description>
+    </entry>
+
+    <entry name="newInstance" impl="org.danann.cernunnos.core.NewInstancePhrase">
+        <description>
+            <p>Attempts to create an instance of the specified class name using the default (zero-argument) constructor, then return it.</p>
+        </description>
+    </entry>
+
+    <entry name="not" impl="org.danann.cernunnos.core.NotPhrase">
+        <description>
+            <p>Returns the opposite of the Boolean specified by VALUE.</p>
+        </description>
+    </entry>
+
+    <entry name="null" impl="org.danann.cernunnos.core.NullPhrase">
+        <description>
+            <p>Returns <code>null</code>.</p>
+        </description>
+    </entry>
+
+    <entry name="parseInt" impl="org.danann.cernunnos.core.ParseIntegerPhrase">
+        <description>
+            <p>Evaluates the <code>Integer</code> value of the specified EXPRESSION and returns it.</p>
+        </description>
+    </entry>
+
+    <entry name="process" impl="org.danann.cernunnos.core.ExecuteProcessTask">
+        <description>
+            <p>Invokes the process specified by COMMAND.</p>
+        </description>
+        <example caption="Invokes the Ant tool to deploy a project.">
+            <pre><xmp><process>ant deploy</process></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="properties" impl="org.danann.cernunnos.core.PropertiesTask">
+        <description>
+            <p>Reads the .properties file specified by LOCATION and registers its contents as request attributes for SUBTASKS.</p>
+        </description>
+        <example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
+            <pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
+    <sql-connection driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
+        <sql-query>
+            <sql>SELECT user_name FROM users</sql>
+            <subtasks>
+                <echo>${req(1)}, </echo>
+            </subtasks>
+        </sql-query>
+    </sql-connection>
+</properties></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="seq" impl="org.danann.cernunnos.core.NamedSequencePhrase">
+        <description>
+            <p>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</p>
+        </description>
+    </entry>
+
+    <entry name="string-replace" impl="org.danann.cernunnos.core.StringReplaceTask">
+        <description>
+            <p>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</p>
+        </description>
+    </entry>
+
+    <entry name="sysprop" impl="org.danann.cernunnos.core.SystemPropertyPhrase">
+        <description>
+            <p>Returns the value of the System property specified by PROPERTY.</p>
+        </description>
+    </entry>
+
+    <entry name="token-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask">
+        <description>
+            <p>Splits the specified STRING into tokens and iterates over them, performing SUBTASKS once for each token in the collection.</p>
+        </description>
+    </entry>
+
+    <entry name="with" impl="org.danann.cernunnos.core.WithTask">
+        <description>
+            <p>Creates one or more request attributes using KEYS and VALUES, then invokes subtasks.</p>
+        </description>
+        <example caption="Creates request attributes named 'foo' and 'myPath' then displays the value of each.">
+            <pre><xmp><with>
+    <attribute key="foo">bar</attribute>
+    <attribute key="myPath">${Attributes.ORIGIN}</attribute>
+    <subtasks>
+        <echo-ln>foo=${foo}</echo-ln>
+        <echo-ln>myPath=${myPath}</echo-ln>
+    </subtasks>
+</with></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask">
+        <description>
+            <p>Creates a request attribute with the specified KEY and VALUE, then invokes subtasks.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  flow
+      +-->
+
+    <entry name="choose" impl="org.danann.cernunnos.flow.ChooseTask">
+        <description>
+            <p>Performs the subtasks within the first WHEN element (&lt;when&gt;) whose 'test' attribute returns true.  You may optionally provide an OTHERWISE (&lt;otherwise&gt;) element whose subtasks will be performed if none of the WHEN conditions are met.</p>
+        </description>
+    </entry>
+
+    <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosPhrase">
+        <description>
+            <p>Returns the value of the specified Cernunnos script;  use the &lt;return&gt; task to set the return value within the specified script.</p>
+        </description>
+    </entry>
+
+    <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosTask">
+        <description>
+            <p>Reads, bootstrapps, and exececutes the specified Cernunnos script.</p>
+        </description>
+    </entry>
+
+    <entry name="for-each" impl="org.danann.cernunnos.flow.ForEachTask">
+        <description>
+            <p>Iterates over the elements in ITEMS, performing SUBTASKS once for each item.</p>
+        </description>
+    </entry>
+
+    <entry name="if" impl="org.danann.cernunnos.flow.IfTask">
+        <description>
+            <p>Execustes SUBTASKS if the TEST expression evaluates to <code>Boolean.TRUE</code>.</p>
+        </description>
+    </entry>
+
+    <entry name="return" impl="org.danann.cernunnos.flow.ReturnTask">
+        <description>
+            <p>Sets the return value of the current Cernunnos operation to the specified VALUE.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  io
+      +-->
+
+    <entry name="archive-iterator" impl="org.danann.cernunnos.io.ArchiveIteratorTask">
+        <description>
+            <p>Iterates over the entries found in the specified archive.  Each entry name will be registered as the request attribute 'Attributes.LOCATION' for subtasks.</p>
+        </description>
+    </entry>
+
+    <entry name="copy-file" impl="org.danann.cernunnos.io.CopyFileTask">
+        <description>
+            <p>Copies the specified file to the specified location, creating missing directories as necessary.  None of this task's reagents are required, but you will usually want to specify either TO_DIR or TO_FILE.</p>
+        </description>
+        <example caption="Copies the document at 'http://www.google.com' to the file 'google_home.html'">
+            <pre><xmp><copy-file location="http://www.google.com" to-file="google_home.html"/></xmp></pre>
+        </example>
+        <example caption="Copies all files from 'some_folder' to 'another_folder'">
+            <pre><xmp><file-iterator dir="some_folder">
+  <copy-file to-dir="another_folder"/>
+</file-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="delete-file" impl="org.danann.cernunnos.io.DeleteFileTask">
+        <description>
+            <p>Deletes the specified file or directory.</p>
+        </description>
+    </entry>
+
+    <entry name="extract-archive" impl="org.danann.cernunnos.io.ExtractArchiveTask">
+        <description>
+            <p>Extracts the contents of the specified archive and writes them to the specified directory.</p>
+        </description>
+    </entry>
+
+    <entry name="file" impl="org.danann.cernunnos.io.FilePhrase">
+        <description>
+            <p>Creates a <code>java.io.File</code> object from the specified LOCATION and returns it.</p>
+        </description>
+    </entry>
+
+    <entry name="file-iterator" impl="org.danann.cernunnos.io.FileIteratorTask">
+        <description>
+            <p>Builds a collection of file names within a specified directory and iterates over them.  Use optional pattern expressions to specify groups of files to include or exclude.</p>
+        </description>
+        <example caption="Copies all files from 'some_folder' to 'another_folder'">
+            <pre><xmp><file-iterator dir="some_folder">
+  <copy-file to-dir="another_folder"/>
+</file-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="mkdirs" impl="org.danann.cernunnos.io.MakeDirectoriesTask">
+        <description>
+            <p>Creates any missing directories in the specified path on the local filesystem.</p>
+        </description>
+    </entry>
+
+    <entry name="print-stream" impl="org.danann.cernunnos.io.OpenPrintStreamTask">
+        <description>
+            <p>Opens a PrintStream that writes to the specified file system location.</p>
+        </description>
+        <example caption="Writes 'Hello World!' to the file 'hello.txt'">
+            <pre><xmp><print-stream file="hello.txt">
+  <echo>Hello World!</echo>
+</print-stream></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="write-file" impl="org.danann.cernunnos.io.WriteFileTask">
+        <description>
+            <p>Writes the specified content to the specified file.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  ldap
+      +-->
+
+    <entry name="ldap-search" impl="org.danann.cernunnos.ldap.SearchTask">
+        <description>
+            <p>Performs the specified search within an LDAP data source and iterates over the results, performing SUBTASKS once for each entry.</p>
+            <p>Cernunnos' LDAP features are based off of <a href="http://www.springframework.org/ldap" target="_new">Spring LDAP</a>.  Spring LDAP is a Java library for simplifying LDAP operations, based on the pattern of Spring's JdbcTemplate.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  net
+      +-->
+
+    <entry name="url" impl="org.danann.cernunnos.net.UrlPhrase">
+        <description>
+            <p>Reads the resource at the specified location, constructs a new Phrase from the content, and returns the result of evaluating the Phrase.</p>
+        </description>
+        <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+            <pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-connection></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="contentsOf" impl="org.danann.cernunnos.net.ContentsOfPhrase">
+        <description>
+            <p>Reads the resource at the specified location and returns the contents.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  runtime
+      +-->
+
+    <entry name="add-grammar" impl="org.danann.cernunnos.runtime.AddGrammarTask">
+        <description>
+            <p>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</p>
+        </description>
+    </entry>
+
+    <entry name="argument-iterator" impl="org.danann.cernunnos.runtime.ArgumentIteratorTask">
+        <description>
+            <p>Iterates over the command line arguments.  For each argument, this task sets the request attribute under ATTRIBUTE_NAME to the current argument, then invokes SUBTASKS.</p>
+        </description>
+    </entry>
+
+    <entry name="grammar" impl="org.danann.cernunnos.runtime.GrammarPhrase">
+        <description>
+            <p>Returns a reference to the Grammar object that created this phrase.</p>
+        </description>
+    </entry>
+
+    <entry name="serialize-grammar" impl="org.danann.cernunnos.runtime.SerializeGrammarTask">
+        <description>
+            <p>Creates an XML representation of the current grammar and sets it as the value of the 'Attributes.NODE' attribute.</p>
+        </description>
+        <example caption="Creates the documentation you are reading (when executed from the root of a Cernunnos source tree)">
+            <pre><xmp><serialize-grammar>
+    <file-iterator dir="media/grammardoc" excludes="**/*.xsl">
+        <copy-file to-dir="docs/grammardoc"/>
+    </file-iterator>
+    <xslt stylesheet="media/grammardoc/table-of-contents.xsl" to-file="docs/grammardoc/table-of-contents.html"/>
+    <node-iterator xpath="entry">
+        <xslt stylesheet="media/grammardoc/entry.xsl" to-file="docs/grammardoc/entries/${valueOf(name)}.html"/>
+    </node-iterator>
+</serialize-grammar></xmp></pre>
+        </example>
+    </entry>
+
+    <!--
+      | Package:  script
+      +-->
+
+    <entry name="groovy" impl="org.danann.cernunnos.script.ScriptPhrase">
+        <description>
+            <p>Returns the value of the specified Groovy EXPRESSION.</p>
+        </description>
+        <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
+    </entry>
+
+    <entry name="groovy" impl="org.danann.cernunnos.script.ScriptTask">
+        <description>
+            <p>Invokes operations specified by SCRIPT using the groovy engine.</p>
+        </description>
+        <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
+    </entry>
+
+    <!--
+      | Package:  spring
+      +-->
+
+    <entry name="spring-beans" impl="org.danann.cernunnos.spring.ApplicationContextTask">
+        <description>
+            <p>Creates a spring context from the specified XML bean definition file, registers all the beans contained therein as request attributes, then invokes SUBTASKS.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  sql
+      +-->
+
+    <entry name="column-iterator" impl="org.danann.cernunnos.sql.ColumnIteratorTask">
+        <description>
+            <p>Iterates over the columns in a ResultSet, placing each column name under the request attribute 'SqlAttributes.COLUMN_NAME'.</p>
+        </description>
+    </entry>
+
+    <entry name="sql" impl="org.danann.cernunnos.sql.SqlPhrase">
+        <description>
+            <p>Executes the specified SQL statement and returns the result.</p>
+        </description>
+    </entry>
+
+    <entry name="sql-connection" impl="org.danann.cernunnos.sql.OpenConnectionTask">
+        <description>
+            <p>Opens the specified RDBMS connection and registers it as a request attribute.  By default, it will be registered under OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.  Cernunnos SQL tasks will look for a connection under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the Connection object.</p>
+        </description>
+        <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+            <pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-connection></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="sql-datasource" impl="org.danann.cernunnos.sql.DataSourceTask">
+        <description>
+            <p>Creates a pooled DataSource and registers it as a request attribute.  By default, it will be registered under SqlAttributes.DATA_SOURCE.  Cernunnos SQL tasks will look for a DataSource under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the DataSource object.</p>
+        </description>
+        <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+            <pre><xmp><sql-datasource driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-datasource></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="sql-query" impl="org.danann.cernunnos.sql.QueryTask">
+        <description>
+            <p>Performs a specified query, then invokes SUBTASKS once for each row in the result set.  For each iteration of SUBTASKS, column values will be registered as request attributes both under (1) the column name (all uppercase), and (2) the column index (starting with 1).</p>
+        </description>
+        <example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
+            <pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
+    <sql-datasource driver="${req(jdbcDriver)}" url="${req(jdbcUrl)}" username="${req(jdbcUser)}" password="${req(jdbcPassword)}">
+        <sql-query>
+            <sql>SELECT user_name FROM users</sql>
+            <subtasks>
+                <echo>${req(1)}, </echo>
+            </subtasks>
+        </sql-query>
+    </sql-datasource>
+</properties></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="sql-statement" impl="org.danann.cernunnos.sql.StatementTask">
+        <description>
+            <p>Executes the specified SQL statement.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</p>
+        </description>
+        <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+            <pre><xmp><sql-datasource driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-datasource></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="sql-transaction" impl="org.danann.cernunnos.sql.TransactionTask">
+        <description>
+            <p>Subtasks that operate on the specified DataSource will be transactional if they use the Cernunnos sql tasks or the Spring JDBC APIs.</p>
+        </description>
+    </entry>
+
+    <entry name="sql-upsert" impl="org.danann.cernunnos.sql.UpsertTask">
+        <description>
+            <p>Executes the specified UPDATE statement.  If zero rows are affected, executes the specified INSERT statement.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</p>
+        </description>
+    </entry>
+
+    <!--
+      | Package:  xml
+      +-->
+
+    <entry name="append-node" impl="org.danann.cernunnos.xml.AppendNodeTask">
+        <description>
+            <p>Adds the specified XML content to the specified PARENT (at the end) or after the specified SIBLING.</p>
+        </description>
+    </entry>
+
+    <entry name="attributeNode" impl="org.danann.cernunnos.xml.AttributeNodePhrase">
+        <description>
+            <p>Creates a new XML attribute node from the specified TUPLE, which must contain an equals character ('=') to separate attribute name and attribute value.</p>
+        </description>
+    </entry>
+
+    <entry name="commentNode" impl="org.danann.cernunnos.xml.CommentNodePhrase">
+        <description>
+            <p>Creates a new XML comment node from the specified VALUE.</p>
+        </description>
+    </entry>
+
+    <entry name="delete-node" impl="org.danann.cernunnos.xml.DeleteNodeTask">
+        <description>
+            <p>Deletes the specified node from the document that contains it.  This change must be persisted by another task (if persistence is desired).</p>
+        </description>
+    </entry>
+
+    <entry name="doc" impl="org.danann.cernunnos.xml.ReadDocumentPhrase">
+        <description>
+            <p>Reads an XML Document from the specified location and returns the root element.  The identified resource must be parsable XML.</p>
+        </description>
+        <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
+            <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+  <echo-ln>${valueOf(.)}</echo-ln>
+</node-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="newDoc" impl="org.danann.cernunnos.xml.NewDocumentPhrase">
+        <description>
+            <p>Creates a new XML Document.  If provided, this task also creates a root element with the specified NAME.  This task return either the root element (if present) or the document node.</p>
+        </description>
+    </entry>
+
+    <entry name="node-iterator" impl="org.danann.cernunnos.xml.NodeIteratorTask">
+        <description>
+            <p>Iterates over the node list resulting from the specified XPath expression.  For each node in the list, this task will set the specified request attribute and then execute its subtasks.</p>
+        </description>
+        <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
+            <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+  <echo-ln>${valueOf(.)}</echo-ln>
+</node-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="prepend-node" impl="org.danann.cernunnos.xml.PrependNodeTask">
+        <description>
+            <p>Adds the specified XML content to the specified PARENT (at the beginning) or before the specified SIBLING.</p>
+        </description>
+    </entry>
+
+    <entry name="singleNode" impl="org.danann.cernunnos.xml.SingleNodePhrase">
+        <description>
+            <p>Returns the first node that matches the specified XPATH expression when evaluated against the SOURCE node.</p>
+        </description>
+    </entry>
+
+    <entry name="textNode" impl="org.danann.cernunnos.xml.TextNodePhrase">
+        <description>
+            <p>Creates a new XML text node from the specified VALUE.</p>
+        </description>
+    </entry>
+
+    <entry name="valueOf" impl="org.danann.cernunnos.xml.ValueOfPhrase">
+        <description>
+            <p>Returns the textual value of the specified XPath expression when evaluated against the specified node.</p>
+        </description>
+        <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
+            <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+  <echo-ln>${valueOf(.)}</echo-ln>
+</node-iterator></xmp></pre>
+        </example>
+    </entry>
+
+    <entry name="write-document" impl="org.danann.cernunnos.xml.WriteDocumentTask">
+        <description>
+            <p>Writes the specified source node to the specified file system location.</p>
+        </description>
+    </entry>
+
+    <entry name="xslt" impl="org.danann.cernunnos.xml.XslTransformTask">
+        <description>
+            <p>Executes the specified XSL Transformation.  By default, this task uses the value of the 'Attributes.NODE' request attribute as the XML source, and places the result of the trasformation under the same request attribute for subtasks.</p>
+        </description>
+        <example caption="Creates the documentation you are reading (when executed from the root of a Cernunnos source tree)">
+            <pre><xmp><serialize-grammar>
+    <file-iterator dir="media/grammardoc" excludes="**/*.xsl">
+        <copy-file to-dir="docs/grammardoc"/>
+    </file-iterator>
+    <xslt stylesheet="media/grammardoc/table-of-contents.xsl" to-file="docs/grammardoc/table-of-contents.html"/>
+    <node-iterator xpath="entry">
+        <xslt stylesheet="media/grammardoc/entry.xsl" to-file="docs/grammardoc/entries/${valueOf(name)}.html"/>
+    </node-iterator>
+</serialize-grammar></xmp></pre>
+        </example>
+    </entry>
+
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
+
+</org.danann.cernunnos.runtime.EncloseGrammarTask>

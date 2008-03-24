@@ -36,7 +36,7 @@
 		  </xsl:when>
 		</xsl:choose>
         <h3>Description:</h3>
-        <p><xsl:value-of select="description"/></p>
+        <xsl:copy-of select="description/*"/>
         <h3>Reagents:</h3>
         <table with="100%" border="1" cellspacing="0" cellpadding="0">
           <tr>

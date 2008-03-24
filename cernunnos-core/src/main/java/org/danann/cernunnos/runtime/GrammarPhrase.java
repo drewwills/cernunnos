@@ -14,51 +14,38 @@
  * limitations under the License.
  */
 
-package org.danann.cernunnos.flow;
+package org.danann.cernunnos.runtime;
 
-import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReagentType;
-import org.danann.cernunnos.ReturnValue;
 import org.danann.cernunnos.SimpleFormula;
-import org.danann.cernunnos.SimpleReagent;
-import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public final class ReturnTask implements Task {
+public class GrammarPhrase implements Phrase {
 
-	// Instance Members.
-	private Phrase value;
-
+	private Grammar grammar;
+	
 	/*
 	 * Public API.
 	 */
-
-	public static final Reagent VALUE = new SimpleReagent("VALUE", "@value", ReagentType.PHRASE, Object.class,
-								"Object that will be returned by the current Cernunnos operation.");
-
+	
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {VALUE};
-		final Formula rslt = new SimpleFormula(ReturnTask.class, reagents);
-		return rslt;
+		return new SimpleFormula(getClass(), new Reagent[0]);
 	}
-
+	
 	public void init(EntityConfig config) {
-
+		
 		// Instance Members.
-		this.value = (Phrase) config.getValue(VALUE);
-
+		this.grammar = config.getGrammar();
+		
 	}
 
-	public void perform(TaskRequest req, TaskResponse res) {
-
-		ReturnValue rslt = (ReturnValue) req.getAttribute(Attributes.RETURN_VALUE);
-		rslt.setValue(value.evaluate(req, res));
-
+	public Object evaluate(TaskRequest req, TaskResponse res) {
+		return grammar;
 	}
 
 }

@@ -17,12 +17,17 @@
 <grammar>
 
 	<!--
-	  | Package:  mail
+	  | Package:  runtime.web
 	  +-->
 
-	<task name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask"/>
-	<doc entry="request-dispatcher">
-		<description>Include the specified resource using a PortletRequestDispatcher.</description>
-	</doc>
+    <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+        <description>
+            <p>Include the specified resource using a PortletRequestDispatcher.</p>
+        </description>
+    </entry>
+
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
 
 </grammar>

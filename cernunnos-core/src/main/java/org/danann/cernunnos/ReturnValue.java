@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.danann.cernunnos.flow;
+package org.danann.cernunnos;
 
 /**
- * Allows a Cernunnos task to return a value.  Use the ReturnTask to set it.
+ * Allows a Cernunnos task to return a value.  Register an instance of this 
+ * interface as the request attribute '<code>Attributes.RETURN_VALUE</code>'.
  */
 public interface ReturnValue {
 	
