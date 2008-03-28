@@ -16,15 +16,19 @@
 
 <grammar>
 
-	<!--
-	  | Package:  runtime.web
-	  +-->
+    <entries>
+    
+        <!--
+          | Package:  runtime.web
+          +-->
 
-    <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
-        <description>
-            <p>Include the specified resource using a PortletRequestDispatcher.</p>
-        </description>
-    </entry>
+        <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+            <description>
+                <p>Include the specified resource using a PortletRequestDispatcher.</p>
+            </description>
+        </entry>
+
+    </entries>
 
     <subtasks>
         <return value="${grammar()}"/>

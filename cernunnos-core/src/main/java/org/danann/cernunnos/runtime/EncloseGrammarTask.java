@@ -40,7 +40,7 @@ public final class EncloseGrammarTask extends AbstractContainerTask {
 	 * Public API.
 	 */
 
-	public static final Reagent ENTRIES = new SimpleReagent("ENTRIES", "*[name() != 'subtasks']", ReagentType.NODE_LIST, 
+	public static final Reagent ENTRIES = new SimpleReagent("ENTRIES", "entries/*", ReagentType.NODE_LIST, 
 						List.class, "Set of grammar entries that will suppliment the existing grammar.", 
 						new LinkedList<Task>());
 
