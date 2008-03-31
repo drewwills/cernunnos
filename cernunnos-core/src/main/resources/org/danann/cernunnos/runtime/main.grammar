@@ -167,6 +167,42 @@
             </example>
         </entry>
 
+        <entry name="prompt" impl="org.danann.cernunnos.core.PromptTask">
+            <description>
+                <p>Promps the user for input within the shell.</p>
+                <p><b>WARNING:</b>  this task is only suitable for Cernunnos XML executed from the command line.</p>
+            </description>
+            <example caption="Prompts the user for input (shown below)">
+                <pre><xmp><prompt message="What is your favorite color?" default="yellow">
+    <option regex="red"/>
+    <option regex="blue"/>
+    <option regex="green"/>
+    <option regex="other"/>
+    <subtasks>
+        <echo-ln>inpt=${Attributes.OBJECT}</echo-ln>
+    </subtasks>
+</prompt></xmp>
+
+Mar 30, 2008 10:35:23 PM org.danann.cernunnos.runtime.ScriptRunner run
+INFO:
+**************************************************
+** Invoking ScriptRunner.run(Task, TaskRequest)
+** TaskRequest contains 1 elements
+**   - Attributes.ORIGIN=c:\HOME\danann\cernunnos\test.crn
+**************************************************
+
+
+What is your favorite color?
+Allowable responses (must match one of these regular expressions):
+        - red
+        - blue
+        - green
+        - other
+Default response:  yellow
+Response:</pre>
+            </example>
+        </entry>
+
         <entry name="properties" impl="org.danann.cernunnos.core.PropertiesTask">
             <description>
                 <p>Reads the .properties file specified by LOCATION and registers its contents as request attributes for SUBTASKS.</p>
