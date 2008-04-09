@@ -54,7 +54,7 @@ public interface Reagent {
 	 * @return A <code>Class</code> that matches the objects returned by this 
 	 * reagent.
 	 */
-	Class getExpectedType();
+	Class<?> getExpectedType();
 	
 	/**
 	 * Provides a description of how this <code>Reagent</code> will be used by 

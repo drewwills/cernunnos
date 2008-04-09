@@ -22,14 +22,14 @@ package org.danann.cernunnos;
  */
 public final class SimpleReagent implements Reagent {
 
-	// Statis Members.
+	// Static Members.
 	private static final Object NO_DEFAULT_SPECIFIED = new Object();
 		
 	// Instance Members.
 	private final String name;
 	private final String xpath;
 	private final ReagentType reagentType;
-	private final Class returnType;
+	private final Class<?> returnType;
 	private final String description;
 	private final Object dflt;
 	
@@ -47,9 +47,9 @@ public final class SimpleReagent implements Reagent {
 	 * the <code>ReagentType</code> enumeration.
 	 * @param returnType The runtime data type that instances of this 
 	 * <code>Reagent</code> must return
-	 * @param description An explaination of how this reagent will be used.
+	 * @param description An explanation of how this reagent will be used.
 	 */
-	public SimpleReagent(String name, String xpath, ReagentType type, Class returnType, String description) {
+	public SimpleReagent(String name, String xpath, ReagentType type, Class<?> returnType, String description) {
 		this(name, xpath, type, returnType, description, NO_DEFAULT_SPECIFIED);
 	}
 	
@@ -63,10 +63,10 @@ public final class SimpleReagent implements Reagent {
 	 * the <code>ReagentType</code> enumeration.
 	 * @param returnType The runtime data type that instances of this 
 	 * <code>Reagent</code> must return
-	 * @param description An explaination of how this reagent will be used.
+	 * @param description An explanation of how this reagent will be used.
 	 * @param dflt The value this reagent should use if none is provided.
 	 */
-	public SimpleReagent(String name, String xpath, ReagentType reagentType, Class returnType, String description, Object dflt) {
+	public SimpleReagent(String name, String xpath, ReagentType reagentType, Class<?> returnType, String description, Object dflt) {
 
 		// Assertions...
 		if (name == null) {
@@ -110,7 +110,7 @@ public final class SimpleReagent implements Reagent {
 		return reagentType;
 	}
 	
-	public Class getExpectedType() {
+	public Class<?> getExpectedType() {
 		return returnType;
 	}
 	
