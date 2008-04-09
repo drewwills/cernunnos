@@ -48,7 +48,7 @@ public final class AppendNodeTask implements Task {
 	private Phrase node;
 	private Phrase parent;
 	private Phrase sibling;
-	private List content;
+	private List<?> content;
 	private Phrase apply_namespace;
 	private Grammar grammar;
 	private final Log log = LogFactory.getLog(AppendNodeTask.class);	// Don't declare as static in general libraries
@@ -74,10 +74,10 @@ public final class AppendNodeTask implements Task {
 					"Optional XML nodes to append.  Use this reagent to specify content in-line.  If "
 					+ "CONTENT is present, it will be prefered over NODE.", null);
 
-	public static final Reagent APPLY_NAMESPACE = new SimpleReagent("APPLY_NAMESPACE", "@apply-namespace", ReagentType.NODE_LIST, List.class,
-					"Tells this task whether to reconstruct the QNames of added elements to include the namespace of " +
-					"the parent element if:  (1) the parent contains a namespace;  and (2) the intended child does not.  " +
-					"The default is Boolean.TRUE.", new LiteralPhrase(Boolean.TRUE));
+	public static final Reagent APPLY_NAMESPACE = new SimpleReagent("APPLY_NAMESPACE", "@apply-namespace", ReagentType.PHRASE, 
+					Boolean.class, "Tells this task whether to reconstruct the QNames of added elements to include the " +
+					"namespace of the parent element if:  (1) the parent contains a namespace;  and (2) the intended child " +
+					"does not.  The default is Boolean.TRUE.", new LiteralPhrase(Boolean.TRUE));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {NODE, PARENT, SIBLING, CONTENT, APPLY_NAMESPACE};
@@ -91,7 +91,7 @@ public final class AppendNodeTask implements Task {
 		this.node = (Phrase) config.getValue(NODE);
 		this.parent = (Phrase) config.getValue(PARENT);
 		this.sibling = (Phrase) config.getValue(SIBLING);
-		this.content = (List) config.getValue(CONTENT);
+		this.content = (List<?>) config.getValue(CONTENT);
 		this.apply_namespace = (Phrase) config.getValue(APPLY_NAMESPACE);
 		this.grammar = config.getGrammar();
 
@@ -130,7 +130,7 @@ public final class AppendNodeTask implements Task {
 			NodeProcessor.evaluatePhrases(n, grammar, req, res);
 
 			// If the parent is an element, check if we should
-			// cary the parent namespace over to the child...
+			// carry the parent namespace over to the child...
 			if ((Boolean) apply_namespace.evaluate(req, res) &&
 					p.getNodeType() == Node.ELEMENT_NODE &&
 					!((Element) p).getNamespace().equals(Namespace.NO_NAMESPACE)) {
