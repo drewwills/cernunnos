@@ -25,9 +25,15 @@
     </xslt>
     
     <node-iterator xpath="entry">
-        <xslt stylesheet="media/grammardoc/entry.xsl">
-            <write-document file="docs/grammardoc/entries/${valueOf(name)}-${valueOf(@type)}.html"/>
-        </xslt>
+        <with>
+            <attribute key="NAME">${valueOf(name)}</attribute>
+            <attribute key="TYPE">${valueOf(@type)}</attribute>
+            <subtasks>
+                <xslt stylesheet="media/grammardoc/entry.xsl">
+                    <write-document file="docs/grammardoc/entries/${NAME}-${TYPE}.html"/>
+                </xslt>
+            </subtasks>
+        </with>
     </node-iterator>
 
 </serialize-grammar>
