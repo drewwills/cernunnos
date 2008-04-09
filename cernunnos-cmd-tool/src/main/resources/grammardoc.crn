@@ -20,10 +20,14 @@
         <copy-file to-dir="docs/grammardoc"/>
     </file-iterator>
 
-    <xslt stylesheet="media/grammardoc/table-of-contents.xsl" to-file="docs/grammardoc/table-of-contents.html"/>
+    <xslt stylesheet="media/grammardoc/table-of-contents.xsl">
+        <write-document file="docs/grammardoc/table-of-contents.html"/>
+    </xslt>
     
     <node-iterator xpath="entry">
-        <xslt stylesheet="media/grammardoc/entry.xsl" to-file="docs/grammardoc/entries/${valueOf(name)}-${valueOf(@type)}.html"/>
+        <xslt stylesheet="media/grammardoc/entry.xsl">
+            <write-document file="docs/grammardoc/entries/${valueOf(name)}-${valueOf(@type)}.html"/>
+        </xslt>
     </node-iterator>
 
 </serialize-grammar>
