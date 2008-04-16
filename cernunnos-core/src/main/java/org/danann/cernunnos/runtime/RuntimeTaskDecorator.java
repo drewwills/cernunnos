@@ -39,7 +39,7 @@ public final class RuntimeTaskDecorator implements Task {
 			throw new IllegalArgumentException(msg);
 		}
 		
-		// Injstance Members.
+		// Instance Members.
 		this.enclosed = enclosed;
 
 	}
