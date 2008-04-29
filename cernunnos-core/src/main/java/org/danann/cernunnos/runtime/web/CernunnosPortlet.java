@@ -153,7 +153,7 @@ public class CernunnosPortlet extends GenericPortlet {
 
 	public void doView(RenderRequest req, RenderResponse res) throws PortletException {
 
-		// Choose a view from 3 possibilities...
+		// Choose a view from 4 possibilities...
 		String view = null;
 		if (req.getParameter(settings.getValue(Settings.Entry.VIEW_PARAMETER)) != null) {
 			// (1) A view has been specified on this request...
@@ -164,8 +164,12 @@ public class CernunnosPortlet extends GenericPortlet {
 		} else if (req.getPortletSession(true).getAttribute(CURRENT_VIEW_SESSION_ATTRIBUTE) != null) {
 			// (2) The user has previously navigated off the default page...
 			view = (String) req.getPortletSession(true).getAttribute(CURRENT_VIEW_SESSION_ATTRIBUTE);
-		} else {
-			// (3) Use the default page...
+		} else if (req.getPreferences().getValue(settings.getValue(Settings.Entry.VIEW_PARAMETER), "").length() > 0) {
+            // (3) The view preference was set, maybe at publish time, maybe by an
+            // admin or maybe by the user.
+            view = req.getPreferences().getValue(settings.getValue(Settings.Entry.VIEW_PARAMETER), "");
+        } else {
+			// (4) Use the default page...
 			view = settings.getValue(Settings.Entry.DEFAULT_VIEW);
 		}
 
