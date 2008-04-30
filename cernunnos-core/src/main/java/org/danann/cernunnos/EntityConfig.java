@@ -34,6 +34,26 @@ public interface EntityConfig {
 	Grammar getGrammar();
 	
 	/**
+	 * Provides the grammatical name that was used to define this entity.  
+	 * EntryName should follow one of the following formats:
+	 * <ul>
+	 *   <li>&lt;<i>name</i>&gt;</li> (for tasks);   or
+	 *   <li>${<i>name</i>}</li> (for phrases)
+	 * </ul>
+	 * 
+	 * @return The name of the grammar entry used to create this entity.
+	 */
+	String getEntryName();
+	
+	/**
+	 * Intended to provide some indication of the origin of this entity.  Might 
+	 * be a line number, might be an XPath expression.
+	 * 
+	 * @return The source of this entity.
+	 */
+	String getSource();
+	
+	/**
 	 * Provides the <code>Formula</code> used by the Cernunnos runtime to 
 	 * prepare parameters for this task.
 	 * 

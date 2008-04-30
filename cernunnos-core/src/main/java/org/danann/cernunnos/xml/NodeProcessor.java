@@ -52,10 +52,10 @@ public final class NodeProcessor {
 		}
 
 		String xpath = "descendant-or-self::text() | descendant-or-self::*/@*";
-		for (Iterator it = n.selectNodes(xpath).iterator(); it.hasNext();) {
+		for (Iterator<?> it = n.selectNodes(xpath).iterator(); it.hasNext();) {
 			Node d =  (Node) it.next();
 			if (d.getText().trim().length() != 0) {
-				Phrase p = g.newPhrase(d.getText());
+				Phrase p = g.newPhrase(d);
 				Object o = p.evaluate(req, res);
 				String value = o != null ? o.toString() : "null";
 				d.setText(value);

@@ -79,7 +79,9 @@ public final class EncloseGrammarTask extends AbstractContainerTask {
 			k.perform(req, res);
 		}
 		
-		super.init(new SimpleEntityConfig(g, config.getFormula(), config.getValues()));
+		super.init(new SimpleEntityConfig(g, config.getEntryName(), 
+						config.getSource(), config.getFormula(), 
+						config.getValues()));
 
 	}
 

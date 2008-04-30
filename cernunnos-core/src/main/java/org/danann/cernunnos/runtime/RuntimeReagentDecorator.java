@@ -16,35 +16,39 @@
 
 package org.danann.cernunnos.runtime;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.ManagedException;
 import org.danann.cernunnos.Phrase;
+import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public final class RuntimePhraseDecorator implements Phrase {
+public final class RuntimeReagentDecorator implements Phrase {
 
 	// Instance Members.
 	private final Phrase enclosed;
-	private final EntityConfig config;
+	private final Reagent reagent;
+	private final Log log = LogFactory.getLog(RuntimeReagentDecorator.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
 	 */
 
-	public RuntimePhraseDecorator(Phrase enclosed, EntityConfig config) {
+	public RuntimeReagentDecorator(Phrase enclosed, Reagent r) {
 
 		// Assertions...
 		// NB:  'enclosed' may be null.
-		if (config == null) {
-			String msg = "Argument 'config' cannot be null.";
+		if (r == null) {
+			String msg = "Argument 'r [Reagent]' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
 		
 		// Instance Members.
 		this.enclosed = enclosed;
-		this.config = config;
+		this.reagent = r;
 
 	}
 
@@ -60,43 +64,21 @@ public final class RuntimePhraseDecorator implements Phrase {
 
 		/*
 		 * RuntimePhraseDecorator.evaluate() decorates the evaluate() method of 
-		 * all Phrase instances.  It has two responsibilities:
-		 *   - (1) Provide enhanced error information for all phrases
+		 * all Phrase instances.  It has the following responsibilities:
+		 *   - (1) WARN if the response type doesn't match the expected type
 		 */
 
-		Object rslt = null;
+		Object rslt = enclosed.evaluate(req, res);
 
-		// Provide enhanced error information for all phrases
-		try {
-			rslt = enclosed.evaluate(req, res);
-		} catch (ManagedException me) {
-			
-			// Already processed...
-			throw me;
-			
-		} catch (RuntimeException re) {
-			
-			// We're obligated to ensure there isn't 
-			// already a ManagedException in the stack trace...
-			for (Throwable cursor = re; cursor != null; cursor = cursor.getCause()) {
-				if (cursor instanceof ManagedException) {
-					throw re;
-				}
-			}
-			
-			throw new ManagedException(config, re);
-
-		} catch (Throwable t) {
-			
-			// We're obligated to ensure there isn't 
-			// already a ManagedException in the stack trace...
-			for (Throwable cursor = t; cursor != null; cursor = cursor.getCause()) {
-				if (cursor instanceof ManagedException) {
-					throw new RuntimeException(t);
-				}
-			}
-			
-			throw new ManagedException(config, t);
+		// WARN if the response type doesn't match the expected type
+		if (rslt != null && log.isWarnEnabled() && !reagent.getExpectedType().isAssignableFrom(rslt.getClass())) {
+			StringBuffer msg = new StringBuffer();
+			msg.append("POSSIBLE SCRIPT ERROR:  A Phrase returned an unexpected type.")
+					.append("\n\t\tReagent Name:  ").append(reagent.getName())
+					.append("\n\t\tXPath:  ").append(reagent.getXpath())
+					.append("\n\t\tExpected Type:  ").append(reagent.getExpectedType().getName())
+					.append("\n\t\tActual Type:  ").append(rslt.getClass().getName()).append("\n");
+			log.warn(msg.toString());
 		}
 
 		return rslt;

@@ -88,7 +88,7 @@ public class StatementTask implements Task {
 		
 		final List<Node> nodes = (List<Node>) config.getValue(PARAMETERS);
 		for (final Node n : nodes) {
-			parameters.add(config.getGrammar().newPhrase(n.getText()));
+			parameters.add(config.getGrammar().newPhrase(n));
 		}
 	}
 

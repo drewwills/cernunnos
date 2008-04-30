@@ -86,7 +86,7 @@ public final class PromptTask extends AbstractContainerTask {
 		List<?> list = (List<?>) config.getValue(OPTIONS);
 		for (Object o : list) {
 			Node n = (Node) o;
-			this.options.add(config.getGrammar().newPhrase(n.getText()));
+			this.options.add(config.getGrammar().newPhrase(n));
 		}
 		this.dflt = (Phrase) config.getValue(DEFAULT);
 

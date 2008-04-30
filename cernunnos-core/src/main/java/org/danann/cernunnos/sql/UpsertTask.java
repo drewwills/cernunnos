@@ -109,7 +109,7 @@ public final class UpsertTask implements Task {
 		this.parameters = new LinkedList<Phrase>();
 		nodes = (List<Node>) config.getValue(PARAMETERS);
 		for (final Node n : nodes) {
-			parameters.add(config.getGrammar().newPhrase(n.getText()));
+			parameters.add(config.getGrammar().newPhrase(n));
 		}
 
 		// UPDATE_PARAMETERS...
@@ -117,7 +117,7 @@ public final class UpsertTask implements Task {
 		if (nodes != null) {
 			this.update_parameters = new LinkedList<Phrase>();
 			for (final Node n : nodes) {
-				update_parameters.add(config.getGrammar().newPhrase(n.getText()));
+				update_parameters.add(config.getGrammar().newPhrase(n));
 			}
 		} else {
 			// Go with PARAMETERS...
@@ -129,7 +129,7 @@ public final class UpsertTask implements Task {
 		if (nodes != null) {
 			this.insert_parameters = new LinkedList<Phrase>();
             for (final Node n : nodes) {
-				insert_parameters.add(config.getGrammar().newPhrase(n.getText()));
+				insert_parameters.add(config.getGrammar().newPhrase(n));
 			}
 		} else {
 			// Go with PARAMETERS...

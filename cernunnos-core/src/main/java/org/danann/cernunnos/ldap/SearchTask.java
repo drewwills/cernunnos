@@ -39,7 +39,6 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
-import org.danann.cernunnos.sql.SqlAttributes;
 
 /**
  * Performs a specified LDAP query, then invokes child tasks once for each row 
@@ -142,10 +141,11 @@ public final class SearchTask extends AbstractContainerTask {
 		this.timeout = (Phrase) config.getValue(TIMEOUT);
         final Object attr = config.getValue(ATTRIBUTES);
         if (attr != null) {
-        	final List<Node> nodes = (List<Node>) attr;
+        	final List<?> nodes = (List<?>) attr;
         	this.attributes = new LinkedList<Phrase>();
-            for (final Node n : nodes) {
-                attributes.add(config.getGrammar().newPhrase(n.getText()));
+            for (Object o : nodes) {
+            	Node n = (Node) o;
+                attributes.add(config.getGrammar().newPhrase(n));
             }
         } else {
     		this.attributes = null;	// also the default...

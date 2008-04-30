@@ -103,31 +103,37 @@ public final class XmlGrammar implements Grammar {
         Entry n = getEntry(name, Entry.Type.TASK);
 
         Task rslt = null;
+        EntityConfig config = null;
         try {
 
             // Create & bootstrap the result...
+        	config = prepareEntryConfig(n, e);
             rslt = (Task) n.getFormula().getImplementationClass().newInstance();
-            rslt.init(prepareEntryConfig(n, e));
+            rslt.init(config);
 
         } catch (Throwable t) {
             String msg = "Unable to create the specified task:  " + name;
             throw new RuntimeException(msg, t);
         }
 
-        return new RuntimeTaskDecorator(rslt);
+        return new RuntimeTaskDecorator(rslt, config);
 
     }
 
     public Phrase newPhrase(String inpt) {
-
+    	return newPhrase(fac.createText(inpt));
+    }
+    
+	public Phrase newPhrase(Node n) {
+		
         // Assertions...
-        if (inpt == null) {
-            String msg = "Argument 'inpt' cannot be null.";
+        if (n == null) {
+            String msg = "Argument 'n [Node]' cannot be null.";
             throw new IllegalArgumentException(msg);
         }
 
         List<String> chunks = new LinkedList<String>();
-        String chunkMe = inpt;
+        String chunkMe = n.getText();
         while (chunkMe.length() != 0) {
             if (chunkMe.startsWith(Phrase.OPEN_PHRASE_DELIMITER)) {
                 chunks.add(Phrase.OPEN_PHRASE_DELIMITER);
@@ -184,13 +190,15 @@ public final class XmlGrammar implements Grammar {
                                 nested = expression;
                             }
 
-                            Entry n = getEntry(name, Entry.Type.PHRASE);
+                            Entry y = getEntry(name, Entry.Type.PHRASE);
                             Phrase p = null;
                             try {
 
                                 // Create & bootstrap the phrase...
-                                p = (Phrase) n.getFormula().getImplementationClass().newInstance();
-                                p.init(prepareEntryConfig(n, fac.createText(nested)));
+                            	EntityConfig config = prepareEntryConfig(y, fac.createText(nested), n.getUniquePath());
+                                Phrase enclosed = (Phrase) y.getFormula().getImplementationClass().newInstance();
+                                enclosed.init(config);
+                                p = new RuntimePhraseDecorator(enclosed, config);
 
                             } catch (Throwable t) {
                                 String msg = "Unable to create the specified phrase:  " + name;
@@ -347,6 +355,10 @@ public final class XmlGrammar implements Grammar {
     }
 
     private EntityConfig prepareEntryConfig(Entry n, Node d) {
+    	return prepareEntryConfig(n, d, d.getUniquePath());
+    }
+    
+    private EntityConfig prepareEntryConfig(Entry n, Node d, String source) {
 
         // Assertions...
         if (n == null) {
@@ -355,6 +367,10 @@ public final class XmlGrammar implements Grammar {
         }
         if (d == null) {
             String msg = "Argument 'd [Element]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (source == null) {
+            String msg = "Argument 'source' cannot be null.";
             throw new IllegalArgumentException(msg);
         }
 
@@ -378,8 +394,17 @@ public final class XmlGrammar implements Grammar {
             mappings.put(r, value);
         }
         mappings.putAll(n.getMappings());
+        
+        String entryName = null;
+        if (n.getType().equals(Entry.Type.TASK)) {
+        		entryName = "<" + n.getName() + ">";
+        } else if (n.getType().equals(Entry.Type.PHRASE)) {
+        		entryName = "${" + n.getName() + "}";
+        } else {
+        	throw new RuntimeException("Unsupported Entry Type:  " + n.getType());
+        }
 
-        return new SimpleEntityConfig(this, n.getFormula(), mappings);
+        return new SimpleEntityConfig(this, entryName, source, n.getFormula(), mappings);
 
     }
 

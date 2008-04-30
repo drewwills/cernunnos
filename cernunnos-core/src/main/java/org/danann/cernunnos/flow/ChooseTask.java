@@ -50,11 +50,11 @@ public final class ChooseTask implements Task {
 	public static final Reagent WHEN = new SimpleReagent("WHEN", "when", ReagentType.NODE_LIST, List.class, 
 						"Zero or more child <when> elements each containing a 'test' attribute.  The "
 						+ "SUBTASKS of the first WHEN whose test is positive (true) will be performed.", 
-						new LinkedList());
+						Collections.emptyList());
 
 	public static final Reagent OTHERWISE = new SimpleReagent("OTHERWISE", "otherwise", ReagentType.NODE_LIST, List.class, 
 						"Optional <otherwise> element whose children will be performed if none of the specified "
-						+ "WHEN conditions is met.", new LinkedList());
+						+ "WHEN conditions is met.", Collections.emptyList());
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {WHEN, OTHERWISE};
@@ -65,17 +65,18 @@ public final class ChooseTask implements Task {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		List wElements = (List) config.getValue(WHEN);
+		List<?> wElements = (List<?>) config.getValue(WHEN);
 		this.whenList = new LinkedList<IfTask>();
-		for (Iterator wIt = wElements.iterator(); wIt.hasNext();) {
+		for (final Iterator<?> wIt = wElements.iterator(); wIt.hasNext();) {
 			Element e = (Element) wIt.next();
 			IfTask k = new IfTask();
-			EntityConfig ec = new EntityConfigImpl(config.getGrammar(), k.getFormula(), e);
+			EntityConfig ec = new EntityConfigImpl(config.getGrammar(), 
+					"<when>", e.getUniquePath(), k.getFormula(), e);
 			k.init(ec);
 			whenList.add(k);
 		}
 		
-		List oElements = (List) config.getValue(OTHERWISE);
+		List<?> oElements = (List<?>) config.getValue(OTHERWISE);
 		switch (oElements.size()) {
 			case 0:
 				// None provided -- all is well...
@@ -85,7 +86,8 @@ public final class ChooseTask implements Task {
 				// One <otherwise> was provided...
 				Element e = (Element) oElements.get(0);
 				this.otherwise = new IfTask();
-				EntityConfigImpl ec = new EntityConfigImpl(config.getGrammar(), otherwise.getFormula(), e);
+				EntityConfigImpl ec = new EntityConfigImpl(config.getGrammar(), 
+						"<otherwise>", e.getUniquePath(), otherwise.getFormula(), e);
 				ec.setValue(IfTask.TEST, new LiteralPhrase(Boolean.TRUE));
 				otherwise.init(ec);
 				break;
@@ -120,6 +122,8 @@ public final class ChooseTask implements Task {
 		
 		// Instance Members.
 		private final Grammar grammar;
+		private final String entryName;
+		private final String source;
 		private final Formula formula;
 		private final Map<Reagent,Object> mappings;
 		
@@ -127,13 +131,18 @@ public final class ChooseTask implements Task {
 		 * Public API.
 		 */
 
-		public EntityConfigImpl(Grammar g, Formula f, Element e) {
+		public EntityConfigImpl(Grammar g, String entryName, String source, Formula f, Element e) {
 			
 			// Assertions...
 			if (g == null) {
 				String msg = "Argument 'g [Grammar]' cannot be null.";
 				throw new IllegalArgumentException(msg);
 			}
+			if (entryName == null) {
+				String msg = "Argument 'entryName' cannot be null.";
+				throw new IllegalArgumentException(msg);
+			}
+			// NB:  'source' may be null.
 			if (f == null) {
 				String msg = "Argument 'f [Formula]' cannot be null.";
 				throw new IllegalArgumentException(msg);
@@ -145,6 +154,8 @@ public final class ChooseTask implements Task {
 			
 			// Instance Members.
 			this.grammar = g;
+			this.entryName = entryName;
+			this.source = source;
 			this.formula = f;
 			this.mappings = new HashMap<Reagent,Object>();
 			for (Reagent r : f.getReagents()) {
@@ -168,6 +179,14 @@ public final class ChooseTask implements Task {
 		
 		public Grammar getGrammar() {
 			return grammar;
+		}
+		
+		public String getEntryName() {
+			return entryName;
+		}
+		
+		public String getSource() {
+			return source;
 		}
 		
 		public Formula getFormula() {

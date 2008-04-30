@@ -34,6 +34,8 @@ public final class SimpleEntityConfig implements EntityConfig {
 
 	// Instance Members.
 	private final Grammar grammar;
+	private final String entryName;
+	private final String source;
 	private final Formula formula;
 	private final Map<Reagent,Object> mappings;
 
@@ -41,13 +43,18 @@ public final class SimpleEntityConfig implements EntityConfig {
 	 * Public API.
 	 */
 
-	public SimpleEntityConfig(Grammar grammar, Formula f, Map<Reagent,Object> mappings) {
+	public SimpleEntityConfig(Grammar grammar, String entryName, String source, Formula f, Map<Reagent,Object> mappings) {
 
 		// Assertions...
 		if (grammar == null) {
 			String msg = "Argument 'grammar' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
+		if (entryName == null) {
+			String msg = "Argument 'entryName' cannot be null.";
+			throw new IllegalArgumentException(msg);
+		}
+		// NB:  'source' may be null.
 		if (f == null) {
 			String msg = "Argument 'f [Formula]' cannot be null.";
 			throw new IllegalArgumentException(msg);
@@ -59,6 +66,8 @@ public final class SimpleEntityConfig implements EntityConfig {
 
 		// Instance Members.
 		this.grammar = grammar;
+		this.entryName = entryName;
+		this.source = source;
 		this.formula = f;
 		this.mappings = (Map<Reagent,Object>) Collections.unmodifiableMap(mappings);
 
@@ -66,6 +75,14 @@ public final class SimpleEntityConfig implements EntityConfig {
 
 	public Grammar getGrammar() {
 		return grammar;
+	}
+
+	public String getEntryName() {
+		return entryName;
+	}
+
+	public String getSource() {
+		return source;
 	}
 
 	public Formula getFormula() {
@@ -96,7 +113,7 @@ public final class SimpleEntityConfig implements EntityConfig {
 		if (rslt != null && r.getReagentType().equals(ReagentType.PHRASE)) {
 			// This decorator will provide a very useful warning if there's likely
 			// trouble and allow the developer to find the problem very quickly...
-			rslt = new RuntimePhraseDecorator((Phrase) rslt, r);
+			rslt = new RuntimeReagentDecorator((Phrase) rslt, r);
 		}
 
 		return rslt;

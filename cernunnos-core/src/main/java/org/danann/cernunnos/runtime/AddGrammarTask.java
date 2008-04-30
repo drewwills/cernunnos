@@ -85,7 +85,9 @@ public final class AddGrammarTask extends AbstractContainerTask {
 			throw new RuntimeException(msg, t);
 		}
 
-		super.init(new SimpleEntityConfig(g, config.getFormula(), config.getValues()));
+		super.init(new SimpleEntityConfig(g, config.getEntryName(), 
+						config.getSource(), config.getFormula(), 
+						config.getValues()));
 
 	}
 

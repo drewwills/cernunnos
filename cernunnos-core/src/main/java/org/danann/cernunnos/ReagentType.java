@@ -58,8 +58,8 @@ public enum ReagentType {
 				throw new IllegalArgumentException(msg);
 			}
 
-			Node match = src.selectSingleNode(xpath);
-			return match != null ? grammar.newPhrase(match.getText()) : null;
+			final Node match = src.selectSingleNode(xpath);
+			return match != null ? grammar.newPhrase(match) : null;
 
 		}
 	},
@@ -85,7 +85,7 @@ public enum ReagentType {
 				throw new IllegalArgumentException(msg);
 			}
 
-			String value = src.valueOf(xpath).trim();	// do we need to trim?
+			final String value = src.valueOf(xpath).trim();	// do we need to trim?
 			return value.length() > 0 ? value : null;
 
 		}
@@ -113,9 +113,9 @@ public enum ReagentType {
 			}
 
 			// The following fancy conversion is here to avoid type safety warnings..
-			List matches = src.selectNodes(xpath);
-			List<Node> rslt = new LinkedList<Node>();
-			for (Iterator it = matches.iterator(); it.hasNext();) {
+			final List<?> matches = src.selectNodes(xpath);
+			final List<Node> rslt = new LinkedList<Node>();
+			for (final Iterator<?> it = matches.iterator(); it.hasNext();) {
 				rslt.add((Node) it.next());
 			}
 			return rslt.size() != 0 ? rslt : null;

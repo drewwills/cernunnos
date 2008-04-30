@@ -66,15 +66,15 @@ public final class WithTask extends AbstractContainerTask {
 
 		// Instance Members.
 		this.attributes = new HashMap<Phrase,Phrase>();
-		List keys = (List) config.getValue(KEYS);
-		List values = (List) config.getValue(VALUES);
+		List<?> keys = (List<?>) config.getValue(KEYS);
+		List<?> values = (List<?>) config.getValue(VALUES);
 		for (int i=0; i < keys.size(); i++) {
 			
 			Node k = (Node) keys.get(i);
 			Node v = (Node) values.get(i);
 			
-			attributes.put(config.getGrammar().newPhrase(k.getText()), 
-						config.getGrammar().newPhrase(v.getText()));
+			attributes.put(config.getGrammar().newPhrase(k), 
+						config.getGrammar().newPhrase(v));
 
 		}
 		

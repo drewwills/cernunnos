@@ -96,14 +96,14 @@ public class InvokeMethodTask extends AbstractContainerTask {
 		this.method = (Phrase) config.getValue(METHOD);
 		this.parameters = new LinkedList<Phrase>();
 		this.parameter_types = new LinkedList<Phrase>();
-		List nodes = (List) config.getValue(PARAMETERS);
-		for (Iterator it = nodes.iterator(); it.hasNext();) {
+		List<?> nodes = (List<?>) config.getValue(PARAMETERS);
+		for (Iterator<?> it = nodes.iterator(); it.hasNext();) {
 			Node n = (Node) it.next();
-			parameters.add(config.getGrammar().newPhrase(n.getText()));
+			parameters.add(config.getGrammar().newPhrase(n));
 			// See if a type was explicitly specified...
 			Node y = n.selectSingleNode("../@type");
 			if (y != null) {
-				parameter_types.add(config.getGrammar().newPhrase(y.getText()));
+				parameter_types.add(config.getGrammar().newPhrase(y));
 			} else {
 				// We need to order this list in parity w/ the other list...
 				parameter_types.add(null);
@@ -120,7 +120,7 @@ public class InvokeMethodTask extends AbstractContainerTask {
 		try {
 
 			// Evaluate the parameters...
-			Class[] argTypes = new Class[parameters.size()];
+			Class<?>[] argTypes = new Class[parameters.size()];
 			Object[] argValues = new Object[parameters.size()];
 			try {
 				for (int i=0; i < parameters.size(); i++) {
@@ -151,14 +151,14 @@ public class InvokeMethodTask extends AbstractContainerTask {
 			Method myMethod = null;
 			for (Method d : methods) {
 				if (d.getName().equals(m)) {
-					Class[] params = d.getParameterTypes();
+					Class<?>[] params = d.getParameterTypes();
 					if (params.length == argTypes.length) {
 						boolean matches = true;
 						for (int i=0; i < params.length; i++) {
 							ArrayList<Class> types = new ArrayList<Class>();
 							types.add(argTypes[i]);
 							types.addAll(Arrays.asList(argTypes[i].getInterfaces()));
-							for (Class sup = argTypes[i].getSuperclass(); sup != null; sup = sup.getSuperclass()) {
+							for (Class<?> sup = argTypes[i].getSuperclass(); sup != null; sup = sup.getSuperclass()) {
 								types.add(sup);
 								types.addAll(Arrays.asList(sup.getInterfaces()));
 							}
@@ -183,7 +183,7 @@ public class InvokeMethodTask extends AbstractContainerTask {
 					msg.append("class '").append(clazz.evaluate(req, res)).append("' ");
 				}
 				msg.append("(argument types follow):");
-				for (Class z : argTypes) {
+				for (Class<?> z : argTypes) {
 					msg.append("\n\t\targ type=").append(z.getName());
 				}
 				throw new RuntimeException(msg.toString());

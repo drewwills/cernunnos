@@ -17,6 +17,7 @@
 package org.danann.cernunnos;
 
 import org.dom4j.Element;
+import org.dom4j.Node;
 
 /**
  * Represents a lexicon or system of tasks.
@@ -28,7 +29,7 @@ public interface Grammar {
 	 * <code>AttributePhrase</code> in all cases where a phrase implementation
 	 * is not indicated either by name or by class name.
 	 */
-	static Class DEFAULT_PHRASE_IMPL = AttributePhrase.class;
+	static Class<?> DEFAULT_PHRASE_IMPL = AttributePhrase.class;
 
 	/**
 	 * Creates a new <code>Task</code> based on the information found in the
@@ -53,7 +54,22 @@ public interface Grammar {
 	 * @param inpt Text that will match the expression
 	 * <code>descendant-or-self::text()</code> in boostrapping.
 	 * @return A new, ready-to-use <code>Phrase</code> instance.
+	 * @deprecated Use newPhrase(Node) for better error information
 	 */
+	@Deprecated
 	Phrase newPhrase(String inpt);
+
+	/**
+	 * Creates a new <code>Phrase</code> based on the specified
+	 * <code>String</code>.  The <code>Grammar</code> implementation is
+	 * responsible for converting this <code>String</code> to a text node to
+	 * work properly within the Cernunnos bootstrapping system.  This text node
+	 * will match the XPath expression <code>descendant-or-self::text()</code>.
+	 *
+	 * @param inpt Text that will match the expression
+	 * <code>descendant-or-self::text()</code> in boostrapping.
+	 * @return A new, ready-to-use <code>Phrase</code> instance.
+	 */
+	Phrase newPhrase(Node n);
 
 }
