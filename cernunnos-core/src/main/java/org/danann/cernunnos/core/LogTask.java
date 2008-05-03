@@ -83,41 +83,24 @@ public final class LogTask implements Task {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		String lvl = (String) level.evaluate(req, res);
-		StringBuffer msg = new StringBuffer();
+		final String lvl = (String) level.evaluate(req, res);
+		final StringBuffer msg = new StringBuffer();
 		msg.append(prefix.evaluate(req, res));
 		msg.append(message.evaluate(req, res));
 		msg.append(suffix.evaluate(req, res));
 
-        String logger = (String) loggerName.evaluate(req, res);
-        
+        final String logger = (String) loggerName.evaluate(req, res);
+
 		try {
-			Log log = getLog(logger);
-			Method m = Log.class.getMethod(lvl, new Class[] {Object.class});
+			final Log log = LogFactory.getLog(logger);
+			final Method m = Log.class.getMethod(lvl, new Class[] {Object.class});
 			m.invoke(log, new Object[] {msg.toString()});
 		} catch (Throwable t) {
-			String s = "Error logging the specified message:  [" + lvl + "]"
+			String s = "Error logging the specified message:  [" + lvl + "] "
 														+ msg.toString();
 			throw new RuntimeException(s, t);
 		}
 
 	}
 
-	/*
-	 * Private Stuff
-	 */
-
-    private synchronized Log getLog(String logger) {
-        if (logger.length() > 0) {
-            final Log rslt = LogFactory.getLog(logger);
-            return rslt;
-        } else {
-            return getLog();
-        }
-    }
-
-	private synchronized Log getLog() {
-		final Log rslt = LogFactory.getLog(LogTask.class);
-		return rslt;
-	}
 }
