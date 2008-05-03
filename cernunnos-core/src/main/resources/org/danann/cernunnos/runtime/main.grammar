@@ -132,6 +132,12 @@
                 <p>Writes the specified MESSAGE to the log.</p>
                 <p>The &lt;log&gt; task uses <a href="http://commons.apache.org/logging/" target="_new">Apache commons-logging</a>.  Consult the <a href="http://commons.apache.org/logging/guide.html" target="_new">commons-logging User Guide</a> for comprehensive documentation.</p>
             </description>
+            <example>
+                <p>Writes the message at <code>WARN</code> level to the default logger:
+                <pre>&lt;log level="warn"&gt;Watch out!&lt;/log&gt;</pre></p>
+                <p>Writes the message at <code>INFO</code> level (the default level) to a logger configured with the name <code>myclass</code>:
+                <pre>&lt;log logger-name="myclass"&gt;A useful piece of information&lt;/log&gt;</pre></p>
+            </example>
         </entry>
 
         <entry name="newInstance" impl="org.danann.cernunnos.core.NewInstancePhrase">

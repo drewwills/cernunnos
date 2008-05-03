@@ -36,7 +36,8 @@ import org.danann.cernunnos.TaskResponse;
 public final class LogTask implements Task {
 
 	// Instance Members.
-	private Phrase level;
+	private Phrase loggerName;
+    private Phrase level;
 	private Phrase prefix;
 	private Phrase message;
 	private Phrase suffix;
@@ -45,6 +46,10 @@ public final class LogTask implements Task {
 	 * Public API.
 	 */
 
+    public static final Reagent LOGGER_NAME = new SimpleReagent("LOGGER_NAME", "@logger-name", ReagentType.PHRASE,
+                        String.class, "The name of the logger to write to.  The default is " +
+                        "org.danann.cernunnos.core.LogTask", new LiteralPhrase("org.danann.cernunnos.core.LogTask"));
+    
 	public static final Reagent LEVEL = new SimpleReagent("LEVEL", "@level", ReagentType.PHRASE, String.class,
 						"The log-level associated with MESSAGE.  From least to most serious, the available " +
 						"log levels are ['trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'].  The" +
@@ -60,7 +65,7 @@ public final class LogTask implements Task {
 						"Characters that follow MESSAGE.  The default is an empty string.", new LiteralPhrase(""));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {LEVEL, PREFIX, MESSAGE, SUFFIX};
+		Reagent[] reagents = new Reagent[] {LOGGER_NAME, LEVEL, PREFIX, MESSAGE, SUFFIX};
 		final Formula rslt = new SimpleFormula(LogTask.class, reagents);
 		return rslt;
 	}
@@ -68,6 +73,7 @@ public final class LogTask implements Task {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
+        this.loggerName = (Phrase) config.getValue(LOGGER_NAME);
 		this.level = (Phrase) config.getValue(LEVEL);
 		this.prefix = (Phrase) config.getValue(PREFIX);
 		this.message = (Phrase) config.getValue(MESSAGE);
@@ -83,8 +89,10 @@ public final class LogTask implements Task {
 		msg.append(message.evaluate(req, res));
 		msg.append(suffix.evaluate(req, res));
 
+        String logger = (String) loggerName.evaluate(req, res);
+        
 		try {
-			Log log = getLog();
+			Log log = getLog(logger);
 			Method m = Log.class.getMethod(lvl, new Class[] {Object.class});
 			m.invoke(log, new Object[] {msg.toString()});
 		} catch (Throwable t) {
@@ -99,9 +107,17 @@ public final class LogTask implements Task {
 	 * Private Stuff
 	 */
 
+    private synchronized Log getLog(String logger) {
+        if (logger.length() > 0) {
+            final Log rslt = LogFactory.getLog(logger);
+            return rslt;
+        } else {
+            return getLog();
+        }
+    }
+
 	private synchronized Log getLog() {
 		final Log rslt = LogFactory.getLog(LogTask.class);
 		return rslt;
 	}
-
 }
