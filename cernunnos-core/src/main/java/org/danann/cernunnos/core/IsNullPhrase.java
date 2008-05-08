@@ -36,7 +36,7 @@ public final class IsNullPhrase implements Phrase {
 	 */
 	
 	public static final Reagent VALUE = new SimpleReagent("VALUE", "descendant-or-self::text()", 
-								ReagentType.PHRASE, String.class, "A phrase that evaluates to a value.");
+					ReagentType.PHRASE, Object.class, "A phrase that evaluates to a value.");
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {VALUE};
