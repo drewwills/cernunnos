@@ -40,6 +40,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public final class AddGrammarTask extends AbstractContainerTask {
 
 	// Instance Members.

@@ -62,15 +62,11 @@ public final class SerializeGrammarTask extends AbstractContainerTask {
 
         Element rslt = fac.createElement("grammar");
 
-        for (Entry e : grammar.getTaskEntries().values()) {
-            rslt.add(serializeEntry(e, fac));
-        }
-        for (Entry e : grammar.getPhraseEntries().values()) {
+        for (Entry e : grammar.getEntries()) {
             rslt.add(serializeEntry(e, fac));
         }
 
         res.setAttribute(Attributes.NODE, rslt);
-
         super.performSubtasks(req, res);
 
     }

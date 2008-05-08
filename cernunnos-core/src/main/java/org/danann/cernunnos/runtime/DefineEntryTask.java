@@ -1,18 +1,28 @@
-/**
- * 
+/*
+ * Copyright 2008 Andrew Wills
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.danann.cernunnos.runtime;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.dom4j.Element;
 import org.dom4j.Node;
 
-import org.danann.cernunnos.Bootstrappable;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -89,58 +99,9 @@ public final class DefineEntryTask implements Task {
 		
 		String n = (String) entry_name.evaluate(req, res);
 		String m = (String) impl.evaluate(req, res);
-		
-		try {
 
-			// Obtain the Formula...
-			Class<?> c = grammar.getClassLoader().loadClass(m);
-			Bootstrappable b = (Bootstrappable) c.newInstance();
-			Formula f = b.getFormula();
-
-			// Sanity check -- refuse the formula if the class doesn't match!
-			if (!f.getImplementationClass().equals(c)) {
-				String msg = "Invalid Formula Provided by Task Implementation:  class '"
-							+ c.getName() + "' provided a formula specifying implementation class '"
-							+ f.getImplementationClass().getName() + "'.";
-				throw new RuntimeException(msg);
-			}
-
-			// Evaluate the mappings...
-			Map<Reagent,Object> mappings = new HashMap<Reagent,Object>();
-			if (content != null) {
-				for (Reagent r : f.getReagents()) {
-					Object value = r.getReagentType().evaluate(grammar, content, r.getXpath());
-					if (value != null) {
-						mappings.put(r, value);
-					}
-				}
-			}
-			
-			// Evaluate the type...
-			Entry.Type y = null;
-			if (b instanceof Phrase) {
-				// NB:  For the moment it seems perilous to allow a 
-				// single class to define both a Phrase and a Task;  
-				// if it implements Phrase, it's a Phrase. 
-				y = Entry.Type.PHRASE;
-			} else if (b instanceof Task) {
-				y = Entry.Type.TASK;
-			} else {
-				String msg = "The specified IMPL class does not implement a " +
-												"known entry type:  " + m;
-				throw new RuntimeException(msg);
-			}
-
-			grammar.addEntry(new Entry(n, y, description, 
-										f, mappings, examples));
-
-		} catch (Throwable t) {
-			String msg = "Unable to parse the specified entry:" +
-							"\n\t\tname=" + n +
-							"\n\t\timpl=" + m;
-			throw new RuntimeException(msg, t);
-		}
-		
+		grammar.addEntry(new Entry(n, description, m, content, grammar, examples));
+					
 	}
 
 }

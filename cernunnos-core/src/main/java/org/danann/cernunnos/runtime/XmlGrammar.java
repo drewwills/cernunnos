@@ -20,9 +20,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
@@ -31,7 +33,6 @@ import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.Bootstrappable;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.LiteralPhrase;
@@ -56,8 +57,7 @@ public final class XmlGrammar implements Grammar {
     // Instance Members.
     private final Grammar parent;
     private final ClassLoader loader;
-    private Map<String,Entry> taskEntries;
-    private Map<String,Entry> phraseEntries;
+    private Map<String,List<Entry>> entries;
 
     /*
      * Public API.
@@ -238,46 +238,29 @@ public final class XmlGrammar implements Grammar {
     }
 
     void addEntry(Entry e) {
-
-        if (e.getType().equals(Entry.Type.TASK)) {
-            taskEntries.put(e.getName(), e);
-        } else if (e.getType().equals(Entry.Type.PHRASE)) {
-            phraseEntries.put(e.getName(), e);
-        } else {
-            String msg = "Unsupported EntryType:  " + e.getType().name();
-            throw new RuntimeException(msg);
+        
+        List<Entry> list = entries.get(e.getName());
+        if (list == null) {
+        	list = new LinkedList<Entry>();
+        	entries.put(e.getName(), list);
         }
+        list.add(e);
 
     }
     
-    Map<String,Entry> getPhraseEntries() {
+    Set<Entry> getEntries() {
 
-    	Map<String,Entry> rslt = null;
+    	Set<Entry> rslt = null;
     	if (parent != null && parent instanceof XmlGrammar) {
-    		rslt = ((XmlGrammar) parent).getPhraseEntries();
+    		rslt = ((XmlGrammar) parent).getEntries();
     	} else {
-    		rslt = new HashMap<String,Entry>();
+    		rslt = new HashSet<Entry>();
     	}
     	
-    	for (Entry y : phraseEntries.values()) {
-    		rslt.put(y.getName(), y);
-    	}
-    	
-    	return rslt;
-
-    }
-
-    Map<String,Entry> getTaskEntries() {
-    	
-    	Map<String,Entry> rslt = null;
-    	if (parent != null && parent instanceof XmlGrammar) {
-    		rslt = ((XmlGrammar) parent).getTaskEntries();
-    	} else {
-    		rslt = new HashMap<String,Entry>();
-    	}
-    	
-    	for (Entry y : taskEntries.values()) {
-    		rslt.put(y.getName(), y);
+    	for (List<Entry> list : entries.values()) {
+    		for (Entry y : list) {
+        		rslt.add(y);
+    		}
     	}
     	
     	return rslt;
@@ -301,57 +284,39 @@ public final class XmlGrammar implements Grammar {
         this.parent = parent;
         this.loader = loader;
 
-        // NB:  Tasks & phrases are set after creation
-        // (viz. in parse() method) due to chicken-egg scenario...
-
-        this.taskEntries = Collections.synchronizedMap(new HashMap<String,Entry>());
-        this.phraseEntries = Collections.synchronizedMap(new HashMap<String,Entry>());
+        // NB:  Tasks & phrases are added after creation...
+        this.entries = Collections.synchronizedMap(new HashMap<String,List<Entry>>());
 
     }
 
     private Entry getEntry(String name, Entry.Type type) {
+    	
         Entry rslt = null;
 
-        // Choose which entry Map...
-        Map<String,Entry> m = null;
-        if (type.equals(Entry.Type.TASK)) {
-            m = taskEntries;
-        } else if (type.equals(Entry.Type.PHRASE)) {
-            m = phraseEntries;
+        // If there's a matching entry w/in this Grammar it trumps all...
+        if (entries.containsKey(name)) {
+        	List<Entry> list = entries.get(name);
+        	for (Entry y : list) {
+        		// Be sure we have an entry of the correct type...
+        		if (y.getType().equals(type)) {
+        			rslt = y;
+        			break;
+        		}
+        	}
         }
-
-        // Might be a null Map if we're currently bootstrapping a Grammar...
-        if (m != null && m.containsKey(name)) {
-            // If there's a matching entry w/in this Grammar it trumps all...
-            return m.get(name);
-        } else if (parent != null && parent instanceof XmlGrammar) {
-            // This is a little hokey... perhaps Entry should be a first-class type?
-            rslt = ((XmlGrammar) parent).getEntry(name, type);
-        } else {
-            // See if the name is a class that implements...
-            try {
-                Class<?> c = Class.forName(name);
-                Bootstrappable b = (Bootstrappable) c.newInstance();
-                Entry.Type y = null;
-                if (type.equals(Entry.Type.PHRASE) && b instanceof Phrase) {
-                    y = Entry.Type.PHRASE;
-                } else if (type.equals(Entry.Type.TASK) && b instanceof Task) {
-                    y = Entry.Type.TASK;
-                } else {
-                    String msg = "The specified class is either not a Phrase or " +
-                            "a Task, or it doesn't match the specified type:  " + name;
-                    throw new RuntimeException(msg);
-                }
-                rslt = new Entry(name, y, (Element) null, b.getFormula(), new HashMap<Reagent,Object>(), new LinkedList<Node>());
-            } catch (ClassNotFoundException cnfe) {
-                String msg = "The specified entry name does not match a known entry or an available class:  " + name;
-                throw new IllegalArgumentException(msg);
-            } catch (Throwable t) {
-                String msg = "Error preparing the specified entry:  " + name;
-                throw new RuntimeException(msg, t);
+        
+        if (rslt == null) {
+            if (parent != null && parent instanceof XmlGrammar) {
+                // This is a little hokey... perhaps Entry should be a first-class type?
+                rslt = ((XmlGrammar) parent).getEntry(name, type);
+            } else {
+                // Assume the name is a class that implements Bootstrappable...
+            	rslt = new Entry(name, (Element) null, name, (Element) null, this, new LinkedList<Node>());
             }
         }
+        
         return rslt;
+
     }
 
     private EntityConfig prepareEntryConfig(Entry n, Node d) {
@@ -374,44 +339,54 @@ public final class XmlGrammar implements Grammar {
             throw new IllegalArgumentException(msg);
         }
 
-        Formula f = n.getFormula();
+        try {
+        	
+            Formula f = n.getFormula();
 
-        Map<Reagent,Object> mappings = new HashMap<Reagent,Object>();
-        List<Reagent> needed = new ArrayList<Reagent>(f.getReagents());
-        needed.removeAll(n.getMappings().keySet());
-        for (Reagent r : needed) {
-            Object value = r.getReagentType().evaluate(this, d, r.getXpath());
-            if (value == null) {
-                // First see if there's a default...
-                if (r.hasDefault()) {
-                    value = r.getDefault();
-                } else {
-                    String msg = "The required expression '" + r.getXpath()
-                        + "' is missing from the following node:  " + d.asXML();
-                    throw new RuntimeException(msg);
+            Map<Reagent,Object> mappings = new HashMap<Reagent,Object>();
+            List<Reagent> needed = new ArrayList<Reagent>(f.getReagents());
+            needed.removeAll(n.getMappings().keySet());
+            for (Reagent r : needed) {
+                Object value = r.getReagentType().evaluate(this, d, r.getXpath());
+                if (value == null) {
+                    // First see if there's a default...
+                    if (r.hasDefault()) {
+                        value = r.getDefault();
+                    } else {
+                        String msg = "The required expression '" + r.getXpath()
+                            + "' is missing from the following node:  " + d.asXML();
+                        throw new RuntimeException(msg);
+                    }
                 }
+                mappings.put(r, value);
             }
-            mappings.put(r, value);
-        }
-        mappings.putAll(n.getMappings());
-        
-        String entryName = null;
-        if (n.getType().equals(Entry.Type.TASK)) {
-        		entryName = "<" + n.getName() + ">";
-        } else if (n.getType().equals(Entry.Type.PHRASE)) {
-        		entryName = "${" + n.getName() + "}";
-        } else {
-        	throw new RuntimeException("Unsupported Entry Type:  " + n.getType());
-        }
+            mappings.putAll(n.getMappings());
+            
+            String entryName = null;
+            if (n.getType().equals(Entry.Type.TASK)) {
+            		entryName = "<" + n.getName() + ">";
+            } else if (n.getType().equals(Entry.Type.PHRASE)) {
+            		entryName = "${" + n.getName() + "}";
+            } else {
+            	throw new RuntimeException("Unsupported Entry Type:  " + n.getType());
+            }
 
-        return new SimpleEntityConfig(this, entryName, source, n.getFormula(), mappings);
+            return new SimpleEntityConfig(this, entryName, source, n.getFormula(), mappings);
+
+        } catch (Throwable t) {
+			StringBuilder msg = new StringBuilder();
+			msg.append("Unable to prepare an EntityConfig based on the specified information:")
+					.append("\n\t\tEntity Name:  ").append(n.getName())
+					.append("\n\t\tSource:  ").append(source);
+			throw new RuntimeException(msg.toString(), t);
+		}
 
     }
 
     /*
      * Nested Types.
      */
-
+    
     private static final class ReturnValueImpl implements ReturnValue {
 		
 		// Instance Members.
