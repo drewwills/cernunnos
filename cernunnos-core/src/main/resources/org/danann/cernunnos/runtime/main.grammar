@@ -46,6 +46,26 @@
             </example>
         </entry>
 
+         <!--
+          | Package:  concurrent
+          +-->
+          <entry name="thread-pool" impl="org.danann.cernunnos.concurrent.ThreadPoolTask">
+             <description>
+                 <p>Creates a thread pool (ExecutorService) with a default size of 4 threads and stores it in a request 
+                 attribute named 'ConcurrentAttributes.EXECUTOR_SERVICE' by default. The task will wait for all tasks 
+                 in the thread pool to complete before completing itself.</p>
+                 <p>Use a <a href="concurrent-TASK.html">&lt;concurrent&gt;</a> task within this task.</p>
+             </description>
+          </entry>
+          
+          <entry name="concurrent" impl="org.danann.cernunnos.concurrent.ConcurrentTask">
+             <description>
+                 <p>Executes the subtasks concurrently using the thread pool from the request under the default attribute 
+                 name 'ConcurrentAttributes.EXECUTOR_SERVICE'.</p>
+                 <p>Use this task within a <a href="thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
+             </description>
+          </entry>
+
         <!--
           | Package:  core
           +-->
@@ -467,6 +487,18 @@ Response:</pre>
         <entry name="groovy" impl="org.danann.cernunnos.script.ScriptPhrase">
             <description>
                 <p>Returns the value of the specified Groovy EXPRESSION.</p>
+                <p>
+                	<a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
+                	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
+                	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
+                	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
+                	<a href="if-TASK.html">&lt;if&gt;</a> and <a href="choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                </p>
+                <p>
+					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
+					so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
+					with exisiting Java code seamlessly.   
+                </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
         </entry>
@@ -474,6 +506,18 @@ Response:</pre>
         <entry name="groovy" impl="org.danann.cernunnos.script.ScriptTask">
             <description>
                 <p>Invokes operations specified by SCRIPT using the groovy engine.</p>
+                <p>
+                	<a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
+                	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
+                	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
+                	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
+                	<a href="if-TASK.html">&lt;if&gt;</a> and <a href="choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                </p>
+                <p>
+					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
+					so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
+					with exisiting Java code seamlessly.   
+                </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
         </entry>
