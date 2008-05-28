@@ -78,7 +78,12 @@ public class DeleteFileTask implements Task {
 			delete(f);
 
 		} catch (Throwable t) {
-			String msg = "Unable to delete the specified file:  " + f.getAbsolutePath();
+			String msg = "Unable to delete the specified file";
+			if (f != null) {
+				msg = msg + ":  " + f.getAbsolutePath();
+			} else {
+				msg = msg + ".";
+			}
 			throw new RuntimeException(msg, t);
 		}
 
