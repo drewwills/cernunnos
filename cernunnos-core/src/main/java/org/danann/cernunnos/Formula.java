@@ -28,7 +28,7 @@ public interface Formula {
 	 * 
 	 * @return A Java class that implements <code>Task</code>.
 	 */
-	Class getImplementationClass();
+	Class<?> getImplementationClass();
 	
 	/**
 	 * Obtains a list of reagents necessary to bootstrap the <code>Task</code> 
@@ -37,5 +37,22 @@ public interface Formula {
 	 * @return A collection of reagents.
 	 */
 	List<Reagent> getReagents();
+
+	/**
+	 * Indicates whether the <code>Task</code> or <code>Phrase</code> has been 
+	 * deprecated.
+	 * 
+	 * @return <code>True</code> if this type is deprecated, otherwise 
+	 * <code>False</code>.
+	 */
+	boolean isDeprecated();
+
+	/**
+	 * Provides details regarding the deprecation of this <code>Task</code> or 
+	 * <code>Phrase</code> if applicable, otherwise <code>null</code>.
+	 * 
+	 * @return An object containing deprecation information or <code>null</code>.
+	 */
+	Deprecation getDeprecation();
 
 }

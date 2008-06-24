@@ -14,21 +14,14 @@
    limitations under the License.
 -->
 
-<html>
+<xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
-<head>
-<title>Cernunnos Manual</title>
-<link rel="stylesheet" type="text/css" href="structural.css"/>
-<link rel="stylesheet" type="text/css" href="classes.css"/>
-</head>
+    <xsl:import href="contents.xsl"/>
 
-<frameset cols="25%,75%">
-<frame src="contents-showdeprecated.html" name="navFrame">
-<frame src="introduction.html" name="mainFrame">
-</frameset>
-<noframes>
-<H2>Cernunnos Task &amp; Phrase Reference</H2>
+    <xsl:template match="/grammar">
+        <xsl:call-template name="main">
+            <xsl:with-param name="showdeprecated">true</xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
 
-</noframes>
-
-</html>
+</xsl:transform>

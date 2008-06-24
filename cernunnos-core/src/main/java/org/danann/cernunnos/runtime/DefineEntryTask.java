@@ -23,11 +23,13 @@ import java.util.List;
 import org.dom4j.Element;
 import org.dom4j.Node;
 
+import org.danann.cernunnos.Deprecation;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.SimpleDeprecation;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
@@ -42,6 +44,8 @@ public final class DefineEntryTask implements Task {
 	private Element content;
 	private Element description;
 	private List<Node> examples;
+	private Phrase deprecation_version;
+	private List<Element> deprecation_description;
 	
 	/*
 	 * Public API.
@@ -68,8 +72,18 @@ public final class DefineEntryTask implements Task {
 				List.class, "Examples of this entry in use.  Each example may optionally include a " +
 				"'caption' attribute that describes what the example does.", Collections.emptyList());
 
+	public static final Reagent DEPRECATION_VERSION = new SimpleReagent("DEPRECATION_VERSION", "deprecation/@since", 
+				ReagentType.PHRASE, String.class, "Version of Cernunnos (or this Cernunnos-based API) when this " +
+				"entry was first deprecated.  The default is null, signifying that this entry has not been " +
+				"deprecated.", null);
+
+	public static final Reagent DEPRECATION_DESCRIPTION = new SimpleReagent("DEPRECATION_DESCRIPTION", "deprecation/*", 
+				ReagentType.NODE_LIST, List.class, "XHTML description of why this entry was deprecated and/or what " +
+				"should be used instead.", Collections.emptyList());
+
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {NAME, IMPL, CONTENT_MODEL, DESCRIPTION, EXAMPLES};
+		Reagent[] reagents = new Reagent[] {NAME, IMPL, CONTENT_MODEL, DESCRIPTION, 
+						EXAMPLES, DEPRECATION_VERSION, DEPRECATION_DESCRIPTION};
 		final Formula rslt = new SimpleFormula(this.getClass(), reagents);
 		return rslt;
 	}
@@ -90,6 +104,12 @@ public final class DefineEntryTask implements Task {
 		for (Object o : list) {
 			examples.add((Node) o);
 		}			
+		this.deprecation_version = (Phrase) config.getValue(DEPRECATION_VERSION);
+		this.deprecation_description = new LinkedList<Element>();
+		list = (List<?>) config.getValue(DEPRECATION_DESCRIPTION);
+		for (Object o : list) {
+			deprecation_description.add((Element) o);
+		}			
 		
 	}
 
@@ -99,8 +119,14 @@ public final class DefineEntryTask implements Task {
 		
 		String n = (String) entry_name.evaluate(req, res);
 		String m = (String) impl.evaluate(req, res);
+		
+		Deprecation dep = null;
+		if (deprecation_version != null) {
+			String v = (String) deprecation_version.evaluate(req, res);
+			dep = new SimpleDeprecation(v, deprecation_description);
+		}
 
-		grammar.addEntry(new Entry(n, description, m, content, grammar, examples));
+		grammar.addEntry(new Entry(n, description, m, content, grammar, examples, dep));
 					
 	}
 

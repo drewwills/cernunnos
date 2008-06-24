@@ -20,7 +20,8 @@
     <html>
       <head>
         <title><xsl:value-of select="name"/></title>
-                <link rel="stylesheet" type="text/css" href="../styles.css"/>
+                <link rel="stylesheet" type="text/css" href="../structural.css"/>
+                <link rel="stylesheet" type="text/css" href="../classes.css"/>
       </head>
       <body>
 		<div align="center">
@@ -35,6 +36,7 @@
 			<xsl:apply-templates select="name" mode="Task"/>
 		  </xsl:when>
 		</xsl:choose>
+		<xsl:apply-templates select="deprecation"/>
         <h3>Description:</h3>
         <xsl:copy-of select="description/*"/>
         <h3>Reagents:</h3>
@@ -67,7 +69,7 @@
     <tr>
       <td><xsl:value-of select="@name"/></td>
       <td><xsl:value-of select="@xpath"/></td>
-      <td><xsl:value-of select="description"/></td>
+      <td><xsl:apply-templates select="deprecation"/><xsl:value-of select="description"/></td>
       <td><xsl:value-of select="@reagent-type"/></td>
       <td><xsl:value-of select="@expected-type"/></td>
       <td><xsl:value-of select="@required"/></td>
@@ -77,6 +79,13 @@
   <xsl:template match="example">
   	<p><xsl:value-of select="@caption"/>:</p>
 	<xsl:copy-of select="*"/>
+  </xsl:template>
+
+  <xsl:template match="deprecation">
+  	<div class="warning">
+	  	<span class="title">** DEPRECATED ** since <xsl:value-of select="@version"/></span>
+		<xsl:copy-of select="*"/>
+	</div>
   </xsl:template>
 
 </xsl:transform>

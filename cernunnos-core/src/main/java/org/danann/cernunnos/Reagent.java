@@ -82,4 +82,20 @@ public interface Reagent {
 	 */
 	Object getDefault();
 
+	/**
+	 * Indicates whether the <code>Reagent</code> has been deprecated.
+	 * 
+	 * @return <code>True</code> if this reagent is deprecated, otherwise 
+	 * <code>False</code>.
+	 */
+	boolean isDeprecated();
+
+	/**
+	 * Provides details regarding the deprecation of this <code>Reagent</code> 
+	 * if applicable, otherwise <code>null</code>.
+	 * 
+	 * @return An object containing deprecation information or <code>null</code>.
+	 */
+	Deprecation getDeprecation();
+		
 }

@@ -32,6 +32,7 @@ public final class SimpleReagent implements Reagent {
 	private final Class<?> returnType;
 	private final String description;
 	private final Object dflt;
+	private final Deprecation deprecation;
 	
 	/*
 	 * Public API.
@@ -66,7 +67,28 @@ public final class SimpleReagent implements Reagent {
 	 * @param description An explanation of how this reagent will be used.
 	 * @param dflt The value this reagent should use if none is provided.
 	 */
-	public SimpleReagent(String name, String xpath, ReagentType reagentType, Class<?> returnType, String description, Object dflt) {
+	public SimpleReagent(String name, String xpath, ReagentType reagentType, 
+						Class<?> returnType, String description, Object dflt) {
+		this(name, xpath, reagentType, returnType, description, dflt, null);
+	}
+
+	/**
+	 * Creates a new <code>SimpleReagent</code> that includes both a return type 
+	 * and a default value.
+	 * 
+	 * @param name A descriptive name.
+	 * @param xpath An expression to use in gathering the value of this reagent.
+	 * @param reagentType The type of this <code>Reagent</code> as defined by
+	 * the <code>ReagentType</code> enumeration.
+	 * @param returnType The runtime data type that instances of this 
+	 * <code>Reagent</code> must return
+	 * @param description An explanation of how this reagent will be used.
+	 * @param dflt The value this reagent should use if none is provided.
+	 * @param deprecation Deprecation details, if appropriate.
+	 */
+	public SimpleReagent(String name, String xpath, ReagentType reagentType, 
+						Class<?> returnType, String description, Object dflt, 
+						Deprecation deprecation) {
 
 		// Assertions...
 		if (name == null) {
@@ -87,6 +109,7 @@ public final class SimpleReagent implements Reagent {
 			throw new IllegalArgumentException(msg);
 		}
 		// NB:  dflt may be null...
+		// NB:  deprecation may be null...
 		
 		// Instance Members.
 		this.name = name;
@@ -95,6 +118,7 @@ public final class SimpleReagent implements Reagent {
 		this.returnType = returnType;
 		this.description = description;
 		this.dflt = dflt;
+		this.deprecation = deprecation;
 
 	}
 	
@@ -132,6 +156,14 @@ public final class SimpleReagent implements Reagent {
 		
 		return dflt;
 		
+	}
+	
+	public boolean isDeprecated() {
+		return deprecation != null;
+	}
+	
+	public Deprecation getDeprecation() {				
+		return deprecation;		
 	}
 	
 	/**

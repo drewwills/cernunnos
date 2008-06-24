@@ -15,14 +15,14 @@
  */
 
 h1 {
-  color:  #003366;
+  color:  #036;
   font-size:  22pt;
   margin-top:  20px;
   margin-bottom:  16px;
 }
 
 h2 {
-  color:  #003366;
+  color:  #036;
   font-size:  18pt;
   margin-top:  15px;
   margin-bottom:  12px;
@@ -30,14 +30,14 @@ h2 {
 
 h3 {
   color:  #FFFFFF;
-  background-color:  #003366;
+  background-color:  #036;
   font-size:  14pt;
   margin-top:  10px;
   margin-bottom:  8px;
 }
 
 h4 {
-  color:  #003366;
+  color:  #036;
   font-size:  14pt;
   margin-top:  8px;
   margin-bottom:  6px;
@@ -49,18 +49,18 @@ p {
 }
 
 table {
-  background-color:  #003366;
+  background-color:  #036;
   margin-top:  6px;
   margin-bottom:  6px;
 }
 
 th {
   color:  #003366;
-  background-color:  #CCCCFF;
+  background-color:  #CCF;
 }
 
 td {
-  background-color:  #FFFFFF;
+  background-color:  #FFF;
 }
 
 pre {

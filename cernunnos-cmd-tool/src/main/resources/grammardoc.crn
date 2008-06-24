@@ -20,8 +20,12 @@
         <copy-file to-dir="docs/grammardoc"/>
     </file-iterator>
 
-    <xslt stylesheet="media/grammardoc/table-of-contents.xsl">
-        <write-document file="docs/grammardoc/table-of-contents.html"/>
+    <xslt stylesheet="media/grammardoc/contents-showdeprecated.xsl">
+        <write-document file="docs/grammardoc/contents-showdeprecated.html"/>
+    </xslt>
+    
+    <xslt stylesheet="media/grammardoc/contents-hidedeprecated.xsl">
+        <write-document file="docs/grammardoc/contents-hidedeprecated.html"/>
     </xslt>
     
     <node-iterator xpath="entry">

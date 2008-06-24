@@ -95,6 +95,16 @@ public final class SerializeGrammarTask extends AbstractContainerTask {
         name.setText(e.getName());
         rslt.add(name);
 
+        // Deprecation.
+        if (e.isDeprecated()) {
+            Element dep = fac.createElement("deprecation");
+            dep.addAttribute("version", e.getDeprecation().getVersion());
+            for (Element n : e.getDeprecation().getDescription()) {
+            	dep.add((Element) n.clone());
+            }
+            rslt.add(dep);
+        }
+
         // Description.
         Element desc = e.getDescription() != null 
         				? (Element) e.getDescription().clone() 
@@ -149,6 +159,14 @@ public final class SerializeGrammarTask extends AbstractContainerTask {
                 desc.setText(r.getDescription());
             }
             reagent.add(desc);
+            if (r.isDeprecated()) {
+            	Element dep = fac.createElement("deprecation");
+            	dep.addAttribute("version", r.getDeprecation().getVersion());
+            	for (Element e : r.getDeprecation().getDescription()) {
+            		dep.add((Element) e.clone());
+            	}
+            	reagent.add(dep);
+            }
             reagents.add(reagent);
         }
         rslt.add(reagents);

@@ -26,6 +26,7 @@ import org.dom4j.Element;
 import org.dom4j.Node;
 
 import org.danann.cernunnos.Bootstrappable;
+import org.danann.cernunnos.Deprecation;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
@@ -44,6 +45,7 @@ public final class Entry {
     private Formula formula;
     private Map<Reagent,Object> mappings;
     private final List<Node> examples;
+	private final Deprecation deprecation;
 
     // Instance Members for lazyLoad()...
     private final String clazz;
@@ -58,8 +60,12 @@ public final class Entry {
         TASK,
         PHRASE
     }
-    
+
     public Entry(String name, Element description, String clazz, Element contentModel, XmlGrammar g, List<Node> examples) {
+    	this(name, description, clazz, contentModel, g, examples, null);
+    }
+
+    public Entry(String name, Element description, String clazz, Element contentModel, XmlGrammar g, List<Node> examples, Deprecation d) {
     	
         // Assertions...
         if (name == null) {
@@ -80,6 +86,7 @@ public final class Entry {
             String msg = "Argument 'examples' cannot be null.";
             throw new IllegalArgumentException(msg);
         }
+        // NB:  d [deprecation] may be null...
 
         // Instance Members.
         this.name = name;
@@ -88,7 +95,8 @@ public final class Entry {
         this.formula = null;
         this.mappings = null;
         this.examples = (List<Node>) Collections.unmodifiableList(examples);
-
+        this.deprecation = d;
+        
         // Instance Members for lazyLoad()...
         this.clazz = clazz;
         this.contentModel = contentModel;
@@ -137,6 +145,7 @@ public final class Entry {
         this.formula = f;
         this.mappings = (Map<Reagent,Object>) Collections.unmodifiableMap(mappings);
         this.examples = (List<Node>) Collections.unmodifiableList(examples);
+        this.deprecation = null;
 
         // Instance Members for lazyLoad()...
         this.clazz = null;
@@ -178,7 +187,15 @@ public final class Entry {
         return examples;
     }
     
-    public boolean equals(Object o) {
+	public boolean isDeprecated() {
+		return deprecation != null;
+	}
+	
+	public Deprecation getDeprecation() {				
+		return deprecation;		
+	}
+
+	public boolean equals(Object o) {
     	
     	boolean rslt = false;	// default...
     	

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -58,6 +60,7 @@ public final class XmlGrammar implements Grammar {
     private final Grammar parent;
     private final ClassLoader loader;
     private Map<String,List<Entry>> entries;
+	private final Log log = LogFactory.getLog(XmlGrammar.class);	// Don't declare as static in general libraries
 
     /*
      * Public API.
@@ -339,6 +342,18 @@ public final class XmlGrammar implements Grammar {
             throw new IllegalArgumentException(msg);
         }
 
+        // Report any use of deprecated entries...
+        if (n.isDeprecated()) {
+			StringBuilder msg = new StringBuilder();
+			msg.append("USE OF DEPRECATED API:  A deprecated ENTRY was referenced.")
+					.append("\n\t\tEntry Name:  ").append(n.getName())
+					.append("\n\t\tDeprecated Since:  ").append(n.getDeprecation().getVersion())
+					.append("\n\t\tEntry Type:  ").append(n.getType())
+					.append("\n\t\tSource:  ").append(source)
+					.append("\n");
+			log.warn(msg.toString());
+        }        
+        
         try {
         	
             Formula f = n.getFormula();
@@ -348,6 +363,20 @@ public final class XmlGrammar implements Grammar {
             needed.removeAll(n.getMappings().keySet());
             for (Reagent r : needed) {
                 Object value = r.getReagentType().evaluate(this, d, r.getXpath());
+                
+                // Report any use of deprecated reagents...
+                if (r.isDeprecated() && value != null) {
+        			StringBuilder msg = new StringBuilder();
+        			msg.append("USE OF DEPRECATED API:  A value was specified for a deprecated REAGENT.")
+        					.append("\n\t\tReagent Name:  ").append(r.getName())
+        					.append("\n\t\tDeprecated Since:  ").append(r.getDeprecation().getVersion())
+        					.append("\n\t\tEntry Name:  ").append(n.getName())
+        					.append("\n\t\tEntry Type:  ").append(n.getType())
+        					.append("\n\t\tSource:  ").append(d.getUniquePath() + "/" + r.getXpath())
+        					.append("\n");
+        			log.warn(msg.toString());
+                }
+                
                 if (value == null) {
                     // First see if there's a default...
                     if (r.hasDefault()) {

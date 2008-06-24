@@ -28,8 +28,9 @@ import java.util.List;
 public final class SimpleFormula implements Formula {
 	
 	// Instance Members.
-	private final Class impl;
+	private final Class<?> impl;
 	private final List<Reagent> reagents;
+	private final Deprecation deprecation;
 	
 	/*
 	 * Public API.
@@ -44,7 +45,20 @@ public final class SimpleFormula implements Formula {
 	 * @param reagents The parameters necessary to bootstrap an instance of the 
 	 * task defined by this formula.
 	 */
-	public SimpleFormula(Class impl, Reagent[] reagents) {
+	public SimpleFormula(Class<?> impl, Reagent[] reagents) {
+		this(impl, reagents, null);
+	}
+	
+	/**
+	 * Creates a new <code>SimpleFormula</code> with the specified class and reagents.  
+	 * <code>Task</code> designers should pass a reference to their own 
+	 * <code>Class</code> object as they define the formula for their task.
+	 * 
+	 * @param impl The Java class which this formula will govern.
+	 * @param reagents The parameters necessary to bootstrap an instance of the 
+	 * task defined by this formula.
+	 */
+	public SimpleFormula(Class<?> impl, Reagent[] reagents, Deprecation deprecation) {
 
 		// Assertions...
 		if (impl == null) {
@@ -55,16 +69,18 @@ public final class SimpleFormula implements Formula {
 			String msg = "Argument 'reagents' cannot be null.";
 			throw new IllegalArgumentException(msg);
 		}
-		
+		// NB:  deprecation may be null...
+
 		// Instance Members.
 		this.impl = impl;
 		List<Reagent> list = new ArrayList<Reagent>();
 		list.addAll(Arrays.asList(reagents));
 		this.reagents = Collections.unmodifiableList(list);
+		this.deprecation = deprecation;
 		
 	}
 
-	public Class getImplementationClass() {
+	public Class<?> getImplementationClass() {
 		return impl;
 	}
 	
@@ -72,4 +88,12 @@ public final class SimpleFormula implements Formula {
 		return reagents;
 	}
 	
+	public boolean isDeprecated() {
+		return deprecation != null;
+	}
+	
+	public Deprecation getDeprecation() {				
+		return deprecation;		
+	}
+
 }
