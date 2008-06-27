@@ -81,8 +81,19 @@ public class ScriptTask extends AbstractContainerTask {
 
 			Bindings n = new SimpleBindings();
 			n.putAll(req.getAttributes());
+			ScriptContext ctx = new javax.script.SimpleScriptContext();
+			ctx.setBindings(n, ScriptContext.GLOBAL_SCOPE);
+			ctx.setBindings(new SimpleBindings(), ScriptContext.ENGINE_SCOPE);
 
-			eng.eval(s, n);
+			eng.eval(s, ctx);
+			
+			// Add new items from the ScriptContext to the TaskResponse...
+			// NOT YET:  This isn't working as expected, so let's not invite weird surprises!
+//			for (Entry<String,Object> e : n.entrySet()) {
+//				if (!req.hasAttribute(e.getKey())) {
+//					res.setAttribute(e.getKey(), e.getValue());
+//				}
+//			}
 
 			// Add the engine to the request attributes and invoke subtasks...
 			StringBuffer key = new StringBuffer();
