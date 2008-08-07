@@ -8,6 +8,7 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public final class FalsePhrase implements Phrase {
 	
 	/*
@@ -16,7 +17,7 @@ public final class FalsePhrase implements Phrase {
 	
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {};
-		return new SimpleFormula(FalsePhrase.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 	
 	public void init(EntityConfig config) {}

@@ -40,6 +40,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public class InvokeMethodTask extends AbstractContainerTask {
 
 	// Instance Members.
@@ -82,7 +83,7 @@ public class InvokeMethodTask extends AbstractContainerTask {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {OBJECT, CLASS, METHOD, PARAMETERS, ATTRIBUTE_NAME, SUBTASKS};
-		final Formula rslt = new SimpleFormula(InvokeMethodTask.class, reagents);
+		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
 

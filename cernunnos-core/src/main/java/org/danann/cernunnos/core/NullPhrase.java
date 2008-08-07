@@ -24,6 +24,7 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public class NullPhrase implements Phrase {
 
 	/*
@@ -31,7 +32,7 @@ public class NullPhrase implements Phrase {
 	 */
 	
 	public Formula getFormula() {
-		return new SimpleFormula(NullPhrase.class, new Reagent[0]);
+		return new SimpleFormula(getClass(), new Reagent[0]);
 	}
 	
 	public void init(EntityConfig config) {}

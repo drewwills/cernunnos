@@ -10,6 +10,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public final class ParseIntegerPhrase implements Phrase {
 
 	// Instance Members.
@@ -24,7 +25,7 @@ public final class ParseIntegerPhrase implements Phrase {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {EXPRESSION};
-		return new SimpleFormula(ParseIntegerPhrase.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 	
 	public void init(EntityConfig config) {

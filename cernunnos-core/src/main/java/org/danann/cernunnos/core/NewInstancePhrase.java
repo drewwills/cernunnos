@@ -13,11 +13,12 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public final class NewInstancePhrase implements Phrase {
 
 	// Instance Members.
 	private Phrase clazz;
-	private final Log log = LogFactory.getLog(NewInstancePhrase.class);	// Don't declare as static in general libraries
+	private final Log log = LogFactory.getLog(getClass());	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -28,7 +29,7 @@ public final class NewInstancePhrase implements Phrase {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CLASS_NAME};
-		return new SimpleFormula(NewInstancePhrase.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 
 	public void init(EntityConfig config) {

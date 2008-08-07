@@ -38,7 +38,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * <code>Task</code> implementation that opens a JDBC connection and makes it
  * available to subtasks.  The new connection will automatically be closed when
  * execution of this task concludes.
- * @deprecated TODO put message here
  */
 @Deprecated
 public final class OpenConnectionTask extends AbstractContainerTask {
@@ -89,7 +88,7 @@ public final class OpenConnectionTask extends AbstractContainerTask {
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, DATA_SOURCE, DRIVER, URL,
 							USERNAME, PASSWORD, DATA_SOURCE_ATTRIBUTE_NAME, AbstractContainerTask.SUBTASKS};
-		return new SimpleFormula(OpenConnectionTask.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 
 	@Override

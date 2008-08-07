@@ -17,6 +17,8 @@
 package org.danann.cernunnos.flow;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
@@ -39,7 +41,9 @@ public final class CernunnosTask implements Task {
 	private Grammar grammar;
 	private Phrase context;
 	private Phrase location;
-
+	private final Map<String,Task> loadedTasks = new HashMap<String,Task>();
+	private ScriptRunner runner = null;
+	
 	/*
 	 * Public API.
 	 */
@@ -56,7 +60,7 @@ public final class CernunnosTask implements Task {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};
-		final Formula rslt = new SimpleFormula(CernunnosTask.class, reagents);
+		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
 
@@ -64,6 +68,7 @@ public final class CernunnosTask implements Task {
 
 		// Instance Members.
 		this.grammar = config.getGrammar();
+		this.runner = new ScriptRunner(grammar);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
 
@@ -76,12 +81,33 @@ public final class CernunnosTask implements Task {
 		try {
 
 			// Choose a script...
-			URL ctx = new URL((String) context.evaluate(req, res));
-			URL crn = new URL(ctx, loc);
+			final URL ctx = new URL((String) context.evaluate(req, res));
+			final URL crn = new URL(ctx, loc);
+			
+			// Choose a Task...
+			final String taskPath = crn.toExternalForm();
+			Task k = null;
+			synchronized (loadedTasks) {
+				if (loadedTasks.containsKey(taskPath)) {
+					
+					// Use what we have...
+					k = loadedTasks.get(taskPath);
 
-			// Compile the task...
-			ScriptRunner runner = new ScriptRunner(grammar);
-			Task k = runner.compileTask(crn.toExternalForm());
+				} else {
+
+					// Compile the Task at the specified location...
+					k = runner.compileTask(taskPath);
+					
+					// NB:  For now we're going to limit the size of loadedTasks 
+					// to 1 to prevent memory issues; 1 is enough for the 
+					// majority of cases.
+					loadedTasks.clear();
+
+					// Add the newly-compiled Task to loadedTasks...
+					loadedTasks.put(taskPath, k);
+					
+				}
+			}
 
 			// Run it...
 			runner.run(k, req, res);

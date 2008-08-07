@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Andrew Wills
+ * Copyright 2008 Andrew Wills
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.danann.cernunnos.core;
 
-import java.lang.reflect.Field;
-
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
@@ -28,46 +27,38 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-@Deprecated
-public final class ConstantPhrase implements Phrase {
+public final class SequencePhrase implements Phrase {
 
 	// Instance Members.
-	private Phrase field;
+	private Phrase sequenceName;
 
 	/*
 	 * Public API.
 	 */
-
-	public static final Reagent FIELD = new SimpleReagent("FIELD", "descendant-or-self::text()", ReagentType.PHRASE,
-						String.class, "The fully-qualified name (e.g. com.foo.myproject.MyClass.SOME_CONSTANT) "
-						+ "of a static variable.");
+	
+	public static final Reagent SEQUENCE_NAME = new SimpleReagent("SEQUENCE_NAME", "@sequence-name", ReagentType.PHRASE, 
+				String.class, "Optional name for the sequence created by this task.  If omitted, the name " +
+				"'SequenceTask.DEFAULT_SEQUENCE_NAME' will be used.", new LiteralPhrase("SequenceTask.DEFAULT_SEQUENCE_NAME"));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {FIELD};
-		return new SimpleFormula(getClass(), reagents);
+		Reagent[] reagents = new Reagent[] {SEQUENCE_NAME};
+		final Formula rslt = new SimpleFormula(getClass(), reagents);
+		return rslt;
 	}
 
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.field = (Phrase) config.getValue(FIELD);
+		this.sequenceName = (Phrase) config.getValue(SEQUENCE_NAME);
 
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
-
-		String s = (String) field.evaluate(req, res);
-		try {
-			String clazz = s.substring(0, s.lastIndexOf("."));
-			String var = s.substring(s.lastIndexOf(".") + 1);
-			Class c = Class.forName(clazz);
-			Field f = c.getDeclaredField(var);
-			return f.get(null);
-		} catch (Throwable t) {
-			String msg = "Unable to instantiate the specified field:  " + s;
-			throw new RuntimeException(msg, t);
-		}
-
+		
+		String n = (String) sequenceName.evaluate(req, res);
+		SequenceTask.SequenceImpl seq = (SequenceTask.SequenceImpl) req.getAttribute(n);
+		return seq.next();
+		
 	}
 
 }

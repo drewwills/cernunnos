@@ -64,7 +64,7 @@
     <xsl:template match="entry">
         <xsl:param name="showdeprecated"/>
         <xsl:if test="not(deprecation) or $showdeprecated = 'true'">
-            <a href="entries/{name}-{@type}.html"><xsl:value-of select="name"/></a><br/>
+            <a href="entries/{name}-{@type}.html"><xsl:value-of select="name"/><xsl:if test="deprecation"><img src="deprecated.jpg" style="border: 0px"/></xsl:if></a><br/>
         </xsl:if>
     </xsl:template>
 

@@ -26,6 +26,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
+@Deprecated
 public final class IsNullPhrase implements Phrase {
 
 	// Instance Members.
@@ -40,7 +41,7 @@ public final class IsNullPhrase implements Phrase {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {VALUE};
-		return new SimpleFormula(IsNullPhrase.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 	
 	public void init(EntityConfig config) {

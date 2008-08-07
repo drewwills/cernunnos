@@ -74,6 +74,9 @@
             <description>
                 <p>Returns the value of the Java constant (<i>i.e.</i> static field) specified by FIELD.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(<i>&lt;field-name&gt;</i>)}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="echo" impl="org.danann.cernunnos.core.EchoTask">
@@ -111,6 +114,9 @@
             <description>
                 <p>Returns <code>Boolean.FALSE</code>.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(false)}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="jexl" impl="org.danann.cernunnos.core.JexlPhrase">
@@ -126,12 +132,18 @@
             <description>
                 <p>Invokes the specified METHOD on the specified OBJECT or CLASS.  If the specified method has a non-void return type, the returned object will be registered as a request attribute under ATTRIBUTE_NAME.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-TASK.html">&lt;groovy&gt;</a> and/or <a href="groovy-Phrase.html">${groovy}</a> instead, or another supported scripting language.</p>
+            </deprecation>
         </entry>
 
         <entry name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase">
             <description>
                 <p>Returns <code>Boolean.TRUE</code> if the specified VALUE is null, otherwise <code>Boolean.FALSE</code>.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(<i>&lt;expression&gt;</i> == null)}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="jndi" impl="org.danann.cernunnos.core.JndiLookupPhrase">
@@ -164,24 +176,36 @@
             <description>
                 <p>Attempts to create an instance of the specified class name using the default (zero-argument) constructor, then return it.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(new <i>&lt;type-name&gt;</i>())}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="not" impl="org.danann.cernunnos.core.NotPhrase">
             <description>
                 <p>Returns the opposite of the Boolean specified by VALUE.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(!<i>&lt;expression&gt;</i>)}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="null" impl="org.danann.cernunnos.core.NullPhrase">
             <description>
                 <p>Returns <code>null</code>.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(null)}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="parseInt" impl="org.danann.cernunnos.core.ParseIntegerPhrase">
             <description>
                 <p>Evaluates the <code>Integer</code> value of the specified EXPRESSION and returns it.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="groovy-PHRASE.html">${groovy(Integer.parseInt(<i>&lt;expression&gt;</i>))}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="process" impl="org.danann.cernunnos.core.ExecuteProcessTask">
@@ -249,8 +273,52 @@ Response:</pre>
 
         <entry name="seq" impl="org.danann.cernunnos.core.NamedSequencePhrase">
             <description>
-                <p>Returns the next (Integer) value in the named sequence.  If the specified name is not recognized, the sequence will be created.</p>
+                <p>This Phrase <b>throws UnsupportedOperationException</b>.</p>
+                <p>${seq} was flawed by design, and therefore it's function was removed entirely.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="sequence-TASK.html">&lt;sequence&gt;</a> and <a href="sequence-PHRASE.html">${sequence}</a> instead.</p>
+            </deprecation>
+        </entry>
+
+        <entry name="sequence" impl="org.danann.cernunnos.core.SequencePhrase">
+            <description>
+                <p>Obtains the next value from the specified sequence.  See also <a href="sequence-TASK.html">&lt;sequence&gt;</a>.</p>
+            </description>
+            <example caption="Prints 'a=1' through 'z=26' to standard output">
+                <pre><xmp><sequence>
+    <for-each items="${groovy('a'..'z')}">
+        <echo-ln>${Attributes.OBJECT}=${sequence()}</echo-ln>
+    </for-each>
+</sequence></xmp></pre>
+            </example>
+            <example caption="Prints 'a=10' through 'z=-15' to standard output">
+                <pre><xmp><sequence start="${groovy(10)}" increment="${groovy(-1)}">
+    <for-each items="${groovy('a'..'z')}">
+        <echo-ln>${Attributes.OBJECT}=${sequence()}</echo-ln>
+    </for-each>
+</sequence></xmp></pre>
+            </example>
+        </entry>
+
+        <entry name="sequence" impl="org.danann.cernunnos.core.SequenceTask">
+            <description>
+                <p>Creates a new sequence for use with <a href="sequence-PHRASE.html">${sequence}</a>.</p>
+            </description>
+            <example caption="Prints 'a=1' through 'z=26' to standard output">
+                <pre><xmp><sequence>
+    <for-each items="${groovy('a'..'z')}">
+        <echo-ln>${Attributes.OBJECT}=${sequence()}</echo-ln>
+    </for-each>
+</sequence></xmp></pre>
+            </example>
+            <example caption="Prints 'a=10' through 'z=-15' to standard output">
+                <pre><xmp><sequence start="${groovy(10)}" increment="${groovy(-1)}">
+    <for-each items="${groovy('a'..'z')}">
+        <echo-ln>${Attributes.OBJECT}=${sequence()}</echo-ln>
+    </for-each>
+</sequence></xmp></pre>
+            </example>
         </entry>
 
         <entry name="string-replace" impl="org.danann.cernunnos.core.StringReplaceTask">
@@ -449,6 +517,9 @@ Response:</pre>
             <description>
                 <p>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</p>
             </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="grammar-TASK.html">&lt;grammar&gt;</a> and <a href="entry-TASK.html">&lt;entry&gt;</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="argument-iterator" impl="org.danann.cernunnos.runtime.ArgumentIteratorTask">
@@ -552,11 +623,9 @@ Response:</pre>
             <description>
                 <p>Opens the specified RDBMS connection and registers it as a request attribute.  By default, it will be registered under OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.  Cernunnos SQL tasks will look for a connection under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the Connection object.</p>
             </description>
-            <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
-                <pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
-  <sql-statement sql="${req($1)}"/>
-</sql-connection></xmp></pre>
-            </example>
+            <deprecation since="1.0.0">
+                <p>Use <a href="sql-datasource-TASK.html">&lt;sql-datasource&gt;</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="sql-datasource" impl="org.danann.cernunnos.sql.DataSourceTask">
