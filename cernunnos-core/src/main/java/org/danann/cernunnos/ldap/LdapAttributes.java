@@ -16,20 +16,69 @@
 
 package org.danann.cernunnos.ldap;
 
+import java.util.Map;
+import javax.naming.directory.SearchControls;
+
+import org.springframework.ldap.core.ContextSource;
+
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.BindingsHelper;
+
 public final class LdapAttributes {
+
+	static {
+		Attributes.registerBindings("LdapAttributes", BindingsHelperImpl.class);
+	}
+
+	/*
+	 * Public API.
+	 */
 
 	/**
 	 * Use this name to create a request attribute containing an 
-	 * <code>org.springframework.ldap.core.support.ContextSource</code> object 
+	 * <code>org.springframework.ldap.core.ContextSource</code> object 
 	 * for use with Cernunnos LDAP features.
 	 */
-	public static final String CONTEXT_SOURCE = "LdapAttributes.CONTEXT_SOURCE";
+	public static final String CONTEXT_SOURCE = LdapAttributes.class.getSimpleName() + ".CONTEXT_SOURCE";
 
 	/**
 	 * Use this name to create a request attribute containing a 
-	 * <code>javax.naming.directory.Search</code> object 
+	 * <code>javax.naming.directory.SearchControls</code> object 
 	 * for use with Cernunnos LDAP features.
 	 */
-	public static final String SEARCH_CONTROLS = "LdapAttributes.SEARCH_CONTROLS";
+	public static final String SEARCH_CONTROLS = LdapAttributes.class.getSimpleName() + ".SEARCH_CONTROLS";
+
+	/*
+	 * Nested Types.
+	 */
+
+	public static final class BindingsHelperImpl implements BindingsHelper {
+
+		/*
+		 * Public API.
+		 */
+		
+		public final ContextSource CONTEXT_SOURCE;
+		public final SearchControls SEARCH_CONTROLS;
+		
+		public BindingsHelperImpl(Map<String,Object> bindings) {
+			
+			// Assertions.
+			if (bindings == null) {
+				String msg = "Argument 'bindings' cannot be null.";
+				throw new IllegalArgumentException(msg);
+			}
+			
+			// Instance Members.
+			this.CONTEXT_SOURCE = (ContextSource) bindings.get(LdapAttributes.CONTEXT_SOURCE);
+			this.SEARCH_CONTROLS = (SearchControls) bindings.get(LdapAttributes.SEARCH_CONTROLS);
+			
+		}
+		
+		public String getBindingName() {
+			return "LdapAttributes";
+		}
+		
+	}
 
 }

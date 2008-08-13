@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Andrew Wills
+ * Copyright 2008 Andrew Wills
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.danann.cernunnos.script;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -25,6 +26,8 @@ import javax.script.ScriptEngine;
 import javax.script.SimpleBindings;
 
 import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.BindingsHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Reagent;
@@ -59,7 +62,7 @@ public class ScriptTask extends AbstractContainerTask {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {ENGINE, SCRIPT, SUBTASKS};
-		final Formula rslt = new SimpleFormula(ScriptTask.class, reagents);
+		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
 
@@ -80,21 +83,27 @@ public class ScriptTask extends AbstractContainerTask {
 		try {
 
 			Bindings n = new SimpleBindings();
-			n.putAll(req.getAttributes());
+
+			// Bind simple things (non-Attributes)...
+			for (Map.Entry<String,Object> y : req.getAttributes().entrySet()) {
+				if (y.getKey().indexOf(".") == -1) {
+					n.put(y.getKey(), y.getValue());
+				}
+			}
+			
+			// Bind Attributes based on BindingsHelper objects...
+			List<BindingsHelper> helpers = Attributes.prepareBindings(
+								new TaskRequestDecorator(req, res));
+			for (BindingsHelper h : helpers) {
+				n.put(h.getBindingName(), h);
+			}
+			
 			ScriptContext ctx = new javax.script.SimpleScriptContext();
 			ctx.setBindings(n, ScriptContext.GLOBAL_SCOPE);
 			ctx.setBindings(new SimpleBindings(), ScriptContext.ENGINE_SCOPE);
 
 			eng.eval(s, ctx);
 			
-			// Add new items from the ScriptContext to the TaskResponse...
-			// NOT YET:  This isn't working as expected, so let's not invite weird surprises!
-//			for (Entry<String,Object> e : n.entrySet()) {
-//				if (!req.hasAttribute(e.getKey())) {
-//					res.setAttribute(e.getKey(), e.getValue());
-//				}
-//			}
-
 			// Add the engine to the request attributes and invoke subtasks...
 			StringBuffer key = new StringBuffer();
 			key.append(ScriptAttributes.ENGINE).append(".")

@@ -16,7 +16,23 @@
 
 package org.danann.cernunnos.script;
 
+import java.util.Map;
+import javax.script.ScriptEngine;
+
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.BindingsHelper;
+import org.danann.cernunnos.TaskRequest;
+import org.danann.cernunnos.TaskResponse;
+
 public final class ScriptAttributes {
+
+	static {
+		Attributes.registerBindings("ScriptAttributes", BindingsHelperImpl.class);
+	}
+
+	/*
+	 * Public API.
+	 */
 
 	/**
 	 * Specifies the current <code>ScriptEngine</code> of a given type when 
@@ -24,6 +40,53 @@ public final class ScriptAttributes {
 	 * <code>ScriptAttributes.ENGINE.groovy</code> for groovy and 
 	 * <code>ScriptAttributes.ENGINE.js</code> for JavaScript (rhino).  
 	 */
-	public static final String ENGINE = "ScriptAttributes.ENGINE";
+	public static final String ENGINE = ScriptAttributes.class.getSimpleName() + ".ENGINE";
+
+	/**
+	 * The current <code>TaskRequest</code> object  will be bound under this 
+	 * name when a JSR-223 script executes.
+	 */
+	public static final String REQUEST = ScriptAttributes.class.getSimpleName() + ".REQUEST";
+
+	/**
+	 * The current <code>TaskResponse</code> object  will be bound under this 
+	 * name when a JSR-223 script executes.
+	 */
+	public static final String RESPONSE = ScriptAttributes.class.getSimpleName() + ".RESPONSE";
+
+	/*
+	 * Nested Types.
+	 */
+
+	public static final class BindingsHelperImpl implements BindingsHelper {
+
+		/*
+		 * Public API.
+		 */
+		
+		public final ScriptEngine ENGINE;
+		public final TaskRequest REQUEST;
+		public final TaskResponse RESPONSE;
+		
+		public BindingsHelperImpl(Map<String,Object> bindings) {
+			
+			// Assertions.
+			if (bindings == null) {
+				String msg = "Argument 'bindings' cannot be null.";
+				throw new IllegalArgumentException(msg);
+			}
+			
+			// Instance Members.
+			this.ENGINE = (ScriptEngine) bindings.get(ScriptAttributes.ENGINE);
+			this.REQUEST = (TaskRequest) bindings.get(ScriptAttributes.REQUEST);
+			this.RESPONSE = (TaskResponse) bindings.get(ScriptAttributes.RESPONSE);
+			
+		}
+		
+		public String getBindingName() {
+			return "ScriptAttributes";
+		}
+		
+	}
 
 }
