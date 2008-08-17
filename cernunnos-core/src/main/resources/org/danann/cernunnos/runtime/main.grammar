@@ -362,6 +362,65 @@ Response:</pre>
         </entry>
 
         <!--
+          | Package:  cvs
+          +-->
+
+        <entry name="cvs-add" impl="org.danann.cernunnos.cvs.AddTask">
+            <description>
+                <p>Perfoms a CVS <code>add</code> operation.</p>
+                <p>
+                    <b>WARNING:</b>  The netbeans javacvs API seems to be a 
+                    bit finicky about path inputs.  It's not hard to get a 
+                    <code>ResponseException</code> with the message "The system 
+                    cannot find the path specified."  For best results, use the 
+                    backslash ('\') character on Windows for both 
+                    <code>LOCAL_PATH</code> and <code>FILES</code>;  otherwise,
+                    use the slash ('/') character.
+                </p>
+            </description>
+            <example caption="Adds 'some-file.txt' and the entire contents of 'another-sub-dir' to the 'myProject' CVS module">
+                <pre><xmp><cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+    <cvs-add local-path="C:\HOME\work\myProject">
+        <file>some-sub-dir\some-file.txt</file>
+        <file>some-sub-dir\another-sub-dir</file>
+    </cvs-add>
+</cvs-client></xmp></pre>
+            </example>
+        </entry>
+
+        <entry name="cvs-checkout" impl="org.danann.cernunnos.cvs.CheckoutTask">
+            <description>
+                <p>Perfoms a CVS <code>checkout</code> ('co') operation.</p>
+            </description>
+        </entry>
+
+        <entry name="cvs-client" impl="org.danann.cernunnos.cvs.CvsClientTask">
+            <description>
+                <p>Creates, configures, and opens an <code>org.netbeans.lib.cvsclient.Client</code> for interacting with a CVS server.</p>
+                <p>
+                    <code>&lt;cvs-client&gt;</code> registers two request attributes for 
+                    subtasks:  (1) an instance of <code>Client</code> under the name 
+                    specified by <code>ATTRIBUTE_NAME</code>;  and (2) the <code>CVSROOT</code> 
+                    String under the name <code>CvaAttributes.CVSROOT</code>.  The latter 
+                    is necessary for constructing the <code>GlobalOptions</code> objects 
+                    required by CVS command classes. 
+                </p>
+            </description>
+        </entry>
+
+        <entry name="cvs-commit" impl="org.danann.cernunnos.cvs.CommitTask">
+            <description>
+                <p>Perfoms a CVS <code>commit</code> operation.</p>
+            </description>
+        </entry>
+
+        <entry name="cvs-remove" impl="org.danann.cernunnos.cvs.RemoveTask">
+            <description>
+                <p>Perfoms a CVS <code>remove</code> operation.</p>
+            </description>
+        </entry>
+
+        <!--
           | Package:  flow
           +-->
 
@@ -408,6 +467,15 @@ Response:</pre>
         <entry name="archive-iterator" impl="org.danann.cernunnos.io.ArchiveIteratorTask">
             <description>
                 <p>Iterates over the entries found in the specified archive.  Each entry name will be registered as the request attribute 'Attributes.LOCATION' for subtasks.</p>
+            </description>
+        </entry>
+
+        <entry name="checksum" impl="org.danann.cernunnos.io.ChecksumPhrase">
+            <description>
+                <p>Returns the <code>Checksum</code> value of the specified 
+                resource.  The ${checksum} phrase currently uses the 
+                <a href="http://en.wikipedia.org/wiki/Adler-32" target="_new">Adler32 
+                algorythim</a>.</p>
             </description>
         </entry>
 
