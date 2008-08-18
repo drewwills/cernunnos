@@ -16,6 +16,20 @@
     <dependencies>
 
         <!-- ===== Compile Time Dependencies ============================== -->
+
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${commons-dbcp.version}</version>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <dependency>
             <groupId>commons-jexl</groupId>
             <artifactId>commons-jexl</artifactId>
@@ -50,26 +64,28 @@
         </dependency>
 
         <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>${commons-dbcp.version}</version>
-            <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>${dom4j.version}</version>
             <scope>compile</scope>
         </dependency>
 
-        <!-- 
+        <dependency>
+            <groupId>javax.script</groupId>
+            <artifactId>script-api</artifactId>
+            <version>${script-api.version}</version>
+            <classifier>jdk14</classifier>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>${javax.mail.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!--
          | Jaxen is actually a transitive dependency of 
          | dom4j, but it's not being picked up properly.  
          | So I've included it here.
@@ -81,17 +97,16 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
-        <dependency>
             <groupId>nekohtml</groupId>
             <artifactId>nekohtml</artifactId>
             <version>${nekohtml.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.netbeans.lib</groupId>
+            <artifactId>cvsclient</artifactId>
+            <version>20060125</version>
         </dependency>
 
         <dependency>
@@ -109,24 +124,24 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>javax.script</groupId>
-            <artifactId>script-api</artifactId>
-            <version>${script-api.version}</version>
-            <classifier>jdk14</classifier>
-            <scope>compile</scope>
-        </dependency>
-
         <!-- ===== Provided Dependencies ================================== -->
+        
         <dependency>
             <groupId>javax.portlet</groupId>
             <artifactId>portlet-api</artifactId>
             <version>${portlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>${servlet-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
 
         <!-- ===== Runtime Dependencies ================================== -->
+        
         <dependency>
             <groupId>net.sf.retrotranslator</groupId>
             <artifactId>retrotranslator-runtime</artifactId>
@@ -148,6 +163,7 @@
         </dependency>
 
         <!-- ===== Test Dependencies ====================================== -->
+        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
