@@ -46,6 +46,7 @@
         <log4j.version>1.2.15</log4j.version>
         <nekohtml.version>0.9.5</nekohtml.version>
         <portlet-api.version>1.0</portlet-api.version>
+        <servlet-api.version>2.4</servlet-api.version>
         <script-api.version>1.0</script-api.version>
         <spring.version>2.5.1</spring.version>
         <spring-ldap.version>1.2.1</spring-ldap.version>
