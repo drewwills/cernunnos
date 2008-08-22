@@ -108,6 +108,18 @@
   <echo-ln>${valueOf(.)}</echo-ln>
 </node-iterator></xmp></pre>
             </example>
+            <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
+                <pre><xmp><choose>
+    <when test="${crn(is-admin.crn)}">
+        <argument-iterator>
+            <delete-file file="${Attributes.STRING}"/>
+        </argument-iterator>
+    </when>
+    <otherwise>
+        <echo-ln>You are not authorized to perform the specified action.</echo-ln>
+    </otherwise>
+</choose></xmp></pre>
+            </example>
         </entry>
 
         <entry name="false" impl="org.danann.cernunnos.core.FalsePhrase">
@@ -164,11 +176,11 @@
                 <p>Writes the specified MESSAGE to the log.</p>
                 <p>The &lt;log&gt; task uses <a href="http://commons.apache.org/logging/" target="_new">Apache commons-logging</a>.  Consult the <a href="http://commons.apache.org/logging/guide.html" target="_new">commons-logging User Guide</a> for comprehensive documentation.</p>
             </description>
-            <example>
-                <p>Writes the message at <code>WARN</code> level to the default logger:
-                <pre>&lt;log level="warn"&gt;Watch out!&lt;/log&gt;</pre></p>
-                <p>Writes the message at <code>INFO</code> level (the default level) to a logger configured with the name <code>myclass</code>:
-                <pre>&lt;log logger-name="myclass"&gt;A useful piece of information&lt;/log&gt;</pre></p>
+            <example caption="Writes a message at WARN level to the default logger">
+                <pre><xmp><log level="warn">Watch out!</log></xmp></pre>
+            </example>
+            <example caption="Writes a message at INFO level (default) to a logger configured with the name 'myclass'">
+                <pre><xmp><log logger-name="myclass">A useful piece of information...</log></xmp></pre>
             </example>
         </entry>
 
@@ -460,12 +472,36 @@ Response:</pre>
             <description>
                 <p>Performs the subtasks within the first WHEN element (&lt;when&gt;) whose 'test' attribute returns true.  You may optionally provide an OTHERWISE (&lt;otherwise&gt;) element whose subtasks will be performed if none of the WHEN conditions are met.</p>
             </description>
+            <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
+                <pre><xmp><choose>
+    <when test="${crn(is-admin.crn)}">
+        <argument-iterator>
+            <delete-file file="${Attributes.STRING}"/>
+        </argument-iterator>
+    </when>
+    <otherwise>
+        <echo-ln>You are not authorized to perform the specified action.</echo-ln>
+    </otherwise>
+</choose></xmp></pre>
+            </example>
         </entry>
 
         <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosPhrase">
             <description>
-                <p>Returns the value of the specified Cernunnos script;  use the &lt;return&gt; task to set the return value within the specified script.</p>
+                <p>Returns the value of the specified Cernunnos script;  use the <a href="return-TASK.html">&lt;return&gt;</a> task to set the return value within the specified script.</p>
             </description>
+            <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
+                <pre><xmp><choose>
+    <when test="${crn(is-admin.crn)}">
+        <argument-iterator>
+            <delete-file file="${Attributes.STRING}"/>
+        </argument-iterator>
+    </when>
+    <otherwise>
+        <echo-ln>You are not authorized to perform the specified action.</echo-ln>
+    </otherwise>
+</choose></xmp></pre>
+            </example>
         </entry>
 
         <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosTask">
@@ -545,6 +581,18 @@ Response:</pre>
             <description>
                 <p>Deletes the specified file or directory.</p>
             </description>
+            <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
+                <pre><xmp><choose>
+    <when test="${crn(is-admin.crn)}">
+        <argument-iterator>
+            <delete-file file="${Attributes.STRING}"/>
+        </argument-iterator>
+    </when>
+    <otherwise>
+        <echo-ln>You are not authorized to perform the specified action.</echo-ln>
+    </otherwise>
+</choose></xmp></pre>
+            </example>
         </entry>
 
         <entry name="extract-archive" impl="org.danann.cernunnos.io.ExtractArchiveTask">
@@ -660,6 +708,18 @@ Response:</pre>
             <description>
                 <p>Iterates over the command line arguments.  For each argument, this task sets the request attribute under ATTRIBUTE_NAME to the current argument, then invokes SUBTASKS.</p>
             </description>
+            <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
+                <pre><xmp><choose>
+    <when test="${crn(is-admin.crn)}">
+        <argument-iterator>
+            <delete-file file="${Attributes.STRING}"/>
+        </argument-iterator>
+    </when>
+    <otherwise>
+        <echo-ln>You are not authorized to perform the specified action.</echo-ln>
+    </otherwise>
+</choose></xmp></pre>
+            </example>
         </entry>
 
         <entry name="grammar" impl="org.danann.cernunnos.runtime.GrammarPhrase">
