@@ -358,7 +358,30 @@ Response:</pre>
         <entry name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask">
             <description>
                 <p>Creates a request attribute with the specified KEY and VALUE, then invokes subtasks.</p>
+                <p>&lt;with-attribute&gt; can be thought of as a shorthand for <a href="with-TASK.html">&lt;with&gt;</a> where only one attribute is needed.</p>
             </description>
+            <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
+    <append-node node="${attributeNode(foo=bar)}"/>
+    <write-document file="example.xml"/>
+</with-attribute></xmp></pre>
+            </example>
+            <example caption="Takes a web address as a parameter (e.g. 'www.yahoo.com');  computes the checksum value of the document at the specified address, then copies that document to a local file called 'markup.html' and finally compares the checksum value of the local document against the previous, online checksum value">
+                <pre><xmp><with-attribute key="onlineChecksum" value="${checksum(http://${$1})}">
+    <copy-file location="http://${$1}/" to-file="markup.html"/>
+    <with-attribute key="localChecksum" value="${checksum(markup.html)}">
+        <groovy>
+            <script>
+                if (onlineChecksum == localChecksum) {
+                    println 'Both checksum values are the same:  ' + onlineChecksum;
+                } else {
+                    println 'The checksum values are different:\n\tonline=' + onlineChecksum + '\n\tlocal=' + localChecksum;
+                }
+            </script>
+        </groovy>
+    </with-attribute>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -477,6 +500,22 @@ Response:</pre>
                 <a href="http://en.wikipedia.org/wiki/Adler-32" target="_new">Adler32 
                 algorythim</a>.</p>
             </description>
+            <example caption="Takes a web address as a parameter (e.g. 'www.yahoo.com');  computes the checksum value of the document at the specified address, then copies that document to a local file called 'markup.html' and finally compares the checksum value of the local document against the previous, online checksum value">
+                <pre><xmp><with-attribute key="onlineChecksum" value="${checksum(http://${$1})}">
+    <copy-file location="http://${$1}/" to-file="markup.html"/>
+    <with-attribute key="localChecksum" value="${checksum(markup.html)}">
+        <groovy>
+            <script>
+                if (onlineChecksum == localChecksum) {
+                    println 'Both checksum values are the same:  ' + onlineChecksum;
+                } else {
+                    println 'The checksum values are different:\n\tonline=' + onlineChecksum + '\n\tlocal=' + localChecksum;
+                }
+            </script>
+        </groovy>
+    </with-attribute>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="copy-file" impl="org.danann.cernunnos.io.CopyFileTask">
@@ -659,6 +698,22 @@ Response:</pre>
                 </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
+            <example caption="Takes a web address as a parameter (e.g. 'www.yahoo.com');  computes the checksum value of the document at the specified address, then copies that document to a local file called 'markup.html' and finally compares the checksum value of the local document against the previous, online checksum value">
+                <pre><xmp><with-attribute key="onlineChecksum" value="${checksum(http://${$1})}">
+    <copy-file location="http://${$1}/" to-file="markup.html"/>
+    <with-attribute key="localChecksum" value="${checksum(markup.html)}">
+        <groovy>
+            <script>
+                if (onlineChecksum == localChecksum) {
+                    println 'Both checksum values are the same:  ' + onlineChecksum;
+                } else {
+                    println 'The checksum values are different:\n\tonline=' + onlineChecksum + '\n\tlocal=' + localChecksum;
+                }
+            </script>
+        </groovy>
+    </with-attribute>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -755,19 +810,60 @@ Response:</pre>
         <entry name="append-node" impl="org.danann.cernunnos.xml.AppendNodeTask">
             <description>
                 <p>Adds the specified XML content to the specified PARENT (at the end) or after the specified SIBLING.</p>
+                <p>See also: <a href="prepend-node-TASK.html">&lt;prepend-node&gt;</a></p>
             </description>
+            <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
+    <append-node node="${attributeNode(foo=bar)}"/>
+    <write-document file="example.xml"/>
+</with-attribute></xmp></pre>
+            </example>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="attributeNode" impl="org.danann.cernunnos.xml.AttributeNodePhrase">
             <description>
-                <p>Creates a new XML attribute node from the specified TUPLE, which must contain an equals character ('=') to separate attribute name and attribute value.</p>
+                <p>Creates a new XML attribute node from the specified TUPLE, 
+                which must contain an equals character ('=') to distinguish 
+                the name from the value of the attribute.</p>
+                <p><code>${attributeNode}</code> is based on the 
+                <a href="http://www.dom4j.org/" target="_new">dom4j API for XML</a>.
+                The attribute created by this phrase is an instance of 
+                <code>org.dom4j.Attribute</code>.</p>
             </description>
+            <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
+    <append-node node="${attributeNode(foo=bar)}"/>
+    <write-document file="example.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="commentNode" impl="org.danann.cernunnos.xml.CommentNodePhrase">
             <description>
                 <p>Creates a new XML comment node from the specified VALUE.</p>
             </description>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="delete-node" impl="org.danann.cernunnos.xml.DeleteNodeTask">
@@ -780,6 +876,17 @@ Response:</pre>
             <description>
                 <p>Reads an XML Document from the specified location and returns the root element.  The identified resource must be parsable XML.</p>
             </description>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
             <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
                 <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
   <echo-ln>${valueOf(.)}</echo-ln>
@@ -791,6 +898,12 @@ Response:</pre>
             <description>
                 <p>Creates a new XML Document.  If provided, this task also creates a root element with the specified NAME.  This task return either the root element (if present) or the document node.</p>
             </description>
+            <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
+    <append-node node="${attributeNode(foo=bar)}"/>
+    <write-document file="example.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="node-iterator" impl="org.danann.cernunnos.xml.NodeIteratorTask">
@@ -807,13 +920,36 @@ Response:</pre>
         <entry name="prepend-node" impl="org.danann.cernunnos.xml.PrependNodeTask">
             <description>
                 <p>Adds the specified XML content to the specified PARENT (at the beginning) or before the specified SIBLING.</p>
+                <p>See also: <a href="append-node-TASK.html">&lt;append-node&gt;</a></p>
             </description>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="singleNode" impl="org.danann.cernunnos.xml.SingleNodePhrase">
             <description>
                 <p>Returns the first node that matches the specified XPATH expression when evaluated against the SOURCE node.</p>
             </description>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="textNode" impl="org.danann.cernunnos.xml.TextNodePhrase">
@@ -837,6 +973,23 @@ Response:</pre>
             <description>
                 <p>Writes the specified source node to the specified file system location.</p>
             </description>
+            <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
+    <append-node node="${attributeNode(foo=bar)}"/>
+    <write-document file="example.xml"/>
+</with-attribute></xmp></pre>
+            </example>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="xslt" impl="org.danann.cernunnos.xml.XslTransformTask">
