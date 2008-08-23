@@ -24,13 +24,41 @@
         <org.danann.cernunnos.runtime.DefineEntryTask name="entry" impl="org.danann.cernunnos.runtime.DefineEntryTask">
             <description>
                 <p>Defines a new grammar entry of class IMPL with the specified NAME.</p>
-                <p>NOTE:  <b>This task may only appear as a direct child of a &lt;grammar&gt; task</b>.</p>
+                <p>NOTE:  <b>This task may only appear as a direct child of a <a href="grammar-TASK.html">&lt;grammar&gt;</a> task</b>.</p>
             </description>
+            <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
+                <pre><xmp><grammar>
+    <entries>
+        <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+            <description>
+                <p>Include the specified resource using a PortletRequestDispatcher.</p>
+            </description>
+        </entry>
+    </entries>
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
+</grammar></xmp></pre>
+            </example>
         </org.danann.cernunnos.runtime.DefineEntryTask>
         <entry name="grammar" impl="org.danann.cernunnos.runtime.EncloseGrammarTask">
             <description>
-                <p>Overlays a new, empty grammar on top of the current grammar.  Use his task in conjunction with &lt;entry&gt;.</p>
+                <p>Overlays a new, empty grammar on top of the current grammar.  Use his task in conjunction with one or more <a href="entry-TASK.html">&lt;entry&gt;</a> tasks.</p>
             </description>
+            <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
+                <pre><xmp><grammar>
+    <entries>
+        <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+            <description>
+                <p>Include the specified resource using a PortletRequestDispatcher.</p>
+            </description>
+        </entry>
+    </entries>
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
+</grammar></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -358,6 +386,15 @@ Response:</pre>
             <description>
                 <p>Splits the specified STRING into tokens and iterates over them, performing SUBTASKS once for each token in the collection.</p>
             </description>
+            <example caption="Tests to see if the first argument on the command line contains the colon (':') character; if so, the argument is sepparated into tokens and a new directory is created using each token">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${$1}">
+    <if test="${groovy(Attributes.STRING.contains(':'))}">
+        <token-iterator regex=":">
+            <mkdirs path="${Attributes.STRING}"/>
+        </token-iterator>
+    </if>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="with" impl="org.danann.cernunnos.core.WithTask">
@@ -520,12 +557,35 @@ Response:</pre>
             <description>
                 <p>Execustes SUBTASKS if the TEST expression evaluates to <code>Boolean.TRUE</code>.</p>
             </description>
+            <example caption="Tests to see if the first argument on the command line contains the colon (':') character; if so, the argument is sepparated into tokens and a new directory is created using each token">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${$1}">
+    <if test="${groovy(Attributes.STRING.contains(':'))}">
+        <token-iterator regex=":">
+            <mkdirs path="${Attributes.STRING}"/>
+        </token-iterator>
+    </if>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="return" impl="org.danann.cernunnos.flow.ReturnTask">
             <description>
                 <p>Sets the return value of the current Cernunnos operation to the specified VALUE.</p>
             </description>
+            <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
+                <pre><xmp><grammar>
+    <entries>
+        <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+            <description>
+                <p>Include the specified resource using a PortletRequestDispatcher.</p>
+            </description>
+        </entry>
+    </entries>
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
+</grammar></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -622,6 +682,15 @@ Response:</pre>
             <description>
                 <p>Creates any missing directories in the specified path on the local filesystem.</p>
             </description>
+            <example caption="Tests to see if the first argument on the command line contains the colon (':') character; if so, the argument is sepparated into tokens and a new directory is created using each token">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${$1}">
+    <if test="${groovy(Attributes.STRING.contains(':'))}">
+        <token-iterator regex=":">
+            <mkdirs path="${Attributes.STRING}"/>
+        </token-iterator>
+    </if>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="print-stream" impl="org.danann.cernunnos.io.OpenPrintStreamTask">
@@ -726,6 +795,20 @@ Response:</pre>
             <description>
                 <p>Returns a reference to the Grammar object that created this phrase.</p>
             </description>
+            <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
+                <pre><xmp><grammar>
+    <entries>
+        <entry name="request-dispatcher" impl="org.danann.cernunnos.runtime.web.RequestDispatcherTask">
+            <description>
+                <p>Include the specified resource using a PortletRequestDispatcher.</p>
+            </description>
+        </entry>
+    </entries>
+    <subtasks>
+        <return value="${grammar()}"/>
+    </subtasks>
+</grammar></xmp></pre>
+            </example>
         </entry>
 
         <entry name="serialize-grammar" impl="org.danann.cernunnos.runtime.SerializeGrammarTask">
@@ -766,6 +849,15 @@ Response:</pre>
                 </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
+            <example caption="Tests to see if the first argument on the command line contains the colon (':') character; if so, the argument is sepparated into tokens and a new directory is created using each token">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${$1}">
+    <if test="${groovy(Attributes.STRING.contains(':'))}">
+        <token-iterator regex=":">
+            <mkdirs path="${Attributes.STRING}"/>
+        </token-iterator>
+    </if>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="groovy" impl="org.danann.cernunnos.script.ScriptTask">
