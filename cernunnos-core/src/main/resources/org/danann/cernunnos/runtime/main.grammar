@@ -903,6 +903,19 @@ Response:</pre>
             <description>
                 <p>Creates a spring context from the specified XML bean definition file, registers all the beans contained therein as request attributes, then invokes SUBTASKS.</p>
             </description>
+            <example caption="Loads a Spring bean container defined in 'datasourceContext.xml' which contains a DataSource, then begins a transaction, then queries that DataSource for the 'user_id' associated with the 'admin' account, then performs an 'upsert' operation on the 'up_user_profile' table">
+                <pre><xmp><spring-beans location="datasourceContext.xml">
+    <with-attribute key="SqlAttributes.DATA_SOURCE" value="${PortalDb}">
+        <sql-transaction>
+            <sql-upsert>
+                <update-statement>UPDATE up_user_profile SET profile_name = 'HTML browser profile' WHERE user_id = ?</update-statement>
+                <insert-statement>INSERT INTO up_user_profile(user_id, profile_id, profile_name, description, layout_id, structure_ss_id, theme_ss_id) VALUES(?, 1, 'HTML browser profile', 'A sample profile for common web browsers', 1, 1 1)</insert-statement>
+                <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = 'admin')}"/>
+            </sql-upsert>
+        </sql-transaction>
+    </with-attribute>
+</spring-beans></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -919,6 +932,19 @@ Response:</pre>
             <description>
                 <p>Executes the specified SQL statement and returns the result.</p>
             </description>
+            <example caption="Loads a Spring bean container defined in 'datasourceContext.xml' which contains a DataSource, then begins a transaction, then queries that DataSource for the 'user_id' associated with the 'admin' account, then performs an 'upsert' operation on the 'up_user_profile' table">
+                <pre><xmp><spring-beans location="datasourceContext.xml">
+    <with-attribute key="SqlAttributes.DATA_SOURCE" value="${PortalDb}">
+        <sql-transaction>
+            <sql-upsert>
+                <update-statement>UPDATE up_user_profile SET profile_name = 'HTML browser profile' WHERE user_id = ?</update-statement>
+                <insert-statement>INSERT INTO up_user_profile(user_id, profile_id, profile_name, description, layout_id, structure_ss_id, theme_ss_id) VALUES(?, 1, 'HTML browser profile', 'A sample profile for common web browsers', 1, 1 1)</insert-statement>
+                <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = 'admin')}"/>
+            </sql-upsert>
+        </sql-transaction>
+    </with-attribute>
+</spring-beans></xmp></pre>
+            </example>
         </entry>
 
         <entry name="sql-connection" impl="org.danann.cernunnos.sql.OpenConnectionTask">
@@ -974,12 +1000,38 @@ Response:</pre>
             <description>
                 <p>Subtasks that operate on the specified DataSource will be transactional if they use the Cernunnos sql tasks or the Spring JDBC APIs.</p>
             </description>
+            <example caption="Loads a Spring bean container defined in 'datasourceContext.xml' which contains a DataSource, then begins a transaction, then queries that DataSource for the 'user_id' associated with the 'admin' account, then performs an 'upsert' operation on the 'up_user_profile' table">
+                <pre><xmp><spring-beans location="datasourceContext.xml">
+    <with-attribute key="SqlAttributes.DATA_SOURCE" value="${PortalDb}">
+        <sql-transaction>
+            <sql-upsert>
+                <update-statement>UPDATE up_user_profile SET profile_name = 'HTML browser profile' WHERE user_id = ?</update-statement>
+                <insert-statement>INSERT INTO up_user_profile(user_id, profile_id, profile_name, description, layout_id, structure_ss_id, theme_ss_id) VALUES(?, 1, 'HTML browser profile', 'A sample profile for common web browsers', 1, 1 1)</insert-statement>
+                <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = 'admin')}"/>
+            </sql-upsert>
+        </sql-transaction>
+    </with-attribute>
+</spring-beans></xmp></pre>
+            </example>
         </entry>
 
         <entry name="sql-upsert" impl="org.danann.cernunnos.sql.UpsertTask">
             <description>
                 <p>Executes the specified UPDATE statement.  If zero rows are affected, executes the specified INSERT statement.  By default, this task looks for a Connection object as a request attribute under the name OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.</p>
             </description>
+            <example caption="Loads a Spring bean container defined in 'datasourceContext.xml' which contains a DataSource, then begins a transaction, then queries that DataSource for the 'user_id' associated with the 'admin' account, then performs an 'upsert' operation on the 'up_user_profile' table">
+                <pre><xmp><spring-beans location="datasourceContext.xml">
+    <with-attribute key="SqlAttributes.DATA_SOURCE" value="${PortalDb}">
+        <sql-transaction>
+            <sql-upsert>
+                <update-statement>UPDATE up_user_profile SET profile_name = 'HTML browser profile' WHERE user_id = ?</update-statement>
+                <insert-statement>INSERT INTO up_user_profile(user_id, profile_id, profile_name, description, layout_id, structure_ss_id, theme_ss_id) VALUES(?, 1, 'HTML browser profile', 'A sample profile for common web browsers', 1, 1 1)</insert-statement>
+                <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = 'admin')}"/>
+            </sql-upsert>
+        </sql-transaction>
+    </with-attribute>
+</spring-beans></xmp></pre>
+            </example>
         </entry>
 
         <!--
