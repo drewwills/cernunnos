@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
@@ -29,7 +29,6 @@ import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
-import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
@@ -84,23 +83,33 @@ public final class LogTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		final String lvl = (String) level.evaluate(req, res);
-		final StringBuffer msg = new StringBuffer();
-		msg.append(prefix.evaluate(req, res));
-		msg.append(message.evaluate(req, res));
-		msg.append(suffix.evaluate(req, res));
-
         final String logger = (String) loggerName.evaluate(req, res);
 
+        String msg = null;
 		try {
 			final Log log = LogFactory.getLog(logger);
-			final Method m = Log.class.getMethod(lvl, new Class[] {Object.class});
-			m.invoke(log, new Object[] {msg.toString()});
+			final Method logEnabledMethod = Log.class.getMethod("is" + capitalize(lvl) + "Enabled", new Class[] { });
+			
+			final boolean enabled = (Boolean)logEnabledMethod.invoke(log);
+            if (enabled) {
+    			final Method logMethod = Log.class.getMethod(lvl, new Class[] {Object.class});
+    			
+    			msg = String.valueOf(prefix.evaluate(req, res));
+    			msg = msg + String.valueOf(message.evaluate(req, res));
+    			msg = msg + String.valueOf(suffix.evaluate(req, res));
+    
+    			logMethod.invoke(log, new Object[] {msg.toString()});
+            }
 		} catch (Throwable t) {
-			String s = "Error logging the specified message:  [" + lvl + "] "
-														+ msg.toString();
-			throw new RuntimeException(s, t);
+			throw new RuntimeException("Error logging the specified message:  [" + lvl + "] " + msg, t);
 		}
 
 	}
 
+	protected String capitalize(String str) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
+    }
 }
