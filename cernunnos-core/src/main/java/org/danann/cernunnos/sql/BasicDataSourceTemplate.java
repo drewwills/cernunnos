@@ -63,6 +63,9 @@ public abstract class BasicDataSourceTemplate {
             dataSource.setDriverClassName(driverClassName);
             dataSource.setUsername(username);
             dataSource.setPassword(password);
+            dataSource.setPoolPreparedStatements(true);
+            dataSource.setMaxActive(-1);
+            dataSource.setMaxIdle(8);
             
             //Provide the DataSource on the response environment
             final String dataSourceAttrName = (String) this.attributeNamePhrase.evaluate(req, res);
