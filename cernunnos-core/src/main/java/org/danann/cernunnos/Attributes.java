@@ -113,7 +113,7 @@ public final class Attributes {
 	 * registered as a request attribute.  The <code>ReturnValue</code> allows 
 	 * Cernunnos operations to return a value where appropriate.
 	 */
-	public static final String RETURN_VALUE = "FlowAttributes.RETURN_VALUE";
+	public static final String RETURN_VALUE = Attributes.class.getSimpleName() + ".RETURN_VALUE";
 	
 	public static List<BindingsHelper> prepareBindings(TaskRequest req) {
 
