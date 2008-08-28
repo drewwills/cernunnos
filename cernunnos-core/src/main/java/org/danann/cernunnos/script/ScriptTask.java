@@ -23,26 +23,32 @@ import java.util.Map;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.BindingsHelper;
+import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.Phrase;
+import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.danann.cernunnos.Tuple;
 
 public class ScriptTask extends AbstractContainerTask {
 
 	// Instance Members.
-	private Phrase engine;
+    private CacheHelper<Tuple<ScriptEngine, String>, ScriptEvaluator> scriptEvaluatorCache;
+    private Phrase engine;
 	private Phrase script;
 
 	/*
@@ -61,63 +67,61 @@ public class ScriptTask extends AbstractContainerTask {
 					"The set of tasks that are children of this task.", new LinkedList<Task>());
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENGINE, SCRIPT, SUBTASKS};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENGINE, SCRIPT, SUBTASKS};
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
 
-	public void init(EntityConfig config) {
-
+	@Override
+    public void init(EntityConfig config) {
 		super.init(config);
 
 		// Instance Members.
 		this.engine = (Phrase) config.getValue(ENGINE);
 		this.script = (Phrase) config.getValue(SCRIPT);
+        this.scriptEvaluatorCache = new DynamicCacheHelper<Tuple<ScriptEngine, String>, ScriptEvaluator>(config);
 
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
+        final ScriptEngine engine = (ScriptEngine) this.engine.evaluate(req, res);
+        final String script = (String) this.script.evaluate(req, res);
+        
+        final Tuple<ScriptEngine, String> scriptEvaluatorKey = new Tuple<ScriptEngine, String>(engine, script);
+        final ScriptEvaluator scriptEvaluator = this.scriptEvaluatorCache.getCachedObject(req, res, scriptEvaluatorKey, ScriptEvaluatorFactory.INSTANCE);
+        
+        final Bindings bindings = new SimpleBindings();
 
-		ScriptEngine eng = (ScriptEngine) engine.evaluate(req, res);
-		String s = (String) script.evaluate(req, res);
-		try {
+        // Bind simple things (non-Attributes)...
+        for (final Map.Entry<String, Object> attrEntry : req.getAttributes().entrySet()) {
+            final String attrKey = attrEntry.getKey();
+            if (attrKey.indexOf(".") == -1) {
+                bindings.put(attrKey, attrEntry.getValue());
+            }
+        }
+        
+        // Bind Attributes based on BindingsHelper objects...
+        final List<BindingsHelper> helpers = Attributes.prepareBindings(new TaskRequestDecorator(req, res));
+        for (final BindingsHelper bindingsHelper : helpers) {
+            bindings.put(bindingsHelper.getBindingName(), bindingsHelper);
+        }
+        
+        final ScriptContext scriptContext = new javax.script.SimpleScriptContext();
+        scriptContext.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
+        scriptContext.setBindings(new SimpleBindings(), ScriptContext.ENGINE_SCOPE);
 
-			Bindings n = new SimpleBindings();
+        final ScriptEngineFactory scriptEngineFactory = engine.getFactory();
+        final String engineName = scriptEngineFactory.getEngineName();
+        try {
+            scriptEvaluator.eval(scriptContext);
 
-			// Bind simple things (non-Attributes)...
-			for (Map.Entry<String,Object> y : req.getAttributes().entrySet()) {
-				if (y.getKey().indexOf(".") == -1) {
-					n.put(y.getKey(), y.getValue());
-				}
-			}
-			
-			// Bind Attributes based on BindingsHelper objects...
-			List<BindingsHelper> helpers = Attributes.prepareBindings(
-								new TaskRequestDecorator(req, res));
-			for (BindingsHelper h : helpers) {
-				n.put(h.getBindingName(), h);
-			}
-			
-			ScriptContext ctx = new javax.script.SimpleScriptContext();
-			ctx.setBindings(n, ScriptContext.GLOBAL_SCOPE);
-			ctx.setBindings(new SimpleBindings(), ScriptContext.ENGINE_SCOPE);
-
-			eng.eval(s, ctx);
-			
-			// Add the engine to the request attributes and invoke subtasks...
-			StringBuffer key = new StringBuffer();
-			key.append(ScriptAttributes.ENGINE).append(".")
-					.append(eng.getFactory().getEngineName());
-			res.setAttribute(key.toString(), eng);
-			super.performSubtasks(req, res);
-
-		} catch (Throwable t) {
-			String msg = "Error while executing the specified script.  " +
-							"\n\t\tENGINE_NAME:  " + eng.getFactory().getEngineName() +
-							"\n\t\tSCRIPT (follows):\n" + s + "\n";
-			throw new RuntimeException(msg, t);
-		}
-
+            res.setAttribute(ScriptAttributes.ENGINE + "." + engineName, engine);
+            super.performSubtasks(req, res);
+        }
+        catch (ScriptException se) {
+            throw new RuntimeException("Error while executing the specified script.  " +
+                    "\n\t\tENGINE_NAME:  " + engineName +
+                    "\n\t\tSCRIPT (follows):\n" + script + "\n", se);
+        }
 	}
-	
 }

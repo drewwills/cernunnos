@@ -17,14 +17,12 @@
 package org.danann.cernunnos.xml;
 
 import java.net.URL;
-import org.xml.sax.EntityResolver;
-
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
@@ -35,11 +33,18 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.danann.cernunnos.Tuple;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.xml.sax.EntityResolver;
 
 public final class ReadDocumentPhrase implements Phrase {
+    public static final String DOCUMENT_LOCAL_CACHE_KEY = ReadDocumentPhrase.class.getSimpleName() + ".DOCUMENT_LOCAL";
 
 	// Instance Members.
-	private Phrase entityResolver;
+    private CacheHelper<Tuple<String, String>, Element> documentCache;
+    private Phrase entityResolver;
 	private Phrase context;
 	private Phrase location;
 
@@ -63,13 +68,14 @@ public final class ReadDocumentPhrase implements Phrase {
 					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENTITY_RESOLVER, CONTEXT, LOCATION};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENTITY_RESOLVER, CONTEXT, LOCATION};
 		return new SimpleFormula(ReadDocumentPhrase.class, reagents);
 	}
 
 	public void init(EntityConfig config) {
 
 		// Instance Members.
+        this.documentCache = new DynamicCacheHelper<Tuple<String, String>, Element>(config);
 		this.entityResolver = (Phrase) config.getValue(ENTITY_RESOLVER);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.location = (Phrase) config.getValue(LOCATION);
@@ -77,36 +83,82 @@ public final class ReadDocumentPhrase implements Phrase {
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
+		final String contextLocation = (String) context.evaluate(req, res);
+		final String documentLocation = (String) location.evaluate(req, res);
+        final EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
 
-		Element rslt = null;
-
-		String ctx_str = (String) context.evaluate(req, res);
-		String loc_str = (String) location.evaluate(req, res);
-		try {
-
-			URL ctx = new URL(ctx_str);
-			URL doc = new URL(ctx, loc_str);
-
-			// Use an EntityResolver if provided...
-			SAXReader rdr = new SAXReader();
-			EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
-			if (resolver != null) {
-				rdr.setEntityResolver(resolver);
-			}
-
-			// Read by passing a URL -- don't manage the URLConnection yourself...
-			rslt = rdr.read(doc).getRootElement();
-			rslt.normalize();
-
-		} catch (Throwable t) {
-			String msg = "Unable to read the specified document:"
-						+ "\n\tCONTEXT=" + ctx_str
-						+ "\n\tLOCATION=" + loc_str;
-			throw new RuntimeException(msg, t);
-		}
-
-		return rslt;
-
+        final Tuple<String, String> documentKey = new Tuple<String, String>(contextLocation, documentLocation);
+        final DocumentFactory documentFactory = new DocumentFactory(resolver);
+        return this.documentCache.getCachedObject(req, res, documentKey, documentFactory);
 	}
+	
+    
+    /**
+     * Loads a DOM4J document from the specified contact and location and returns the root Element
+     */
+    protected Element loadDocument(String ctx_str, String loc_str, EntityResolver resolver) {
+        try {
+            final URL ctx = new URL(ctx_str);
+            final URL doc = new URL(ctx, loc_str);
+            
+            // Use an EntityResolver if provided...
+            final SAXReader rdr = new SAXReader();
+            if (resolver != null) {
+                rdr.setEntityResolver(resolver);
+            }
 
+            // Read by passing a URL -- don't manage the URLConnection yourself...
+            final Element rslt = rdr.read(doc).getRootElement();
+            rslt.normalize();
+            return rslt;
+
+        } catch (Throwable t) {
+            String msg = "Unable to read the specified document:"
+                        + "\n\tCONTEXT=" + ctx_str
+                        + "\n\tLOCATION=" + loc_str;
+            throw new RuntimeException(msg, t);
+        }
+    }
+    
+    protected static final class DocumentFactory implements CacheHelper.Factory<Tuple<String, String>, Element> {
+        private final EntityResolver resolver;
+        
+        public DocumentFactory(EntityResolver resolver) {
+            this.resolver = resolver;
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
+         */
+        public Element createObject(Tuple<String, String> key) {
+            try {
+                URL ctx = new URL(key.first);
+                URL doc = new URL(ctx, key.second);
+
+                // Use an EntityResolver if provided...
+                SAXReader rdr = new SAXReader();
+                if (resolver != null) {
+                    rdr.setEntityResolver(resolver);
+                }
+
+                // Read by passing a URL -- don't manage the URLConnection yourself...
+                final Document document = rdr.read(doc);
+                final Element rslt = document.getRootElement();
+                rslt.normalize();
+                return rslt;
+            }
+            catch (Throwable t) {
+                throw new RuntimeException("Unable to read the specified document:" + 
+                        "\n\tCONTEXT=" + key.first + 
+                        "\n\tLOCATION=" + key.second, t);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
+         */
+        public boolean isThreadSafe(Tuple<String, String> key, Element instance) {
+            return false;
+        }
+    }
 }

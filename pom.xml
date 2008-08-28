@@ -36,21 +36,164 @@
     </modules>
 
     <properties>
-        <commons-dbcp.version>1.2.1</commons-dbcp.version>
+        <commons-dbcp.version>1.2.2</commons-dbcp.version>
         <commons-jexl.version>1.1</commons-jexl.version>
-        <commons-logging.version>1.1</commons-logging.version>
+        <commons-lang.version>2.4</commons-lang.version>
+        <commons-logging.version>1.1.1</commons-logging.version>
+        <commons-pool.version>1.4</commons-pool.version>
+        <cvsclient.version>20060125</cvsclient.version>
         <dom4j.version>1.6.1</dom4j.version>
-        <javax.mail.version>1.4.1</javax.mail.version>
+        <groovy.version>1.5.6</groovy.version>
+        <groovy-engine.version>1.0</groovy-engine.version>
+        <mail.version>1.4.1</mail.version>
         <jaxen.version>1.1.1</jaxen.version>
         <junit.version>4.4</junit.version>
         <log4j.version>1.2.15</log4j.version>
-        <nekohtml.version>0.9.5</nekohtml.version>
+        <nekohtml.version>1.9.6.2</nekohtml.version>
         <portlet-api.version>1.0</portlet-api.version>
-        <servlet-api.version>2.4</servlet-api.version>
+        <retrotranslator-runtime.version>1.2.7</retrotranslator-runtime.version>
         <script-api.version>1.0</script-api.version>
-        <spring.version>2.5.1</spring.version>
+        <servlet-api.version>2.4</servlet-api.version>
+        <spring.version>2.5.5</spring.version>
         <spring-ldap.version>1.2.1</spring-ldap.version>
+        <xml-apis.version>1.0.b2</xml-apis.version>
     </properties>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>${commons-dbcp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-jexl</groupId>
+                <artifactId>commons-jexl</artifactId>
+                <version>${commons-jexl.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>${commons-logging.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>avalon-framework</groupId>
+                        <artifactId>avalon-framework</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>logkit</groupId>
+                        <artifactId>logkit</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>commons-pool</groupId>
+                <artifactId>commons-pool</artifactId>
+                <version>${commons-pool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dom4j</groupId>
+                <artifactId>dom4j</artifactId>
+                <version>${dom4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>${mail.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.portlet</groupId>
+                <artifactId>portlet-api</artifactId>
+                <version>${portlet-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.script</groupId>
+                <artifactId>groovy-engine</artifactId>
+                <classifier>jdk14</classifier>
+                <version>${groovy-engine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.script</groupId>
+                <artifactId>script-api</artifactId>
+                <version>${script-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jaxen</groupId>
+                <artifactId>jaxen</artifactId>
+                <version>${jaxen.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nekohtml</groupId>
+                <artifactId>nekohtml</artifactId>
+                <version>${nekohtml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.sf.retrotranslator</groupId>
+                <artifactId>retrotranslator-runtime</artifactId>
+                <version>${retrotranslator-runtime.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy</artifactId>
+                <version>${groovy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.netbeans.lib</groupId>
+                <artifactId>cvsclient</artifactId>
+                <version>${cvsclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jdbc</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.ldap</groupId>
+                <artifactId>spring-ldap</artifactId>
+                <version>${spring-ldap.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+                <version>${xml-apis.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <mailingLists>
         <mailingList>

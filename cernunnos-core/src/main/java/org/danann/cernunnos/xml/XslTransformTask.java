@@ -18,28 +18,22 @@ package org.danann.cernunnos.xml;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.DocumentResult;
-import org.dom4j.io.DOMWriter;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
-import org.xml.sax.EntityResolver;
-
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
+import org.danann.cernunnos.DynamicCacheHelper;
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
@@ -47,9 +41,20 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
-import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.danann.cernunnos.Tuple;
+import org.danann.cernunnos.CacheHelper.Factory;
+import org.dom4j.Document;
+import org.dom4j.DocumentFactory;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.DOMWriter;
+import org.dom4j.io.DocumentResult;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+import org.xml.sax.EntityResolver;
 
 /**
  * <code>Task</code> implementation that performs an XSL Transformation over the
@@ -57,9 +62,11 @@ import org.danann.cernunnos.TaskResponse;
  * stylesheet through the (mandatory) STYLESHEET reagent.
  */
 public final class XslTransformTask extends AbstractContainerTask {
+    public static final String STYLESHEET_LOCAL_CACHE_KEY = XslTransformTask.class.getSimpleName() + ".STYLESHEET_LOCAL";
 
 	// Instance Members.
-	private TransformerFactory fac;
+    private final Factory<Tuple<String, String>, Transformer> transformerFactory = new CachedTransformerFactory();
+	private CacheHelper<Tuple<String, String>, Transformer> transformerCache;
 	private Phrase entityResolver;
 	private Phrase context;
 	private Phrase stylesheet;
@@ -105,18 +112,18 @@ public final class XslTransformTask extends AbstractContainerTask {
 					+ "'Attributes.NODE' on the task request for subtasks.", null);
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENTITY_RESOLVER, CONTEXT, STYLESHEET,
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENTITY_RESOLVER, CONTEXT, STYLESHEET,
 					NODE, LOCATION, TO_FILE, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(XslTransformTask.class, reagents);
 		return rslt;
 	}
 
-	public void init(EntityConfig config) {
-
+	@Override
+    public void init(EntityConfig config) {
 		super.init(config);
 
 		// Instance Members.
-		this.fac = TransformerFactory.newInstance();
+		this.transformerCache = new DynamicCacheHelper<Tuple<String, String>, Transformer>(config);
 		this.entityResolver = (Phrase) config.getValue(ENTITY_RESOLVER);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.stylesheet = (Phrase) config.getValue(STYLESHEET);
@@ -127,15 +134,12 @@ public final class XslTransformTask extends AbstractContainerTask {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
+        final String contextLocation = (String) context.evaluate(req, res);
+        final String stylesheetLocation = (String) stylesheet.evaluate(req, res);
+        final Tuple<String, String> transformerKey = new Tuple<String, String>(contextLocation, stylesheetLocation);
+        final Transformer trans = this.transformerCache.getCachedObject(req, res, transformerKey, this.transformerFactory);
 
-		URL transUrl = null;
-
-		try {
-
-			URL ctx = new URL((String) context.evaluate(req, res));
-			transUrl = new URL(ctx, (String) stylesheet.evaluate(req, res));
-			Transformer trans = fac.newTransformer(new StreamSource(transUrl.toExternalForm()));
-
+        try {
 			Element srcElement = null;
 			Node nodeReagentEvaluated = node != null ? (Node) node.evaluate(req, res) : null;
 			if (nodeReagentEvaluated != null) {
@@ -143,6 +147,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 				srcElement = (Element) nodeReagentEvaluated;
 			} else {
 				// But read from LOCATION if NODE isn't set...
+			    URL ctx = new URL(contextLocation);
 				URL loc = new URL(ctx, (String) location.evaluate(req, res));
 
 				// Use an EntityResolver if provided...
@@ -177,15 +182,45 @@ public final class XslTransformTask extends AbstractContainerTask {
 			}
 
 		} catch (Throwable t) {
-			StringBuffer msg = new StringBuffer("Unable to perform the requested transformation.");
-			if (transUrl != null) {
-				msg.append("\n\t\tstylesheet=").append(transUrl.toExternalForm());
-			}
-			throw new RuntimeException(msg.toString(), t);
+			throw new RuntimeException("Unable to perform the requested transformation with XSL from scriptEngine='" + contextLocation + "' and script='" + stylesheetLocation + "'", t);
 		}
 
 		super.performSubtasks(req, res);
 
 	}
 
+    /**
+     * Factory to create new Transformer instances
+     */
+    protected static class CachedTransformerFactory implements CacheHelper.Factory<Tuple<String, String>, Transformer> {
+        private TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
+         */
+        public Transformer createObject(Tuple<String, String> key) {
+            final URL xslUrl;
+            try {
+                final URL contextUrl = new URL(key.first);
+                xslUrl = new URL(contextUrl, key.second);
+            }
+            catch (MalformedURLException mue) {
+                throw new RuntimeException("Failed to create URL to XSL from scriptEngine='" + key.first + "' and script='" + key.second + "'", mue);
+            }
+            
+            try {
+                return this.transformerFactory.newTransformer(new StreamSource(xslUrl.toExternalForm()));
+            }
+            catch (TransformerConfigurationException tce) {
+                throw new RuntimeException("Failed to create Transformer for XSL='" + xslUrl.toExternalForm() + "'", tce);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
+         */
+        public boolean isThreadSafe(Tuple<String, String> key, Transformer instance) {
+            return false;
+        }
+    }
 }

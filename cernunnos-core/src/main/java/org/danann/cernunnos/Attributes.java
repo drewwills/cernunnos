@@ -62,6 +62,22 @@ public final class Attributes {
 	 */
 	public static final String CONTEXT = Attributes.class.getSimpleName() + ".CONTEXT";
 
+    /**
+     * Specifies a cache that Tasks and Phrases can use to store data for the duration
+     * of a script execution. This attribute will be set by either the Cernunnos runtime
+     * (most commonly) or by the invoker of Cernunnos. In either case it will be available
+     * by default.
+     * 
+     * The attribute will always be a Map and shouldn't not be assumed to be synchronized.
+     */
+    public static final String CACHE = Attributes.class.getSimpleName() + ".CACHE";
+
+    /**
+     * Specifies how tasks and phrases should cache expensive resources. Valid values are
+     * 'cache-one' and 'cache-all'
+     */
+    public static final String CACHE_MODEL = Attributes.class.getSimpleName() + ".CACHE_MODEL";
+
 	/**
 	 * Use this name to create a request attribute containing a
 	 * <code>java.lang.String</code> that represents the location of a resource.

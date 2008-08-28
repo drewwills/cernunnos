@@ -16,11 +16,14 @@
 
 package org.danann.cernunnos.script;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -32,11 +35,13 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ScriptEnginePhrase implements Phrase {
+    private static final Log LOG = LogFactory.getLog(ScriptEnginePhrase.class); // Don't declare as static in general libraries
+    private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
+    private static final CachedScriptEngineFactory cachedScriptEngineFactory = new CachedScriptEngineFactory();
 	
 	// Instance Members.
+    private CacheHelper<String, ScriptEngine> scriptEngineCache;
 	private Phrase engineName;
-	private final ScriptEngineManager mgr = new ScriptEngineManager();
-	private final Log log = LogFactory.getLog(ScriptEnginePhrase.class);	// Don't declare as static in general libraries
 
 	/*
 	 * Public API.
@@ -48,7 +53,7 @@ public final class ScriptEnginePhrase implements Phrase {
 	public ScriptEnginePhrase() {}
 	
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENGINE_NAME};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENGINE_NAME};
 		final Formula rslt = new SimpleFormula(ScriptEnginePhrase.class, reagents);
 		return rslt;
 	}
@@ -56,40 +61,55 @@ public final class ScriptEnginePhrase implements Phrase {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.engineName = (Phrase) config.getValue(ENGINE_NAME);
+        this.scriptEngineCache = new DynamicCacheHelper<String, ScriptEngine>(config);
+
+        this.engineName = (Phrase) config.getValue(ENGINE_NAME);
 
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
-		
-		Object rslt = null;
+		ScriptEngine scriptEngine = null;
 		
 		// Look for an engine under 'ScriptAttributes.ENGINE.{ENGINE_NAME}'
 		String eName = (String) engineName.evaluate(req, res);
-		StringBuffer key = new StringBuffer();
-		key.append(ScriptAttributes.ENGINE).append(".").append(eName);
-		if (req.hasAttribute(key.toString())) {
+		String engineAttributeKey = ScriptAttributes.ENGINE + "." + eName;
+		if (req.hasAttribute(engineAttributeKey.toString())) {
 
 			// There is one, use it...
-			rslt = req.getAttribute(key.toString());
-			
-		} else {
-			
-			// Create a new engine of the specified type...
-			// ScriptEngineManager will return null if there's
-			// no provider for the named platform...
-			rslt = mgr.getEngineByName(eName);
-			if (rslt == null) {
-				String msg = "Unable to locate the specified scripting engine:  "
-																	+ eName;
-				log.error(msg);
-				throw new RuntimeException(msg);
-			}
+			scriptEngine = (ScriptEngine)req.getAttribute(engineAttributeKey.toString());
 			
 		}
+		// No attribute, try the cache
+		else {
+		    scriptEngine = this.scriptEngineCache.getCachedObject(req, res, eName, cachedScriptEngineFactory);
+		}
 		
-		return rslt;
-		
+		return scriptEngine;
 	}
-	
+
+    protected final static class CachedScriptEngineFactory implements CacheHelper.Factory<String, ScriptEngine> {
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
+         */
+        public ScriptEngine createObject(String key) {
+            final ScriptEngine scriptEngine = SCRIPT_ENGINE_MANAGER.getEngineByName(key);
+            if (scriptEngine == null) {
+                final RuntimeException re = new RuntimeException("Unable to locate the specified scripting engine:  " + key);
+                LOG.error(re, re);
+                throw re;
+            }
+            
+            return scriptEngine;
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
+         */
+        public boolean isThreadSafe(String key, ScriptEngine instance) {
+            final ScriptEngineFactory factory = instance.getFactory();
+            final Object threadingAbility = factory.getParameter("THREADING");
+            return threadingAbility != null;
+        }
+    }
 }

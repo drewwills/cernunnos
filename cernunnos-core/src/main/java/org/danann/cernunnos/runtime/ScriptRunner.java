@@ -18,14 +18,10 @@ package org.danann.cernunnos.runtime;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -33,6 +29,9 @@ import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 /**
  * Simplifies the process of invoking Cernunnos tasks from within Java code.
@@ -230,20 +229,24 @@ public class ScriptRunner {
         }
 
         // Set up Attributes.ORIGIN if possible...
-        TaskRequest tr = req;   // default...
+        // Set up Attributes.ORIGIN if possible...
+        RuntimeRequestResponse tr = new RuntimeRequestResponse();
+        tr.enclose(req);
         if (k instanceof TaskDecorator) {
             String origin = ((TaskDecorator) k).getOrigin();
-            RuntimeRequestResponse wrapper = new RuntimeRequestResponse();
-            wrapper.setAttribute(Attributes.ORIGIN, origin);
-            wrapper.enclose(req);
-            tr = wrapper;
+            tr.setAttribute(Attributes.ORIGIN, origin);
         }
 
         // Provide a warning if there's no Attributes.ORIGIN at this point...
         if (!tr.hasAttribute(Attributes.ORIGIN)) {
-        	log.warn("Request attribute 'Attributes.ORIGIN' is not present.  " +
-        			"Cernunnos may not be able to access resources relative " +
-        			"to the script.");
+            log.warn("Request attribute 'Attributes.ORIGIN' is not present.  " +
+                    "Cernunnos may not be able to access resources relative " +
+                    "to the script.");
+        }
+        
+        // Set up Attributes.CACHE if not already provided...
+        if (!tr.hasAttribute(Attributes.CACHE)) {
+            tr.setAttribute(Attributes.CACHE, new HashMap<Object, Object>());
         }
 
         // Write the initial contents of the TaskRequest to the logs...

@@ -14,163 +14,130 @@
     <description>Cernunnos - Core.</description>
 
     <dependencies>
-
-        <!-- ===== Compile Time Dependencies ============================== -->
-
+        <!-- ===== Compile Dependencies ======================================= -->
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
-            <version>${commons-dbcp.version}</version>
             <scope>compile</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
         <dependency>
             <groupId>commons-jexl</groupId>
             <artifactId>commons-jexl</artifactId>
-            <version>${commons-jexl.version}</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>${commons-logging.version}</version>
-            <type>jar</type>
             <scope>compile</scope>
-            <exclusions>
-                 <exclusion>
-                     <groupId>avalon-framework</groupId>
-                     <artifactId>avalon-framework</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>log4j</groupId>
-                     <artifactId>log4j</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>logkit</groupId>
-                     <artifactId>logkit</artifactId>
-                 </exclusion>
-                 <exclusion>
-                     <groupId>javax.servlet</groupId>
-                     <artifactId>servlet-api</artifactId>
-                 </exclusion>
-            </exclusions>
         </dependency>
-
         <dependency>
             <groupId>dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>${dom4j.version}</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>javax.script</groupId>
-            <artifactId>script-api</artifactId>
-            <version>${script-api.version}</version>
-            <classifier>jdk14</classifier>
-            <scope>compile</scope>
-        </dependency>
-
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
             <scope>compile</scope>
         </dependency>
-
-        <!--
-         | Jaxen is actually a transitive dependency of 
-         | dom4j, but it's not being picked up properly.  
-         | So I've included it here.
-         +-->
         <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-            <version>${jaxen.version}</version>
+            <groupId>javax.script</groupId>
+            <artifactId>script-api</artifactId>
+            <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>nekohtml</groupId>
             <artifactId>nekohtml</artifactId>
-            <version>${nekohtml.version}</version>
             <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.netbeans.lib</groupId>
             <artifactId>cvsclient</artifactId>
-            <version>20060125</version>
+            <scope>compile</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>${spring.version}</version>
+            <artifactId>spring-beans</artifactId>
             <scope>compile</scope>
         </dependency>
-
-         <dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.ldap</groupId>
             <artifactId>spring-ldap</artifactId>
-            <version>${spring-ldap.version}</version>
-            <type>jar</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
             <scope>compile</scope>
         </dependency>
 
-        <!-- ===== Provided Dependencies ================================== -->
-        
+        <!-- ===== Provided Dependencies ====================================== -->
         <dependency>
             <groupId>javax.portlet</groupId>
             <artifactId>portlet-api</artifactId>
-            <version>${portlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>${servlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
-
-
-        <!-- ===== Runtime Dependencies ================================== -->
         
-        <dependency>
-            <groupId>net.sf.retrotranslator</groupId>
-            <artifactId>retrotranslator-runtime</artifactId>
-            <version>1.2.1</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>1.0</version>
-            <scope>runtime</scope>
-        </dependency>
+        <!-- ===== Runtime Dependencies ======================================= -->
         <dependency>
             <groupId>javax.script</groupId>
             <artifactId>groovy-engine</artifactId>
-            <version>1.0</version>
             <classifier>jdk14</classifier>
             <scope>runtime</scope>
         </dependency>
-
-        <!-- ===== Test Dependencies ====================================== -->
+        <dependency>
+            <groupId>net.sf.retrotranslator</groupId>
+            <artifactId>retrotranslator-runtime</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+            <scope>runtime</scope>
+        </dependency>
         
+        <!-- ===== Test Dependencies ========================================== -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
+
 
 </project>

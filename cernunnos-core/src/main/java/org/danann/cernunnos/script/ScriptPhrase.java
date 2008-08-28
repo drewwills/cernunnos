@@ -21,24 +21,28 @@ import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.BindingsHelper;
+import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.Phrase;
+import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.danann.cernunnos.Tuple;
 
 public class ScriptPhrase implements Phrase {
-
 	// Instance Members.
-	private Phrase engine;
+    private CacheHelper<Tuple<ScriptEngine, String>, ScriptEvaluator> scriptEvaluatorCache;
+	private Phrase enginePhrase;
 	private Phrase expression;
 
 	/*
@@ -54,7 +58,7 @@ public class ScriptPhrase implements Phrase {
 					String.class, "Script expression to evaluate.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ENGINE, EXPRESSION};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENGINE, EXPRESSION};
 		final Formula rslt = new SimpleFormula(ScriptPhrase.class, reagents);
 		return rslt;
 	}
@@ -62,42 +66,41 @@ public class ScriptPhrase implements Phrase {
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.engine = (Phrase) config.getValue(ENGINE);
+		this.enginePhrase = (Phrase) config.getValue(ENGINE);
 		this.expression = (Phrase) config.getValue(EXPRESSION);
-
+        this.scriptEvaluatorCache = new DynamicCacheHelper<Tuple<ScriptEngine, String>, ScriptEvaluator>(config);
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
+		final ScriptEngine engine = (ScriptEngine) this.enginePhrase.evaluate(req, res);
+		final String script = (String) this.expression.evaluate(req, res);
 
-		ScriptEngine eng = (ScriptEngine) engine.evaluate(req, res);
-		String x = (String) expression.evaluate(req, res);
+		final Tuple<ScriptEngine, String> scriptEvaluatorKey = new Tuple<ScriptEngine, String>(engine, script);
+		final ScriptEvaluator scriptEvaluator = this.scriptEvaluatorCache.getCachedObject(req, res, scriptEvaluatorKey, ScriptEvaluatorFactory.INSTANCE);
+		
+		final Bindings bindings = new SimpleBindings();
+
+        // Bind simple things (non-Attributes)...
+        for (final Map.Entry<String, Object> attrEntry : req.getAttributes().entrySet()) {
+            final String attrKey = attrEntry.getKey();
+            if (attrKey.indexOf(".") == -1) {
+                bindings.put(attrKey, attrEntry.getValue());
+            }
+        }
+        
+        // Bind Attributes based on BindingsHelper objects...
+        final List<BindingsHelper> helpers = Attributes.prepareBindings(new TaskRequestDecorator(req, res));
+        for (final BindingsHelper bindingsHelper : helpers) {
+            bindings.put(bindingsHelper.getBindingName(), bindingsHelper);
+        }
+	
 		try {
-
-			Bindings n = new SimpleBindings();
-
-			// Bind simple things (non-Attributes)...
-			for (Map.Entry<String,Object> y : req.getAttributes().entrySet()) {
-				if (y.getKey().indexOf(".") == -1) {
-					n.put(y.getKey(), y.getValue());
-				}
-			}
-			
-			// Bind Attributes based on BindingsHelper objects...
-			List<BindingsHelper> helpers = Attributes.prepareBindings(
-								new TaskRequestDecorator(req, res));
-			for (BindingsHelper h : helpers) {
-				n.put(h.getBindingName(), h);
-			}
-
-			return eng.eval(x, n);
-
-		} catch (Throwable t) {
-			String msg = "Error while evaluating the specified script expression.  " +
-							"\n\t\tENGINE_NAME:  " + eng.getFactory().getEngineName() +
-							"\n\t\tEXPRESSION:  " + x;
-			throw new RuntimeException(msg, t);
+		    return scriptEvaluator.eval(bindings);
 		}
-
+		catch (ScriptException se) {
+            throw new RuntimeException("Error while executing the specified script.  " +
+                    "\n\t\tENGINE_NAME:  " + engine.getFactory().getEngineName() +
+                    "\n\t\tSCRIPT (follows):\n" + script + "\n", se);
+        }
 	}
-
 }

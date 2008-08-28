@@ -30,12 +30,12 @@ public class ThreadPoolTask extends AbstractContainerTask {
              "Optional name under which the new ExecutorService will be registered as a request attribute.  If omitted, " +
              "the name 'ConcurrentAttributes.EXECUTOR_SERVICE' will be used.", new LiteralPhrase(ConcurrentAttributes.EXECUTOR_SERVICE));
      
-     public static final Reagent THREADS = new SimpleReagent("THREADS", "@threads", ReagentType.PHRASE, Integer.class,
+     public static final Reagent THREADS = new SimpleReagent("THREADS", "@threads", ReagentType.PHRASE, String.class,
              "Number of threads to use in the thread pool, defaults to 4.", new LiteralPhrase(4));
      
-     public static final Reagent USE_EXISTING = new SimpleReagent("USE_EXISTING", "@use-existing", ReagentType.PHRASE, Boolean.class,
+     public static final Reagent USE_EXISTING = new SimpleReagent("USE_EXISTING", "@use-existing", ReagentType.PHRASE, String.class,
              "If true an ExecutorService that already exists for the specified attribute name will be used instead of creating a new " +
-             "ExecutorService. Defaults to true.", new LiteralPhrase(Boolean.TRUE));
+             "ExecutorService. Defaults to false.", new LiteralPhrase(Boolean.FALSE.toString()));
 
      /* (non-Javadoc)
       * @see org.danann.cernunnos.Bootstrappable#getFormula()
@@ -70,7 +70,7 @@ public class ThreadPoolTask extends AbstractContainerTask {
          }
          else {
              //No existing pool or configured to ignore it, create a new pool
-             final int threads = (Integer) this.threadsPhrase.evaluate(req, res);
+             final int threads = Integer.parseInt((String) this.threadsPhrase.evaluate(req, res));
              executorService = Executors.newFixedThreadPool(threads);
              usingExisting = false;
          }

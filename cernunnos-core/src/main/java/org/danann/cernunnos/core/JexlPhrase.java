@@ -20,7 +20,8 @@ import org.apache.commons.jexl.Expression;
 import org.apache.commons.jexl.ExpressionFactory;
 import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
-
+import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -34,7 +35,8 @@ import org.danann.cernunnos.TaskResponse;
 public final class JexlPhrase implements Phrase {
 
 	// Instance Members.
-	private Phrase expression;
+    private CacheHelper<String, Expression> expressionCache;
+    private Phrase expression;
 	
 	/*
 	 * Public API.
@@ -44,40 +46,58 @@ public final class JexlPhrase implements Phrase {
 									ReagentType.PHRASE, String.class, "A valid JEXL expression.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {EXPRESSION};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, EXPRESSION};
 		return new SimpleFormula(JexlPhrase.class, reagents);
 	}
 	
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.expression = (Phrase) config.getValue(EXPRESSION);
+	    this.expressionCache = new DynamicCacheHelper<String, Expression>(config);
+        this.expression = (Phrase) config.getValue(EXPRESSION);
 
 	}
 
 	public Object evaluate(TaskRequest req, TaskResponse res) {
-
-		String exp = (String) expression.evaluate(req, res);
+		final String exp = (String) expression.evaluate(req, res);
 		
-		Object rslt = null;
+		// Get or Create a JEXL expression object...
+        final Expression e = this.expressionCache.getCachedObject(req, res, exp, CachableExpressionFactory.INSTANCE);
+        
 		try {
-			
-			// Create a JEXL expression object...
-		    Expression e = ExpressionFactory.createExpression(exp);
-		    
 		    // Prepare the JEXL context...
 		    JexlContext jc = JexlHelper.createContext();
 		    jc.setVars(req.getAttributes());
 		    
-		    rslt = e.evaluate(jc);
-		    
-		} catch (Throwable t) {
-			String msg = "Unable to evaluate the following JEXL expression:  " + exp;
-			throw new RuntimeException(msg, t);
+		    return e.evaluate(jc);
+		} 
+		catch (Throwable t) {
+			throw new RuntimeException("Unable to evaluate the following JEXL expression:  " + exp, t);
 		}
-	    
-		return rslt;
-		
 	}
 	
+
+    
+    protected static final class CachableExpressionFactory implements CacheHelper.Factory<String, Expression> {
+        public static final CachableExpressionFactory INSTANCE = new CachableExpressionFactory();
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
+         */
+        public Expression createObject(String key) {
+            try {
+                return ExpressionFactory.createExpression(key);
+            }
+            catch (Exception e) {
+                throw new RuntimeException("Failed to create Expression for '" + key + "'", e);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
+         */
+        public boolean isThreadSafe(String key, Expression instance) {
+            return false;
+        }
+    }
 }
