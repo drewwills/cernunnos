@@ -23,6 +23,8 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.Node;
 import org.dom4j.QName;
+import org.dom4j.XPath;
+import org.dom4j.xpath.DefaultXPath;
 
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.Phrase;
@@ -30,6 +32,15 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class NodeProcessor {
+    private final static ThreadLocal<XPath> XPATH_LOCAL = new ThreadLocal<XPath>() {
+        /* (non-Javadoc)
+         * @see java.lang.ThreadLocal#initialValue()
+         */
+        @Override
+        protected XPath initialValue() {
+            return new DefaultXPath("descendant-or-self::text() | descendant-or-self::*/@*");
+        }
+    };
 
 	/*
 	 * Public API.
@@ -51,8 +62,8 @@ public final class NodeProcessor {
 			((Branch) n).normalize();
 		}
 
-		String xpath = "descendant-or-self::text() | descendant-or-self::*/@*";
-		for (Iterator<?> it = n.selectNodes(xpath).iterator(); it.hasNext();) {
+		final XPath xpath = XPATH_LOCAL.get();
+		for (Iterator<?> it = xpath.selectNodes(n).iterator(); it.hasNext();) {
 			Node d =  (Node) it.next();
 			if (d.getText().trim().length() != 0) {
 				Phrase p = g.newPhrase(d);

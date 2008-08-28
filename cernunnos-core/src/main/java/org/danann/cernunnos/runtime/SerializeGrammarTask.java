@@ -18,10 +18,6 @@ package org.danann.cernunnos.runtime;
 
 import java.util.Map;
 
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.Node;
-
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
@@ -30,6 +26,9 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.DocumentFactory;
+import org.dom4j.Element;
+import org.dom4j.Node;
 
 public final class SerializeGrammarTask extends AbstractContainerTask {
 
@@ -149,7 +148,7 @@ public final class SerializeGrammarTask extends AbstractContainerTask {
             }
             Element reagent = fac.createElement("reagent");
             reagent.addAttribute("name", r.getName());
-            reagent.addAttribute("xpath", r.getXpath());
+            reagent.addAttribute("xpath", r.getXpath().getText());
             reagent.addAttribute("reagent-type", r.getReagentType().name());
             reagent.addAttribute("expected-type", r.getExpectedType().getName());
             boolean req = !r.hasDefault();

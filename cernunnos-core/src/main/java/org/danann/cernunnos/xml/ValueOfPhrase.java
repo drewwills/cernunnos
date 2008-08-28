@@ -17,9 +17,12 @@
 package org.danann.cernunnos.xml;
 
 import org.dom4j.Node;
+import org.dom4j.XPath;
 
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -38,7 +41,8 @@ import org.danann.cernunnos.TaskResponse;
 public final class ValueOfPhrase implements Phrase {
 
 	// Instance Members.
-	private Phrase source;
+    private CacheHelper<String, XPath> xpathCache;
+    private Phrase source;
 	private Phrase expression;
 
 	/*
@@ -54,13 +58,14 @@ public final class ValueOfPhrase implements Phrase {
 										ReagentType.PHRASE, String.class, "An XPATH expression.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {SOURCE, EXPRESSION};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, SOURCE, EXPRESSION};
 		return new SimpleFormula(ValueOfPhrase.class, reagents);
 	}
 	
 	public void init(EntityConfig config) {
 
 		// Instance Members.
+	    this.xpathCache = new DynamicCacheHelper<String, XPath>(config);
 		this.source = (Phrase) config.getValue(SOURCE); 
 		this.expression = (Phrase) config.getValue(EXPRESSION); 
 		
@@ -69,7 +74,9 @@ public final class ValueOfPhrase implements Phrase {
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 
 		Node src = (Node) source.evaluate(req, res);
-		return src.valueOf((String) expression.evaluate(req, res));
+		final String xpathExpresion = (String) expression.evaluate(req, res);
+		final XPath xpath = this.xpathCache.getCachedObject(req, res, xpathExpresion, XPathCacheFactory.INSTANCE);
+		return xpath.valueOf(src);
 		
 	}
 	

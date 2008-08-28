@@ -16,6 +16,9 @@
 
 package org.danann.cernunnos;
 
+import org.dom4j.XPath;
+import org.dom4j.xpath.DefaultXPath;
+
 /**
  * No-nonsense, immutable <code>Reagent</code> implementation for use by task 
  * authors who don't need anything outlandish.
@@ -27,7 +30,7 @@ public final class SimpleReagent implements Reagent {
 		
 	// Instance Members.
 	private final String name;
-	private final String xpath;
+	private final ThreadLocal<XPath> xpathHolder;
 	private final ReagentType reagentType;
 	private final Class<?> returnType;
 	private final String description;
@@ -113,7 +116,7 @@ public final class SimpleReagent implements Reagent {
 		
 		// Instance Members.
 		this.name = name;
-		this.xpath = xpath;
+		this.xpathHolder = new XPathLocal(xpath);
 		this.reagentType = reagentType;
 		this.returnType = returnType;
 		this.description = description;
@@ -126,8 +129,8 @@ public final class SimpleReagent implements Reagent {
 		return name;
 	}
 	
-	public String getXpath() {
-		return xpath;
+	public XPath getXpath() {
+		return this.xpathHolder.get();
 	}
 	
 	public ReagentType getReagentType() {
@@ -195,4 +198,19 @@ public final class SimpleReagent implements Reagent {
 		return name.hashCode();
 	}
 	
+	private static final class XPathLocal extends ThreadLocal<XPath> {
+	    private final String xpath;
+	    
+        public XPathLocal(String xpath) {
+            this.xpath = xpath;
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.ThreadLocal#initialValue()
+         */
+        @Override
+        protected XPath initialValue() {
+            return new DefaultXPath(this.xpath);
+        }
+	}
 }

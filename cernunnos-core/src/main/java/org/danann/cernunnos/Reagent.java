@@ -16,6 +16,8 @@
 
 package org.danann.cernunnos;
 
+import org.dom4j.XPath;
+
 /**
  * Represents a configurable parameter of a task.  Reagents are specified by 
  * <code>Task</code> implementations, but their values are prepared by the 
@@ -37,7 +39,7 @@ public interface Reagent {
 	 * 
 	 * @return An valid XPath expression.
 	 */
-	String getXpath();
+	XPath getXpath();
 	
 	/**
 	 * Provides the type of this <code>Reagent</code> as defined by the 

@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.dom4j.Node;
+import org.dom4j.XPath;
 
 /**
  * Identifies the runtime type of a <code>SimpleReagent</code>.  SimpleReagent types help
@@ -42,7 +43,8 @@ public enum ReagentType {
 	 * implementations, which provide tremendous flexibility.
 	 */
 	PHRASE {
-		public Object evaluate(Grammar grammar, Node src, String xpath) {
+	    @Override
+        public Object evaluate(Grammar grammar, Node src, XPath xpath) {
 
 			// Assertions...
 			if (grammar == null) {
@@ -58,7 +60,7 @@ public enum ReagentType {
 				throw new IllegalArgumentException(msg);
 			}
 
-			final Node match = src.selectSingleNode(xpath);
+			final Node match = xpath.selectSingleNode(src);
 			return match != null ? grammar.newPhrase(match) : null;
 
 		}
@@ -69,7 +71,8 @@ public enum ReagentType {
 	 * <code>SimpleReagent</code> is used (or must be known) at bootsrap time.
 	 */
 	STRING {
-		public Object evaluate(Grammar grammar, Node src, String xpath) {
+	    @Override
+        public Object evaluate(Grammar grammar, Node src, XPath xpath) {
 
 			// Assertions...
 			if (grammar == null) {
@@ -85,7 +88,7 @@ public enum ReagentType {
 				throw new IllegalArgumentException(msg);
 			}
 
-			final String value = src.valueOf(xpath).trim();	// do we need to trim?
+			final String value = xpath.valueOf(src).trim();	// do we need to trim?
 			return value.length() > 0 ? value : null;
 
 		}
@@ -96,7 +99,8 @@ public enum ReagentType {
 	 * <code>SimpleReagent</code> is an XML structure.
 	 */
 	NODE_LIST {
-		public Object evaluate(Grammar grammar, Node src, String xpath) {
+		@Override
+        public Object evaluate(Grammar grammar, Node src, XPath xpath) {
 
 			// Assertions...
 			if (grammar == null) {
@@ -113,7 +117,7 @@ public enum ReagentType {
 			}
 
 			// The following fancy conversion is here to avoid type safety warnings..
-			final List<?> matches = src.selectNodes(xpath);
+			final List<?> matches = xpath.selectNodes(src);
 			final List<Node> rslt = new LinkedList<Node>();
 			for (final Iterator<?> it = matches.iterator(); it.hasNext();) {
 				rslt.add((Node) it.next());
@@ -133,6 +137,6 @@ public enum ReagentType {
 	 * node to calculate the value of a <code>SimpleReagent</code>.
 	 * @return A reagent or <code>null</code>.
 	 */
-	public abstract Object evaluate(Grammar grammar, Node src, String xpath);
+	public abstract Object evaluate(Grammar grammar, Node src, XPath xpath);
 
 }
