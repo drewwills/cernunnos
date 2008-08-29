@@ -1033,7 +1033,16 @@ Response:</pre>
 </spring-beans></xmp></pre>
             </example>
         </entry>
-
+        
+        <!--
+          | Package:  xml
+          +-->
+        <entry name="cache" impl="org.danann.cernunnos.cache.CacheTask">
+            <description>
+                <p>Caches the object returned by the factory Phrase using the specified cache-key and makes it availbe under the key attribute.</p>
+            </description>
+        </entry>
+        
         <!--
           | Package:  xml
           +-->
