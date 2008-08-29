@@ -65,7 +65,7 @@ public abstract class BasicDataSourceTemplate {
             dataSource.setPassword(password);
             dataSource.setPoolPreparedStatements(true);
             dataSource.setMaxActive(-1);
-            dataSource.setMaxIdle(8);
+            dataSource.setMaxIdle(32);
             
             //Provide the DataSource on the response environment
             final String dataSourceAttrName = (String) this.attributeNamePhrase.evaluate(req, res);
