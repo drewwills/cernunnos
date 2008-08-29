@@ -40,8 +40,6 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.EntityResolver;
 
 public final class ReadDocumentPhrase implements Phrase {
-    public static final String DOCUMENT_LOCAL_CACHE_KEY = ReadDocumentPhrase.class.getSimpleName() + ".DOCUMENT_LOCAL";
-
 	// Instance Members.
     private CacheHelper<Tuple<String, String>, Element> documentCache;
     private Phrase entityResolver;
