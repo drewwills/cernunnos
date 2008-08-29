@@ -231,6 +231,8 @@ public final class Attributes {
 		public final String STRING;
 		public final Object OBJECT;
 		public final Object RETURN_VALUE;
+		public final Map<?, ?> CACHE;
+        public final String CACHE_MODEL;
 		
 		public BindingsHelperImpl(Map<String,Object> bindings) {
 			
@@ -248,8 +250,9 @@ public final class Attributes {
 			this.STREAM = (PrintStream) bindings.get(Attributes.STREAM);
 			this.STRING = (String) bindings.get(Attributes.STRING);
 			this.OBJECT = bindings.get(Attributes.OBJECT);
-			this.RETURN_VALUE = bindings.get(Attributes.RETURN_VALUE);			
-			
+			this.RETURN_VALUE = bindings.get(Attributes.RETURN_VALUE);	
+			this.CACHE = (Map<?, ?>) bindings.get(Attributes.CACHE);
+			this.CACHE_MODEL = (String) bindings.get(Attributes.CACHE_MODEL);
 		}
 		
 		public String getBindingName() {
