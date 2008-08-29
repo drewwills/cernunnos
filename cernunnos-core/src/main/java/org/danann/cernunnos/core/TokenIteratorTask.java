@@ -39,12 +39,12 @@ public class TokenIteratorTask extends AbstractContainerTask {
 	 * Public API.
 	 */
 
-	public static final Reagent STRING = new SimpleReagent("STRING", "@string", ReagentType.PHRASE,
-				String.class, "Textual content that will be split into tokens based on REGEX.",
-				new AttributePhrase(Attributes.STRING));
+	public static final Reagent STRING = new SimpleReagent("STRING", "@string", ReagentType.PHRASE, String.class,
+							"Textual content that will be split into tokens based on REGEX.  The default is the value " +
+							"of the 'Attributes.STRING' request attribute.", new AttributePhrase(Attributes.STRING));
 
 	public static final Reagent REGEX = new SimpleReagent("REGEX", "@regex", ReagentType.PHRASE, String.class,
-				"Delimiting regular expression used to split STRING into tokens.");
+							"Delimiting regular expression used to split STRING into tokens.");
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {STRING, REGEX, AbstractContainerTask.SUBTASKS};

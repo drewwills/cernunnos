@@ -47,8 +47,8 @@ public interface EntityConfig {
 	
 	/**
 	 * Intended to provide some indication of the origin of this entity.  Might 
-	 * be a line number, might be an XPath expression.
-	 * 
+	 * be a line number, might be an XPath expression.  In any case, it should
+	 * uniquely identify the entity within its containing document. 
 	 * @return The source of this entity.
 	 */
 	String getSource();
