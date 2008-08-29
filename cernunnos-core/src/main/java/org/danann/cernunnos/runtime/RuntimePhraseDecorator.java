@@ -66,9 +66,13 @@ public final class RuntimePhraseDecorator implements Phrase {
 
 		Object rslt = null;
 
+		// Manage the request attribute stack
+        RuntimeRequestResponse rrr = (RuntimeRequestResponse) res;
+        rrr.enclose(req);
+        
 		// Provide enhanced error information for all phrases
 		try {
-			rslt = enclosed.evaluate(req, res);
+			rslt = enclosed.evaluate(rrr, new RuntimeRequestResponse());
 		} catch (ManagedException me) {
 			
 			// Already processed...
