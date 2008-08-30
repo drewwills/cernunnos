@@ -895,6 +895,20 @@ Response:</pre>
             </example>
         </entry>
 
+        <entry name="js" impl="org.danann.cernunnos.script.ScriptPhrase">
+            <description>
+                <p>Returns the value of the specified JavaScript EXPRESSION.</p>
+            </description>
+            <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(js)}"/>
+        </entry>
+
+        <entry name="js" impl="org.danann.cernunnos.script.ScriptTask">
+            <description>
+                <p>Invokes operations specified by SCRIPT using the JavaScript engine.</p>
+            </description>
+            <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(js)}"/>
+        </entry>
+
         <!--
           | Package:  spring
           +-->
@@ -1035,7 +1049,7 @@ Response:</pre>
         </entry>
         
         <!--
-          | Package:  xml
+          | Package:  cache
           +-->
         <entry name="cache" impl="org.danann.cernunnos.cache.CacheTask">
             <description>
