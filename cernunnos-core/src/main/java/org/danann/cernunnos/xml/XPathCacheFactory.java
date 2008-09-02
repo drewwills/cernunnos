@@ -16,7 +16,6 @@
 
 package org.danann.cernunnos.xml;
 
-import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.CacheHelper.Factory;
 import org.dom4j.XPath;
 import org.dom4j.xpath.DefaultXPath;
