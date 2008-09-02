@@ -71,8 +71,13 @@ public final class SingleNodePhrase  implements Phrase {
 		Node src = (Node) source.evaluate(req, res);
 		final String xpathExpresion = (String) this.xpath.evaluate(req, res);
 		final XPath xpath = this.xpathCache.getCachedObject(req, res, xpathExpresion, XPathCacheFactory.INSTANCE);
-		return xpath.selectSingleNode(src);
-		
+		try {
+		    xpath.setVariableContext(new RequestVariableContext(req));
+            return xpath.selectSingleNode(src);
+		}
+		finally {
+		    xpath.setVariableContext(null);
+		}
 	}
 	
 	

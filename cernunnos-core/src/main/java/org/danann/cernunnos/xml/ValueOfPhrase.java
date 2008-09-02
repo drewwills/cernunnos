@@ -16,9 +16,6 @@
 
 package org.danann.cernunnos.xml;
 
-import org.dom4j.Node;
-import org.dom4j.XPath;
-
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CacheHelper;
@@ -32,6 +29,8 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
+import org.dom4j.XPath;
 
 /**
  * <code>PhraseComponent</code> implementation that evaluates by performing an 
@@ -76,7 +75,13 @@ public final class ValueOfPhrase implements Phrase {
 		Node src = (Node) source.evaluate(req, res);
 		final String xpathExpresion = (String) expression.evaluate(req, res);
 		final XPath xpath = this.xpathCache.getCachedObject(req, res, xpathExpresion, XPathCacheFactory.INSTANCE);
-		return xpath.valueOf(src);
+		try {
+            xpath.setVariableContext(new RequestVariableContext(req));
+            return xpath.valueOf(src);
+        }
+        finally {
+            xpath.setVariableContext(null);
+        }
 		
 	}
 	
