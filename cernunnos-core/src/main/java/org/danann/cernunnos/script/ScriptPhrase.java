@@ -16,16 +16,10 @@
 
 package org.danann.cernunnos.script;
 
-import java.util.List;
-import java.util.Map;
-
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.script.SimpleBindings;
 
-import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.BindingsHelper;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
@@ -78,21 +72,7 @@ public class ScriptPhrase implements Phrase {
 		final Tuple<ScriptEngine, String> scriptEvaluatorKey = new Tuple<ScriptEngine, String>(engine, script);
 		final ScriptEvaluator scriptEvaluator = this.scriptEvaluatorCache.getCachedObject(req, res, scriptEvaluatorKey, ScriptEvaluatorFactory.INSTANCE);
 		
-		final Bindings bindings = new SimpleBindings();
-
-        // Bind simple things (non-Attributes)...
-        for (final Map.Entry<String, Object> attrEntry : req.getAttributes().entrySet()) {
-            final String attrKey = attrEntry.getKey();
-            if (attrKey.indexOf(".") == -1) {
-                bindings.put(attrKey, attrEntry.getValue());
-            }
-        }
-        
-        // Bind Attributes based on BindingsHelper objects...
-        final List<BindingsHelper> helpers = Attributes.prepareBindings(new TaskRequestDecorator(req, res));
-        for (final BindingsHelper bindingsHelper : helpers) {
-            bindings.put(bindingsHelper.getBindingName(), bindingsHelper);
-        }
+		final Bindings bindings = ScriptUtils.generateBindings(req, res);
 	
 		try {
 		    return scriptEvaluator.eval(bindings);
