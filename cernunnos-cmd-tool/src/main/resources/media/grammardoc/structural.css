@@ -48,6 +48,11 @@ p {
   margin-bottom:  6px;
 }
 
+blockquote {
+  border-left:  2px solid #CCF;
+  padding-left:  4px;
+}
+
 table {
   background-color:  #036;
   margin-top:  6px;

@@ -32,6 +32,8 @@
                 <br/>
                 <a href="request-attributes.html">Request Attributes</a>
                 <br/>
+                <a href="anatomy-of-a-task.html">Anatomy of a Task</a>
+                <br/>
                 <br/>
                 <input id="hideDeprecated" type="checkbox">
                     <xsl:choose>

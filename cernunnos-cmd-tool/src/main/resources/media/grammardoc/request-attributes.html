@@ -24,14 +24,14 @@ any type of <code>Object</code>, but keys are always <code>String</code>s.</p>
 
 <p>You can create request attributes in several ways;  perhaps the most common
 (and most broadly applicable) method is the
-<a href="entries/with-attribute.html"><code>&lt;with-attribute&gt;</code>
+<a href="entries/with-attribute-TASK.html"><code>&lt;with-attribute&gt;</code>
 task</a>.  This task registers any <code>Object</code> (specified by the
 <code>VALUE</code> reagent) under any name (specified by the <code>KEY</code>).
 The resulting name/value pair will be visible to all subtasks:  this is the role
 and the entire purpose of the <code>&lt;with-attribute&gt;</code> task.</p>
 
 <p>Conversely, some tasks that set request attributes have other duties.  The
-<a href="entries/sql-connection.html"><code>&lt;sql-connection&gt;</code>
+<a href="entries/sql-connection-TASK.html"><code>&lt;sql-connection&gt;</code>
 task</a> is a great example.  <code>&lt;sql-connection&gt;</code> is responsible
 for opening a JDBC connection to an SQL data source.  This connection is then
 made available to subtasks of <code>&lt;sql-connection&gt;</code>, which use it
@@ -44,14 +44,14 @@ contain the SQL connection through the <code>ATTRIBUTE_NAME</code> reagent.  If
 you don't specify a name, a default name will be used (more on this topic
 below).  Tasks that open or establish resources for the benefit of subtasks
 commonly support the <code>ATTRIBUTE_NAME</code> reagent.  These include
-<a href="entries/invoke-method.html"><code>&lt;invoke-method&gt;</code></a>,
-<a href="entries/node-iterator.html"><code>&lt;node-iterator&gt;</code></a>, and
-<a href="entries/print-stream.html"><code>&lt;print-stream&gt;</code></a>.</p>
+<a href="entries/invoke-method-TASK.html"><code>&lt;invoke-method&gt;</code></a>,
+<a href="entries/node-iterator-TASK.html"><code>&lt;node-iterator&gt;</code></a>, and
+<a href="entries/print-stream-TASK.html"><code>&lt;print-stream&gt;</code></a>.</p>
 
 <h3>Getting Request Attributes</h3>
 
 <p>The usual way to access the value of a request attribute is through the
-<a href="entries/req.html"><code>${req()}</code> phrase</a>.  Just put the name
+<a href="entries/req-PHRASE.html"><code>${req()}</code> phrase</a>.  Just put the name
 of the desired request attribute between the parentheses, like so:</p>
 
 <blockquote><code>$req(Attributes.LOCATION)</code></blockquote>
@@ -148,8 +148,8 @@ script.</p>
 
 <p>There are, moreover, several tasks that use <code>Attributes.ORIGIN</code> as
 the default value for their <code>CONTEXT</code> reagent.  Some examples are
-<a href="entries/properties.html"><code>&lt;properties&gt;</code></a> and
-<a href="entries/crn.html"><code>&lt;crn&gt;</code></a>.  These tasks will
+<a href="entries/properties-TASK.html"><code>&lt;properties&gt;</code></a> and
+<a href="entries/crn-TASK.html"><code>&lt;crn&gt;</code></a>.  These tasks will
 evaluate <code>LOCATION</code> relative to the current script if
 <code>CONTEXT</code> is omitted.</p>
 
@@ -183,7 +183,7 @@ request attributes as <code>$1</code>, <code>$2</code>, and so on.</p>
 <p>Cernunnos has been used to develop several
 <a href="http://jcp.org/en/jsr/detail?id=168">Java Portlets</a>.  For detailed
 instructions on how to create portlets with Cernunnos, refer to
-<a href="http://www.unicon.net/node/822">this article</a>.</p>
+<a href="http://www.unicon.net/node/822" target="_new">this article</a>.</p>
 
 <p>The Cernunnos portlet class
 (<code>org.danann.cernunnos.runtime.web.CernunnosPortlet</code>) can pre-load
