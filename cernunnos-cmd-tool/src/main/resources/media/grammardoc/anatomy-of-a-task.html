@@ -1,0 +1,308 @@
+<html>
+
+<head>
+<title>Cernunnos Manual - Anatomy of a Task</title>
+<link rel="stylesheet" type="text/css" href="structural.css"/>
+<link rel="stylesheet" type="text/css" href="classes.css"/>
+</head>
+
+<body>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
+</div>
+
+<hr/>
+
+<h2>Anatomy of a Task</h2>
+
+<p>The capabilities of Cernunnos come in tidy packages:  <em>tasks</em> and 
+<em>phrases</em>.  The Cernunnos Runtime Environment does the magic of assembling 
+these components into useful bundles of software based on your specifications.  
+On a basic level, you don't have to know <em>how</em> these capabilities work to 
+use them;  you simply tell Cernunnos <em>what</em> you need.</p>
+
+<p>Nevertheless, to get the most from Cernunnos it's better to be able to look 
+below the surface.</p>
+
+<p>Most java classes in Cernunnos implement one or the other of the these two 
+core interfaces:  <code>Task</code> or <code>Phrase</code>.  </p>
+
+<a name="FooTask"/>
+<h3>FooTask.java</h3>
+
+<p>In order to get to know how tasks work, we will look at a made-up task called 
+<code>FooTask</code> (<a href="examples/FooTask.java.html">view complete Java 
+code</a>).  This task executes a <em>foo</em> operation, which we loosely define 
+with the following requirements:</p>
+
+<ul>
+  <li>Compute the value of a <em>foo</em> object</li>
+  <li>
+    Make the foo object available to subtasks as a 
+    <a href="request-attributes.html">request attribute</a>
+  </li>
+  <li>
+    Callers may optionally specify the name of this attribute, 
+    though a default name will be used if they don't
+  </li>
+</ul>
+
+<h4>Getting Started</h4>
+
+<p>The <code>FooTask</code> resides in the <code>org.danann.cernunnos.foo</code> 
+package.</p>
+
+<blockquote><code><pre>
+package org.danann.cernunnos.foo;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.EntityConfig;
+import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
+import org.danann.cernunnos.Phrase;
+import org.danann.cernunnos.Reagent;
+import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.SimpleFormula;
+import org.danann.cernunnos.SimpleReagent;
+import org.danann.cernunnos.TaskRequest;
+import org.danann.cernunnos.TaskResponse;
+</pre></code></blockquote>
+
+<p>For our <code>FooTask</code>, note that all other Cernunnos types we import 
+come from the same package:  <code>org.danann.cernunnos</code>.  This is the 
+root package of Cernunnos and the parent of the <code>foo</code>package.  This 
+relationship illustrates an important principal of dependency organization in 
+Cernunnos:  <strong>import statements may only go <em>up</em> the package 
+tree</strong>.  Java classes in Cernunnos may never import down, such as from 
+<code>a.b.c</code> to <code>a.b.c.d</code>, or laterally, such as from 
+<code>a.b.c.d</code> to <code>a.b.c.e</code>.</p>
+
+<h4>Class Declaration</h4>
+
+<p>Every task must implement the <code>Task</code> interface either directly or 
+indirectly, such as by subclassing <code>AbstractContainerTask</code>.</p>
+
+<blockquote><code><pre>
+public final class FooTask extends AbstractContainerTask {
+</pre></code></blockquote>
+
+<p>The <code>FooTask</code> extends <code>AbstractContainerTask</code>, which 
+means it supports <em>subtasks</em>.  It's not mandatory for tasks that support 
+subtasks to subclass <code>AbstractContainerTask</code>, but it makes the 
+process easier.</p>
+
+<p>Our <code>FooTask</code> is <code>final</code> because it's not designed for 
+inheritance.  Many Java engineers feel that this is a good practice generally:  
+make classes either <code>abstract</code> or <code>final</code>, depending if 
+they're designed to be subclassed or not, respectively.</p>
+
+<h4>Phrases &amp; Reagents</h4>
+
+<p>The <code>FooTask</code> has three member variables, which are 
+<code>private</code>, and two class variables, which are <code>public</code>.</p>
+
+<blockquote><code><pre>
+// Instance Members.
+private Phrase attribute_name;
+private Phrase foo;
+private final Log log = LogFactory.getLog(getClass());
+
+/*
+ * Public API.
+ */
+
+public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", 
+        ReagentType.PHRASE, String.class, "Optional name under which the value of FOO will be " +
+        "registered as a request attribute.  If omitted, the name 'FooAttributes.FOO' will be " +
+        "used.", new LiteralPhrase(FooAttributes.FOO));
+
+public static final Reagent FOO = new SimpleReagent("FOO", "@foo", ReagentType.PHRASE, String.class, 
+        "The foo object that will be available to subtasks as the request attribute specified by " +
+        "ATTRIBUTE_NAME.");
+</pre></code></blockquote>
+
+<p>Observe how the '<code>attribute_name</code>' and '<code>foo</code>' 
+variables correspond to class variables with similar names:  each pairing works 
+in concert to support a single concept.  The member variables are instances of 
+<code>Phrase</code>;  the class variables are instances of <code>Reagent</code>.  
+The <code>FooTask</code> uses <em>reagents</em> to tell the Cernunnos Runtime 
+about the information it will need to do it's work.  It uses <em>phrases</em> to 
+get that information when the time is right.</p>
+
+<p>Both reagents include a <em>name</em>, an <em>XPath expression</em>, a 
+<em>reagent type</em>, an expected <em>return type</em>, and a 
+<em>description</em> -- in that order.  The <code>ATTRIBUTE_NAME</code> reagent 
+also specifies a default value.  <strong>Defaults should be provided where 
+possible and sensible</strong>, since they allow authors to accept them tacitly 
+in the majority of cases.</p>
+
+<a name="FooAttributes"/>
+<p>The default value of the <code>ATTRIBUTE_NAME</code> reagent uses a special 
+class:  <code>FooAttributes</code>.  Cernunnos uses Java classes that 
+end in '<code>-Attributes</code>' to define standard names for common request 
+attributes.  Whenever two (or more) tasks and/or phrases use the same, standard 
+name for something by default, they establish a pattern of cooperation that is 
+<em>implied</em> or <em>tacit</em>:  as long as neither default is overridden, 
+they cooperate automatically.  See the 
+<a href="examples/FooAttributes.java.html">Java code</a> for this class.</p>
+
+<p>The Cernunnos Manual documents the information specified by reagents 
+in the task and phrase reference;  the name and description are provided purely 
+for this purpose.  The Cernunnos Runtime uses the XPath expression to analyze 
+the value of the reagent, and the reagent type determines how that value will be 
+calculated.  Currently, the return type just acts as a hint, signaling when the 
+author may have made a mistake (allowing Cernunnos to issue a warning).  We 
+hope that return types can help Cernunnos provide support for 
+<a href="http://en.wikipedia.org/wiki/Type_coercion" target="_new">type coercion</a> 
+in the future.</p>
+
+<h4>The <code>getFormula()</code> Method</h4>
+
+<p>Tasks and phrases both implement the <code>Bootstrappable</code> interface, 
+which declares two methods.  The first of these is <code>getFormula()</code>.</p>
+
+<blockquote><code><pre>
+public Formula getFormula() {
+    Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, FOO, AbstractContainerTask.SUBTASKS};
+    final Formula rslt = new SimpleFormula(getClass(), reagents);
+    return rslt;
+}
+</pre></code></blockquote>
+
+<p>As you might expect, the <code>getFormula()</code> method provides a 
+<code>Formula</code> object to the Cernunnos Runtime.  The <em>formula</em> of a 
+task (or phrase) describes its essential metadata:  <i>e.g.</i> what Java class 
+implements it, what reagents it uses, and whether it's been deprecated.  The 
+information in the formula tells Cernunnos how to bootstrap the 
+<code>FooTask</code> properly and how to document it accurately in the Cernunnos 
+Manual.</p>
+
+<h4>The <code>init()</code> Method</h4>
+
+<p>The second method that <code>Bootstrappable</code> defines is 
+<code>init()</code>.</p>
+
+<blockquote><code><pre>
+public void init(EntityConfig config) {
+
+    super.init(config);
+
+    // Instance Members.
+    this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
+    this.foo = (Phrase) config.getValue(FOO);
+
+}
+</pre></code></blockquote>
+
+<p>The Cernunnos Runtime calls this method on every task (or phrase) before 
+putting it into service.  The <code>init()</code> method will be called exactly 
+once.</p>
+
+<p>Task implementations use the <code>init()</code> method to prepare themselves 
+for service.  The Cernunnos Runtime passes an <code>EntityConfig</code> object, 
+which provides access to some essential resources.  Perhaps the most important 
+of these resources are the <em>values</em> of reagents declared by the formula.  
+In general, task implementations will "link up" their reagents with member 
+variables in the <code>init()</code> method.</p>
+
+<p>The <code>FooTask</code> connects two member variables in this way:  
+'<code>attribute_name</code>' and '<code>foo</code>.'  Both of these variables 
+are references of type <code>Phrase</code>.  Reagents usually work with phrases, 
+though there are some exceptions.  <code>FooTask</code> also calls 
+<code>super.init()</code>, allowing <code>AbstractContainerTask</code> to 
+bootstrap <em>its</em> reagents as well.</p>
+
+<h4>The <code>perform()</code> Method</h4>
+
+<p>All <code>Task</code> implementations work their magic in the 
+<code>perform()</code> method.  Unlike <code>getFormula()</code> and 
+<code>init()</code> above, <code>perform()</code> applies only to tasks;  
+phrases implement a different (but similar) method called 
+<code>evaluate()</code>.</p>
+
+<blockquote><code><pre>
+public void perform(TaskRequest req, TaskResponse res) {
+
+    Object f = null;
+    try {
+        final String name = (String) attribute_name.evaluate(req, res);
+        f = foo.evaluate(req, res);
+        res.setAttribute(name, f);
+        if (log.isInfoEnabled()) {
+            log.info("The FooTask performed the foo operation " +
+                    "successfully.  The 'foo' object is:  " + f);
+        }
+    } catch (Throwable t) {
+        String msg = "The FooTask failed to foo properly.  The 'foo' " +
+                                            "object is:  " + f;
+        throw new RuntimeException(msg, t);
+    }
+
+    super.performSubtasks(req, res);
+
+}
+</pre></code></blockquote>
+
+<p>The Cernunnos Runtime provides a <code>TaskRequest</code> and a 
+<code>TaskResponse</code>;  these are similar to request/response objects in 
+Java Servlets, Java Portlets, and numerous other container-managed APIs both 
+within the <a href="http://java.sun.com/index.jsp" target="_new">Java Platform</a> 
+and elsewhere.  The <em>request</em> provides inputs to the task, most notably 
+<em>request attributes</em>.  The <em>response</em> gives tasks somewhere to 
+direct their outputs, which, incidentally, are often request attributes for 
+subtasks.</p>
+
+<p>The <code>FooTask</code> first invokes <code>evaluate()</code> on its 
+phrases:  '<code>attribute_name</code>' and '<code>foo</code>.'  Notice that 
+<code>evaluate()</code> also uses the request and response;  phrases get their 
+inputs in the same manner as tasks (though their outputs are handled 
+differently).  <code>FooTask</code> does not know the actual value of the items 
+its phrases represent until they are evaluated in the <code>perform()</code> 
+method.  These values depend on contextual circumstances (<i>e.g.</i> the work 
+of other tasks and phrases), and can be different each time the task is 
+invoked.</p>
+
+<p>All runtime-managed objects in Cernunnos (<i>viz.</i> both tasks and phrases) 
+are obligated <em>not</em> to maintain stateful information between calls to 
+<code>perform()</code>/<code>evaluate()</code>;  this kind of information must 
+be maintained in the request and response objects.  Cernunnos objects are 
+therefore both <em>reusable</em> and <em>thread-safe</em>.  Instances of 
+<code>TaskRequest</code> and <code>TaskResponse</code> are neither reusable nor 
+thread-safe.</p>
+
+<p>With the real value of the '<code>foo</code>' phrase in hand, the 
+<code>FooTask</code> uses the response to create a new request attribute under 
+the name specified by '<code>attribute_name</code>.'  This attribute will be 
+visible to all subtasks.  This is the sole purpose of <code>FooTask</code>;  
+from here, it only has to invoke its subtasks.</p>
+
+<p>Now that its own work is done, the <code>FooTask</code> takes a moment to log 
+the outcome of its efforts.  Cernunnos uses the 
+<a href="http://commons.apache.org/logging/">Apache Commons Logging</a> package, 
+which is a <i>de facto</i> industry standard.  Information about components 
+operating normally (<i>i.e.</i> without exceptions or surprises) is logged at 
+the <code>TRACE</code> level.</p>
+
+<p>If, on the other hand, an exception does arise while <code>FooTask</code> 
+does its work, it will be caught and execution will pass into the 
+<code>catch</code> block.  In this case, our task will wrap whatever it catches 
+in a <code>RuntimeException</code> with a message describing everything known 
+about the <em>foo</em> operation at the time of failure.  Under the hood, the 
+Cernunnos Runtime wraps this exception with a <code>ManagedException</code>, 
+which provides helpful information about the source of the error within the 
+Cernunnos XML document that contains our <code>FooTask</code>.</p>
+
+<p>Lastly the <code>FooTask</code> invokes its subtasks with 
+<code>super.performSubtasks()</code>.  Notice that our task calls this method 
+<em>outside</em> the try/catch block in which it does its own work.  This 
+practice prevents the stack trace from swelling with information that's not 
+especially useful and may even be misleading, and is emerging as the recommended 
+pattern for tasks that support subtasks.</p>
+
+<hr/>
+
+</body>
+</html>

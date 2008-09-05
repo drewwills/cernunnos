@@ -1,0 +1,83 @@
+<html>
+
+<head>
+<title>FooAttributes.java</title>
+<link rel="stylesheet" type="text/css" href="structural.css"/>
+<link rel="stylesheet" type="text/css" href="classes.css"/>
+</head>
+
+<body>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
+</div>
+
+<hr/>
+
+<h2><code>FooAttributes.java</code></h2>
+
+<p><a href="../anatomy-of-a-task.html#FooAttributes">Return to Anatomy of a Task</a></p>
+
+<code><pre>
+package org.danann.cernunnos.foo;
+
+import java.util.Map;
+
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.BindingsHelper;
+
+public final class FooAttributes {
+    
+    static {
+        Attributes.registerBindings("FooAttributes", BindingsHelperImpl.class);
+    }
+
+    /*
+     * Public API.
+     */
+
+    /**
+     * The default name under which a foo may be registered as a request 
+     * attribute.
+     */
+    public static final String FOO = FooAttributes.class.getSimpleName() + ".FOO";
+
+    /*
+     * Nested Types.
+     */
+
+    public static final class BindingsHelperImpl implements BindingsHelper {
+
+        /*
+         * Public API.
+         */
+        
+        public final Object FOO;
+        
+        public BindingsHelperImpl(Map<String,Object> bindings) {
+            
+            // Assertions.
+            if (bindings == null) {
+                String msg = "Argument 'bindings' cannot be null.";
+                throw new IllegalArgumentException(msg);
+            }
+            
+            // Instance Members.
+            this.FOO = bindings.get(FooAttributes.FOO);
+            
+        }
+        
+        public String getBindingName() {
+            return "FooAttributes";
+        }
+        
+    }
+
+}
+</pre></code>
+
+<p><a href="../anatomy-of-a-task.html#FooAttributes">Return to Anatomy of a Task</a></p>
+
+<hr/>
+
+</body>
+</html>

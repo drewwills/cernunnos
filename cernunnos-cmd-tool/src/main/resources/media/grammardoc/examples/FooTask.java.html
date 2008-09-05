@@ -1,0 +1,103 @@
+<html>
+
+<head>
+<title>FooTask.java</title>
+<link rel="stylesheet" type="text/css" href="structural.css"/>
+<link rel="stylesheet" type="text/css" href="classes.css"/>
+</head>
+
+<body>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
+</div>
+
+<hr/>
+
+<h2><code>FooTask.java</code></h2>
+
+<p><a href="../anatomy-of-a-task.html#FooTask">Return to Anatomy of a Task</a></p>
+
+<code><pre>
+package org.danann.cernunnos.foo;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.danann.cernunnos.AbstractContainerTask;
+import org.danann.cernunnos.EntityConfig;
+import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
+import org.danann.cernunnos.Phrase;
+import org.danann.cernunnos.Reagent;
+import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.SimpleFormula;
+import org.danann.cernunnos.SimpleReagent;
+import org.danann.cernunnos.TaskRequest;
+import org.danann.cernunnos.TaskResponse;
+
+public final class FooTask extends AbstractContainerTask {
+
+    // Instance Members.
+    private Phrase attribute_name;
+    private Phrase foo;
+    private final Log log = LogFactory.getLog(getClass());
+
+    /*
+     * Public API.
+     */
+
+    public static final Reagent ATTRIBUTE_NAME = new SimpleReagent("ATTRIBUTE_NAME", "@attribute-name", 
+            ReagentType.PHRASE, String.class, "Optional name under which the value of FOO will be " +
+            "registered as a request attribute.  If omitted, the name 'FooAttributes.FOO' will be " +
+            "used.", new LiteralPhrase(FooAttributes.FOO));
+
+    public static final Reagent FOO = new SimpleReagent("FOO", "@foo", ReagentType.PHRASE, String.class, 
+            "The foo object that will be available to subtasks as the request attribute specified by " +
+            "ATTRIBUTE_NAME.");
+
+    public Formula getFormula() {
+        Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, FOO, AbstractContainerTask.SUBTASKS};
+        final Formula rslt = new SimpleFormula(getClass(), reagents);
+        return rslt;
+    }
+
+    public void init(EntityConfig config) {
+
+        super.init(config);
+
+        // Instance Members.
+        this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
+        this.foo = (Phrase) config.getValue(FOO);
+
+    }
+
+    public void perform(TaskRequest req, TaskResponse res) {
+
+        Object f = null;
+        try {
+            final String name = (String) attribute_name.evaluate(req, res);
+            f = foo.evaluate(req, res);
+            res.setAttribute(name, f);
+            if (log.isInfoEnabled()) {
+                log.info("The FooTask performed the foo operation " +
+                        "successfully.  The 'foo' object is:  " + f);
+            }
+        } catch (Throwable t) {
+            String msg = "The FooTask failed to foo properly.  The 'foo' " +
+                                                "object is:  " + f;
+            throw new RuntimeException(msg, t);
+        }
+        
+        super.performSubtasks(req, res);
+        
+    }
+
+}
+</pre></code>
+
+<p><a href="../anatomy-of-a-task.html#FooTask">Return to Anatomy of a Task</a></p>
+
+<hr/>
+
+</body>
+</html>
