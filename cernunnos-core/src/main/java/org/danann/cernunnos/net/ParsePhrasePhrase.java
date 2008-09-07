@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Andrew Wills
+ * Copyright 2008 Andrew Wills
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-public final class UrlPhrase implements Phrase {
+public final class ParsePhrasePhrase implements Phrase {
 
 	// Instance Members.
 	private Grammar grammar;
@@ -53,7 +53,7 @@ public final class UrlPhrase implements Phrase {
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};
-		return new SimpleFormula(UrlPhrase.class, reagents);
+		return new SimpleFormula(getClass(), reagents);
 	}
 
 	public void init(EntityConfig config) {

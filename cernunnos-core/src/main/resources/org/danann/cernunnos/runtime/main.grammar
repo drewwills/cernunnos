@@ -734,17 +734,6 @@ Response:</pre>
           | Package:  net
           +-->
 
-        <entry name="url" impl="org.danann.cernunnos.net.UrlPhrase">
-            <description>
-                <p>Reads the resource at the specified location, constructs a new Phrase from the content, and returns the result of evaluating the Phrase.</p>
-            </description>
-            <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
-                <pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${url(/C:/passwd.txt)}">
-  <sql-statement sql="${req($1)}"/>
-</sql-connection></xmp></pre>
-            </example>
-        </entry>
-
         <entry name="contentsOf" impl="org.danann.cernunnos.net.ContentsOfPhrase">
             <description>
                 <p>Reads the resource at the specified location and returns the contents as a <code>String</code>.</p>
@@ -758,6 +747,26 @@ Response:</pre>
     </string-replace>
 </with-attribute></xmp></pre>
             </example>
+        </entry>
+
+        <entry name="phrase" impl="org.danann.cernunnos.net.ParsePhrasePhrase">
+            <description>
+                <p>Reads the resource at the specified location, constructs a new Phrase from the content, and returns the result of evaluating the Phrase.</p>
+            </description>
+            <example caption="Connects to a database using the password stored in '/C:/passwd.txt', executes the SQL statement specified by the first argument on the command line">
+                <pre><xmp><sql-connection driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:8887" username="sa" password="${phrase(/C:/passwd.txt)}">
+  <sql-statement sql="${req($1)}"/>
+</sql-connection></xmp></pre>
+            </example>
+        </entry>
+
+        <entry name="url" impl="org.danann.cernunnos.net.ParsePhrasePhrase">
+            <description>
+                <p>Reads the resource at the specified location, constructs a new Phrase from the content, and returns the result of evaluating the Phrase.</p>
+            </description>
+            <deprecation since="1.0.0">
+                <p>Use <a href="phrase-PHRASE.html">${phrase}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <!--
