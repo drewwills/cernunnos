@@ -1,5 +1,5 @@
 /*
- * Copyright 2007 Andrew Wills
+ * Copyright 2008 Andrew Wills
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.ReturnValue;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
@@ -180,9 +181,9 @@ public class ScriptRunner {
 	/**
 	 * Invokes the specified <code>Task</code>.
 	 *
-	 * @param k A bootstrapped <code>Task</code> object.
+	 * @param k A fully-bootstrapped <code>Task</code> object.
 	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
+	 * specified task.
 	 */
 	public TaskResponse run(Task k) {
 		return run(k, new RuntimeRequestResponse());
@@ -194,10 +195,10 @@ public class ScriptRunner {
 	 * method if you need to pre-load information into the
 	 * <code>TaskRequest</code>.
 	 *
-	 * @param k A bootstrapped <code>Task</code> object.
+	 * @param k A fully-bootstrapped <code>Task</code> object.
 	 * @param req A <code>TaskRequest</code> prepared externally.
 	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
+	 * specified task.
 	 */
     public TaskResponse run(Task k, TaskRequest req) {
     	return run(k, req, new RuntimeRequestResponse());
@@ -210,11 +211,11 @@ public class ScriptRunner {
 	 * pre-load information into both the <code>TaskRequest</code> and 
 	 * the <code>TaskResponse</code>.
 	 *
-	 * @param k A bootstrapped <code>Task</code> object.
+	 * @param k A fully-bootstrapped <code>Task</code> object.
 	 * @param req A <code>TaskRequest</code> prepared externally.
 	 * @param req A <code>TaskResponse</code> prepared externally.
 	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
+	 * specified task.
 	 */
     public TaskResponse run(Task k, TaskRequest req, TaskResponse res) {
 
@@ -228,7 +229,6 @@ public class ScriptRunner {
             throw new IllegalArgumentException(msg);
         }
 
-        // Set up Attributes.ORIGIN if possible...
         // Set up Attributes.ORIGIN if possible...
         RuntimeRequestResponse tr = new RuntimeRequestResponse();
         tr.enclose(req);
@@ -268,8 +268,110 @@ public class ScriptRunner {
         return res;
 
     }
+    
+    /**
+     * Invokes the script found at the specified location (file system or URL) 
+     * and returns the <code>RETURN_VALUE</code>.
+     *
+     * @param location A file on the file system or a URL.
+     * @return The <code>RETURN_VALUE</code> of the specified task.
+     */
+    public Object evaluate(String location) {
+        return evaluate(location, new RuntimeRequestResponse());
+    }
 
-	/*
+    /**
+     * Invokes the script found at the specified location (file system or URL) 
+     * and returns the <code>RETURN_VALUE</code>.
+     *
+     * @param location A file on the file system or a URL.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>RETURN_VALUE</code> of the specified task.
+     */
+    public Object evaluate(String location, TaskRequest req) {
+
+        // Assertions.
+        if (location == null) {
+            String msg = "Argument 'location' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+
+        return evaluate(compileTask(location), req);
+
+    }
+
+    /**
+     * Invokes the script defined by the specified element with the specified
+     * <code>TaskRequest</code> and returns the <code>RETURN_VALUE</code>.
+     *
+     * @param m An <code>Element</code> that defines a Task.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>RETURN_VALUE</code> of the specified task.
+     */
+    public Object evaluate(Element m, TaskRequest req) {
+
+        // Assertions.
+        if (m == null) {
+            String msg = "Argument 'm [Element]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+
+        return evaluate(compileTask(m), req);
+
+    }
+
+    /**
+     * Invokes the specified <code>Task</code> and returns the 
+     * <code>RETURN_VALUE</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @return The <code>RETURN_VALUE</code> of the specified task.
+     */
+    public Object evaluate(Task k) {
+        return evaluate(k, new RuntimeRequestResponse());
+    }
+
+    /**
+     * Invokes the specified <code>Task</code> with the specified
+     * <code>TaskRequest</code> and returns the <code>RETURN_VALUE</code>.  
+     * Use this overload of the <code>evaluate</code> method if you need to 
+     * pre-load information into the <code>TaskRequest</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>RETURN_VALUE</code> of the specified task.
+     */
+    public Object evaluate(Task k, TaskRequest req) {
+        return evaluate(k, req, new RuntimeRequestResponse());
+    }
+
+    /**
+     * Invokes the specified <code>Task</code> with the specified
+     * <code>TaskRequest</code> and <code>TaskResponse</code> and returns the 
+     * <code>RETURN_VALUE</code>.  Use this 
+     * overload of the <code>evaluate</code> method when you may need to 
+     * pre-load information into both the <code>TaskRequest</code> and 
+     * the <code>TaskResponse</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @param req A <code>TaskResponse</code> prepared externally.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified task.
+     */
+    public Object evaluate(Task k, TaskRequest req, TaskResponse res) {
+        
+        ReturnValueImpl rslt = new ReturnValueImpl();
+        RuntimeRequestResponse tr = new RuntimeRequestResponse();
+        tr.enclose(req);
+        tr.setAttribute(Attributes.RETURN_VALUE, rslt);
+        
+        run(k, tr, res);
+        return rslt.getValue();
+
+    }
+
+    /*
 	 * Nested Types.
 	 */
 
@@ -315,6 +417,26 @@ public class ScriptRunner {
 
         public String getOrigin() {
             return origin;
+        }
+
+    }
+
+    private static final class ReturnValueImpl implements ReturnValue {
+        
+        // Instance Members.
+        private Object value;
+        
+        
+        /*
+         * Public API.
+         */
+        
+        public Object getValue() {
+            return value;
+        }
+        
+        public void setValue(Object value) {
+            this.value = value;
         }
 
     }
