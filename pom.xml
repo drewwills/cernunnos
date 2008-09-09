@@ -44,7 +44,7 @@
         <cvsclient.version>20060125</cvsclient.version>
         <dom4j.version>1.6.1</dom4j.version>
         <groovy.version>1.5.6</groovy.version>
-        <groovy-engine.version>1.0</groovy-engine.version>
+        <groovy-engine.version>1.1</groovy-engine.version>
         <mail.version>1.4.1</mail.version>
         <jaxen.version>1.1.1</jaxen.version>
         <junit.version>4.4</junit.version>
