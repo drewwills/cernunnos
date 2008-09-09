@@ -93,7 +93,15 @@ public final class ScriptEnginePhrase implements Phrase {
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
          */
         public ScriptEngine createObject(String key) {
-            final ScriptEngine scriptEngine = SCRIPT_ENGINE_MANAGER.getEngineByName(key);
+            
+        	ScriptEngine scriptEngine = null;
+        	try {
+        	    scriptEngine = SCRIPT_ENGINE_MANAGER.getEngineByName(key);
+        	} catch (Throwable t) {
+        		final String msg = "SCRIPT_ENGINE_MANAGER could not get the specified engine:  " + key;
+        		throw new RuntimeException(msg, t);
+        	}
+        	
             if (scriptEngine == null) {
                 final RuntimeException re = new RuntimeException("Unable to locate the specified scripting engine:  " + key);
                 LOG.error(re, re);
@@ -101,6 +109,7 @@ public final class ScriptEnginePhrase implements Phrase {
             }
             
             return scriptEngine;
+            
         }
 
         /* (non-Javadoc)
@@ -111,5 +120,7 @@ public final class ScriptEnginePhrase implements Phrase {
             final Object threadingAbility = factory.getParameter("THREADING");
             return threadingAbility != null;
         }
+        
     }
+    
 }
