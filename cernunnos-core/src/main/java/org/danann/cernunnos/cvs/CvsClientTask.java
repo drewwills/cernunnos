@@ -46,6 +46,7 @@ public class CvsClientTask extends AbstractContainerTask {
 	private Phrase attribute_name;
 	private Phrase cvsroot;
 	private Phrase encoded_password;
+	private Phrase adapter;
 	private final Log log = LogFactory.getLog(getClass());
 
 	/*
@@ -59,11 +60,14 @@ public class CvsClientTask extends AbstractContainerTask {
 	public static final Reagent CVSROOT = new SimpleReagent("CVSROOT", "@cvsroot", ReagentType.PHRASE, String.class,
 					"CVSRoot string for connecting to the CVS server (e.g. ':pserver:user@host:/usr/local/cvsroot').");
 
+	public static final Reagent ADAPTER = new SimpleReagent("ADAPTER", "@adapter", ReagentType.PHRASE, CVSAdapter.class,
+					"Event handling adapter class (this must be coded in Java)", new LiteralPhrase(new CVSAdapterImpl()));
+	
 	public static final Reagent ENCODED_PASSWORD = new SimpleReagent("ENCODED_PASSWORD", "@encoded-password", 
 					ReagentType.PHRASE, String.class, "The CVS password encoded appropriately.");
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CVSROOT, ENCODED_PASSWORD, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CVSROOT, ENCODED_PASSWORD, ADAPTER, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
@@ -76,7 +80,8 @@ public class CvsClientTask extends AbstractContainerTask {
 		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
 		this.cvsroot = (Phrase) config.getValue(CVSROOT);
 		this.encoded_password = (Phrase) config.getValue(ENCODED_PASSWORD);
-
+		this.adapter = (Phrase) config.getValue(ADAPTER);
+		
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
@@ -96,7 +101,7 @@ public class CvsClientTask extends AbstractContainerTask {
 		    conn.open();
 		    
 			Client client = new Client(conn, new StandardAdminHandler());
-			client.getEventManager().addCVSListener(new CVSAdapterImpl());
+			client.getEventManager().addCVSListener((CVSAdapter) adapter.evaluate(req, res));
 						
 			// Execute Children...
 			res.setAttribute((String) attribute_name.evaluate(req, res), client);
@@ -124,8 +129,9 @@ public class CvsClientTask extends AbstractContainerTask {
 	 * Nested Types.
 	 */
 	
-    public class CVSAdapterImpl extends CVSAdapter {
+    public static class CVSAdapterImpl extends CVSAdapter {
 
+		@Override
         public void messageSent(MessageEvent e) {
         	
             String msg = e.getMessage();
