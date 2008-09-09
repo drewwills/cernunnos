@@ -59,14 +59,14 @@ public class CvsClientTask extends AbstractContainerTask {
 
 	public static final Reagent CVSROOT = new SimpleReagent("CVSROOT", "@cvsroot", ReagentType.PHRASE, String.class,
 					"CVSRoot string for connecting to the CVS server (e.g. ':pserver:user@host:/usr/local/cvsroot').");
-
-	public static final Reagent ADAPTER = new SimpleReagent("ADAPTER", "@adapter", ReagentType.PHRASE, CVSAdapter.class,
-					"Event handling adapter class (this must be coded in Java)", new LiteralPhrase(new CVSAdapterImpl()));
 	
 	public static final Reagent ENCODED_PASSWORD = new SimpleReagent("ENCODED_PASSWORD", "@encoded-password", 
 					ReagentType.PHRASE, String.class, "The CVS password encoded appropriately.");
 
-	public Formula getFormula() {
+    public static final Reagent ADAPTER = new SimpleReagent("ADAPTER", "@adapter", ReagentType.PHRASE, CVSAdapter.class,
+            "Event handling adapter class (this must be coded in Java)", new LiteralPhrase(new CVSAdapterImpl()));
+
+    public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CVSROOT, ENCODED_PASSWORD, ADAPTER, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
