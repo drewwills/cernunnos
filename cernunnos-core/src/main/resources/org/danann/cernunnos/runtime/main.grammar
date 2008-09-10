@@ -482,6 +482,11 @@ Response:</pre>
             <description>
                 <p>Perfoms a CVS <code>checkout</code> ('co') operation.</p>
             </description>
+            <example caption="Checks out the 'foo/bar' CVS module into the 'myProject' directory">
+                <pre><xmp><cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+    <cvs-checkout local-path="/usr/local/person" dir="myProject" module="foo/bar"/>
+</cvs-client></xmp></pre>
+            </example>
         </entry>
 
         <entry name="cvs-client" impl="org.danann.cernunnos.cvs.CvsClientTask">
@@ -496,18 +501,43 @@ Response:</pre>
                     required by CVS command classes. 
                 </p>
             </description>
+            <example caption="Checks out the 'foo/bar' CVS module into the 'myProject' directory">
+                <pre><xmp><cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+    <cvs-checkout local-path="/usr/local/person" dir="myProject" module="foo/bar"/>
+</cvs-client></xmp></pre>
+            </example>
+            <example caption="Adds 'some-file.txt' and the entire contents of 'another-sub-dir' to the 'myProject' CVS module">
+                <pre><xmp><cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+    <cvs-add local-path="C:\HOME\work\myProject">
+        <file>some-sub-dir\some-file.txt</file>
+        <file>some-sub-dir\another-sub-dir</file>
+    </cvs-add>
+</cvs-client></xmp></pre>
+            </example>
         </entry>
 
         <entry name="cvs-commit" impl="org.danann.cernunnos.cvs.CommitTask">
             <description>
                 <p>Perfoms a CVS <code>commit</code> operation.</p>
             </description>
+            <example caption="Commits the 'MyClass.java' file within the CVS module checked out to '/usr/local/person' with the message 'Fixing a bug'">
+                <pre><xmp><cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+    <cvs-commit files="MyClass.java" local-path="/usr/local/person" message="Fixing a bug"/>
+</cvs-client></xmp></pre>
+            </example>
         </entry>
 
         <entry name="cvs-remove" impl="org.danann.cernunnos.cvs.RemoveTask">
             <description>
                 <p>Perfoms a CVS <code>remove</code> operation.</p>
             </description>
+            <example caption="Removes the files 'abc.txt' and 'xyz.txt' from the CVS module checked out at '/usr/local/person'">
+                <pre><xmp><with-attribute key="myFiles" value="${groovy(['abc.txt', 'xyz.txt'])}">
+    <cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+        <cvs-remove files="${myFiles}" local-path="/usr/local/person"/>
+    </cvs-client>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <!--
@@ -554,12 +584,22 @@ Response:</pre>
             <description>
                 <p>Reads, bootstrapps, and exececutes the specified Cernunnos script.</p>
             </description>
+            <example caption="Invokes the 'go-to-south-park.crn' file once for each of the specified characters">
+                <pre><xmp><for-each items="${groovy(['Stan', 'Kyle', 'Cartman', 'Kenny'])}">
+    <crn location="go-to-south-park.crn"/>
+</for-each></xmp></pre>
+            </example>
         </entry>
 
         <entry name="for-each" impl="org.danann.cernunnos.flow.ForEachTask">
             <description>
                 <p>Iterates over the elements in ITEMS, performing SUBTASKS once for each item.</p>
             </description>
+            <example caption="Invokes the 'go-to-south-park.crn' file once for each of the specified characters">
+                <pre><xmp><for-each items="${groovy(['Stan', 'Kyle', 'Cartman', 'Kenny'])}">
+    <crn location="go-to-south-park.crn"/>
+</for-each></xmp></pre>
+            </example>
         </entry>
 
         <entry name="if" impl="org.danann.cernunnos.flow.IfTask">
@@ -874,6 +914,13 @@ Response:</pre>
             <mkdirs path="${Attributes.STRING}"/>
         </token-iterator>
     </if>
+</with-attribute></xmp></pre>
+            </example>
+            <example caption="Removes the files 'abc.txt' and 'xyz.txt' from the CVS module checked out at '/usr/local/person'">
+                <pre><xmp><with-attribute key="myFiles" value="${groovy(['abc.txt', 'xyz.txt'])}">
+    <cvs-client cvsroot=":pserver:user@host:/usr/local/cvsroot" encoded-password="change^me">
+        <cvs-remove files="${myFiles}" local-path="/usr/local/person"/>
+    </cvs-client>
 </with-attribute></xmp></pre>
             </example>
         </entry>
