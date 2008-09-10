@@ -36,7 +36,7 @@ public final class SequencePhrase implements Phrase {
 	 * Public API.
 	 */
 	
-	public static final Reagent SEQUENCE_NAME = new SimpleReagent("SEQUENCE_NAME", "@sequence-name", ReagentType.PHRASE, 
+	public static final Reagent SEQUENCE_NAME = new SimpleReagent("SEQUENCE_NAME", "descendant-or-self::text()", ReagentType.PHRASE, 
 				String.class, "Optional name for the sequence created by this task.  If omitted, the name " +
 				"'SequenceTask.DEFAULT_SEQUENCE_NAME' will be used.", new LiteralPhrase("SequenceTask.DEFAULT_SEQUENCE_NAME"));
 
