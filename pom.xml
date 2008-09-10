@@ -37,6 +37,7 @@
 
     <properties>
         <commons-dbcp.version>1.2.2</commons-dbcp.version>
+        <commons-fileupload.version>1.2.1</commons-fileupload.version>
         <commons-jexl.version>1.1</commons-jexl.version>
         <commons-lang.version>2.4</commons-lang.version>
         <commons-logging.version>1.1.1</commons-logging.version>
@@ -67,6 +68,11 @@
                 <groupId>commons-dbcp</groupId>
                 <artifactId>commons-dbcp</artifactId>
                 <version>${commons-dbcp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>${commons-fileupload.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-jexl</groupId>
