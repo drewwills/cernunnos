@@ -68,6 +68,7 @@
         <entry name="req" impl="org.danann.cernunnos.AttributePhrase">
             <description>
                 <p>Returns the value of the specified attribute from the TaskRequest.  An error will occur if the attribute is not present.</p>
+                <p>The <code>${req}</code> phrase is the <i>default phrase implementation</i> in Cernunnos.  In other words, it's not necessary to name it explicitly to use it.  The expression '<code>${Attributes.LOCATION}</code>' is preferred, and is equivalent to '<code>${req(Attributes.LOCATION)}</code>.'</p>
             </description>
             <example caption="Copies the document at 'http://www.google.com' to the file system location identified by the first argument on the command line">
                 <pre><xmp><copy-file location="http://www.google.com" to-file="${req($1)}"/></xmp></pre>
@@ -455,6 +456,7 @@ Response:</pre>
         <entry name="with" impl="org.danann.cernunnos.core.WithTask">
             <description>
                 <p>Creates one or more request attributes using KEYS and VALUES, then invokes subtasks.</p>
+                <p>See also: <a href="with-attribute-TASK.html">&lt;with-attribute&gt;</a></p>
             </description>
             <example caption="Creates request attributes named 'foo' and 'myPath' then displays the value of each.">
                 <pre><xmp><with>
