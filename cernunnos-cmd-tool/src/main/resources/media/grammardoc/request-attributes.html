@@ -54,12 +54,25 @@ commonly support the <code>ATTRIBUTE_NAME</code> reagent.  These include
 <a href="entries/req-PHRASE.html"><code>${req()}</code> phrase</a>.  Just put the name
 of the desired request attribute between the parentheses, like so:</p>
 
-<blockquote><code>$req(Attributes.LOCATION)</code></blockquote>
+<blockquote><code>${req(Attributes.LOCATION)}</code></blockquote>
 
 <p>Just like tasks, phrases use reagents to accept inputs;  the expression
 '<code>Attributes.LOCATION</code>' above is associated with the <code>KEY</code>
-reagent of <code>${req()}</code>.  Unlike tasks, typically phrases may only have
+reagent of <code>${req()}</code>.  Unlike tasks, phrases typically have only 
 one reagent.</p>
+
+<p>Accessing request attributes is very common in Cernunnos.  The 
+<code>${req()}</code> phrase, therefore, is the <i>default phrase 
+implementation</i>.  Since it's the default, you don't have to specify it 
+explicitly to use it.</p>
+
+<p>The expression:</p>
+
+<blockquote><code>${req(Attributes.LOCATION)}</code></blockquote>
+
+<p>is usually abbreviated as:</p>
+
+<blockquote><code>${Attributes.LOCATION}</code></blockquote>
 
 <h3>Other Important Considerations</h3>
 
@@ -121,7 +134,11 @@ underscore '_' characters).  For example:</p>
 	<li><code>XmlAttributes.ENTITY_RESOLVER</code></li>
 </ul>
 
-<p><i>Ad-hoc</i> request attributes need not (and probably <em>should not</em>) adhere to this convention.</p>
+<p><i>Ad-hoc</i> request attributes need not -- <em>and should not</em> -- adhere 
+to this convention.  User-defined request attributes that contain special 
+characters may not play well with some <code>Task</code> or <code>Phrase</code> 
+implementations.  Use camel-case names for request attributes, like Java 
+variables (<i>e.g.</i> 'myFile' or 'theXslTemplateLocation').</p>
 
 <h3>Request Attributes at Startup</h3>
 

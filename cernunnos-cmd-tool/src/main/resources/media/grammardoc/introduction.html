@@ -45,13 +45,20 @@ The reason for this condition is that industry-normal programming practices
 include designing the <em>shape</em> of components (i.e. the way in which they
 connect to other components) together and in accordance with their
 <em>function</em>.  The result is components that look a lot like what they do.
-Components that collaborate with other components must be coded to fit them
-explicitly.  New collaborations require refactoring, forking, or simply
-rewriting one or more participants.</p>
+New components that collaborate with existing components must be written to fit 
+them explicitly, and new collaborations among existing components always require 
+one or more labor-intensive undertakings:</p>
+
+<ul>
+    <li>writing <i>"glue code"</i></li>
+    <li>refactoring</li>
+    <li>forking</li>
+    <li>rewriting (<i>i.e.</i> giving up)</li>
+</ul>
 
 <p>Cernunnos seeks to define the shape of software components independent of
 their function.  Put another way, Cernunnos makes software less like puzzle
-pieces and more like Lego bricks.  Since all the components have the same shape,
+pieces and more like LEGO bricks.  Since all the components have the same shape,
 the number of possible combinations is open-ended.</p>
 
 <h3>Tasks &amp; Phrases</h3>
