@@ -198,12 +198,12 @@ public class CernunnosPortlet extends GenericPortlet {
 
     }
 
-    public void runScript(URL u, PortletRequest req, PortletResponse res) {
+    private void runScript(URL u, PortletRequest req, PortletResponse res) {
         runScript(u, req, res, new RuntimeRequestResponse());
     }
 
     @SuppressWarnings("unchecked")
-    public void runScript(URL u, PortletRequest req, PortletResponse res, RuntimeRequestResponse rrr) {
+    private void runScript(URL u, PortletRequest req, PortletResponse res, RuntimeRequestResponse rrr) {
 
         // Choose the right Task...
         Task k = getTask(u);
@@ -216,6 +216,9 @@ public class CernunnosPortlet extends GenericPortlet {
         // data & convert to request attributes if we find any...
         List<InputStream> streams = new LinkedList<InputStream>();
         if (req instanceof ActionRequest && PortletFileUpload.isMultipartContent((ActionRequest) req)) {
+            
+            log.debug("Miltipart form data detected (preparing to process).");
+            
             try {
                 final DiskFileItemFactory fac = new DiskFileItemFactory();
                 final PortletFileUpload pfu = new PortletFileUpload(fac);
@@ -225,8 +228,12 @@ public class CernunnosPortlet extends GenericPortlet {
                 fac.setSizeThreshold((int) (maxSize + 1L));
                 List<FileItem> items = pfu.parseRequest((ActionRequest) req);
                 for (FileItem f : items) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Processing file upload:  name='" + f.getName() 
+                                    + "',fieldName='" + f.getFieldName() + "'");
+                    }
                     InputStream inpt = f.getInputStream();
-                    rrr.setAttribute(f.getName(), inpt);
+                    rrr.setAttribute(f.getFieldName(), inpt);
                     streams.add(inpt);
                 }
             } catch (Throwable t) {
@@ -234,6 +241,9 @@ public class CernunnosPortlet extends GenericPortlet {
                                             "form data from the request.";
                 throw new RuntimeException(msg, t);
             }
+            
+        } else {
+            log.debug("Miltipart form data was not detected.");
         }
 
         // Anything that should be included from the spring_context?
