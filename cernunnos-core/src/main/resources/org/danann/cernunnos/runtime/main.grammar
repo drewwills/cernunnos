@@ -93,6 +93,23 @@
                  in the thread pool to complete before completing itself.</p>
                  <p>Use a <a href="concurrent-TASK.html">&lt;concurrent&gt;</a> task within this task.</p>
              </description>
+            <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
+                <pre><xmp><js>
+    <script>
+        var urls = ['http://www.google.com/', 'http://www.amazon.com/', 'http://www.yahoo.com/'];
+        ScriptAttributes.RESPONSE.setAttribute('urls', urls);
+    </script>
+    <subtasks>
+        <thread-pool threads="5">
+            <for-each items="${groovy([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}" attribute-name="num">
+                <concurrent>
+                    <echo-ln>${num}=${checksum(${js(urls[num % 3])})}</echo-ln>
+                </concurrent>
+            </for-each>
+        </thread-pool>
+    </subtasks>
+</js></xmp></pre>
+            </example>
           </entry>
           
           <entry name="concurrent" impl="org.danann.cernunnos.concurrent.ConcurrentTask">
@@ -101,6 +118,23 @@
                  name 'ConcurrentAttributes.EXECUTOR_SERVICE'.</p>
                  <p>Use this task within a <a href="thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
              </description>
+            <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
+                <pre><xmp><js>
+    <script>
+        var urls = ['http://www.google.com/', 'http://www.amazon.com/', 'http://www.yahoo.com/'];
+        ScriptAttributes.RESPONSE.setAttribute('urls', urls);
+    </script>
+    <subtasks>
+        <thread-pool threads="5">
+            <for-each items="${groovy([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}" attribute-name="num">
+                <concurrent>
+                    <echo-ln>${num}=${checksum(${js(urls[num % 3])})}</echo-ln>
+                </concurrent>
+            </for-each>
+        </thread-pool>
+    </subtasks>
+</js></xmp></pre>
+            </example>
           </entry>
 
         <!--
@@ -199,6 +233,15 @@
             <description>
                 <p>Returns the JNDI object defined by EXPRESSION.</p>
             </description>
+            <example caption="Obtains a DataSource from JNDI, then opens a Connection, then executes an SQL statement using a parameter from a request attribute">
+                <pre><xmp><with-attribute key="SqlAttributes.DATA_SOURCE" value="${jndi(java:comp/env/jdbc/PortalDb)}">
+  <sql-connection>
+    <sql-statement sql="DELETE FROM up_layout_struct WHERE user_id = ?">
+      <parameter value="${sql(SELECT user_id FROM up_user WHERE user_name = '${req(username)}')}"/>
+    </sql-statement>
+  </sql-connection>
+</with-attribute></xmp></pre>
+            </example>
         </entry>
 
         <entry name="line-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask">
@@ -389,6 +432,9 @@ Response:</pre>
             <description>
                 <p>Returns the value of the System property specified by PROPERTY.</p>
             </description>
+            <example caption="Extracts Apache Tomcat version 6.0.16 to the current user's home directory">
+                <pre><xmp><extract-archive location="apache-tomcat-6.0.16.zip" to-dir="${sysprop(user.home)}"/></xmp></pre>
+            </example>
         </entry>
 
         <entry name="token-iterator" impl="org.danann.cernunnos.core.TokenIteratorTask">
@@ -708,6 +754,9 @@ Response:</pre>
             <description>
                 <p>Extracts the contents of the specified archive and writes them to the specified directory.</p>
             </description>
+            <example caption="Extracts Apache Tomcat version 6.0.16 to the current user's home directory">
+                <pre><xmp><extract-archive location="apache-tomcat-6.0.16.zip" to-dir="${sysprop(user.home)}"/></xmp></pre>
+            </example>
         </entry>
 
         <entry name="file" impl="org.danann.cernunnos.io.FilePhrase">
@@ -965,6 +1014,23 @@ Response:</pre>
                 <p>Returns the value of the specified JavaScript EXPRESSION.</p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(js)}"/>
+            <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
+                <pre><xmp><js>
+    <script>
+        var urls = ['http://www.google.com/', 'http://www.amazon.com/', 'http://www.yahoo.com/'];
+        ScriptAttributes.RESPONSE.setAttribute('urls', urls);
+    </script>
+    <subtasks>
+        <thread-pool threads="5">
+            <for-each items="${groovy([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}" attribute-name="num">
+                <concurrent>
+                    <echo-ln>${num}=${checksum(${js(urls[num % 3])})}</echo-ln>
+                </concurrent>
+            </for-each>
+        </thread-pool>
+    </subtasks>
+</js></xmp></pre>
+            </example>
         </entry>
 
         <entry name="js" impl="org.danann.cernunnos.script.ScriptTask">
@@ -972,6 +1038,23 @@ Response:</pre>
                 <p>Invokes operations specified by SCRIPT using the JavaScript engine.</p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(js)}"/>
+            <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
+                <pre><xmp><js>
+    <script>
+        var urls = ['http://www.google.com/', 'http://www.amazon.com/', 'http://www.yahoo.com/'];
+        ScriptAttributes.RESPONSE.setAttribute('urls', urls);
+    </script>
+    <subtasks>
+        <thread-pool threads="5">
+            <for-each items="${groovy([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}" attribute-name="num">
+                <concurrent>
+                    <echo-ln>${num}=${checksum(${js(urls[num % 3])})}</echo-ln>
+                </concurrent>
+            </for-each>
+        </thread-pool>
+    </subtasks>
+</js></xmp></pre>
+            </example>
         </entry>
 
         <!--
