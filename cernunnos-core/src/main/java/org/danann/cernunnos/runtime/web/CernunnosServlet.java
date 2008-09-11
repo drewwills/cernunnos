@@ -186,28 +186,23 @@ public class CernunnosServlet extends HttpServlet {
 			}
 			
 			// Render the view...
-			try {
-				String scriptPath = settings.getValue(Settings.Entry.VIEW_PREFIX)
-									+ viewPath
-									+ settings.getValue(Settings.Entry.VIEW_SUFFIX);
-				URL url = getServletConfig().getServletContext().getResource(scriptPath);
-				runScript(url, req, res);
-			} catch (Throwable t) {
-				String msg = "Rendering failure in CernunnosPortlet.doView()";
-				throw new ServletException(msg, t);
-			}
+			String scriptPath = settings.getValue(Settings.Entry.VIEW_PREFIX)
+								+ viewPath
+								+ settings.getValue(Settings.Entry.VIEW_SUFFIX);
+			URL url = getServletConfig().getServletContext().getResource(scriptPath);
+			runScript(url, req, res);
 
 		}
 		
 	}
 	
 	
-    public void runScript(URL u, HttpServletRequest req, HttpServletResponse res) {
+    private void runScript(URL u, HttpServletRequest req, HttpServletResponse res) throws ServletException {
     	runScript(u, req, res, new RuntimeRequestResponse());
     }
 
     @SuppressWarnings("unchecked")
-	public void runScript(URL u, HttpServletRequest req, HttpServletResponse res, RuntimeRequestResponse rrr) {
+	private void runScript(URL u, HttpServletRequest req, HttpServletResponse res, RuntimeRequestResponse rrr) throws ServletException {
 
         // Choose the right Task...
         Task k = getTask(u);
@@ -223,8 +218,19 @@ public class CernunnosServlet extends HttpServlet {
         		rrr.setAttribute((String) entry.getKey(), entry.getValue());
         	}
         }
-
-        runner.run(k, rrr);
+		
+		try {
+			runner.run(k, rrr);
+		} catch(Exception ex) {
+			
+			// Something went wrong in the Cernunnos script.  
+			
+			if (log.isFatalEnabled()) {
+				log.fatal("An error occurred during the run", ex);
+			}
+			
+			throw new ServletException("An error occurred during the run", ex);
+		}
 
     }
 
