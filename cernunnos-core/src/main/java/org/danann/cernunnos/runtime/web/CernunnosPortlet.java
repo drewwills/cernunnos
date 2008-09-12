@@ -38,19 +38,17 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.portlet.PortletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
-
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.Grammar;
-import org.danann.cernunnos.ReturnValue;
+import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.Task;
-import org.danann.cernunnos.runtime.XmlGrammar;
 import org.danann.cernunnos.runtime.RuntimeRequestResponse;
 import org.danann.cernunnos.runtime.ScriptRunner;
+import org.danann.cernunnos.runtime.XmlGrammar;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 public class CernunnosPortlet extends GenericPortlet {
 
@@ -309,29 +307,4 @@ public class CernunnosPortlet extends GenericPortlet {
         return rslt;
 
     }
-
-    /*
-     * Nested Types.
-     */
-
-    private static final class ReturnValueImpl implements ReturnValue {
-        
-        // Instance Members.
-        private Object value;
-        
-        
-        /*
-         * Public API.
-         */
-        
-        public Object getValue() {
-            return value;
-        }
-        
-        public void setValue(Object value) {
-            this.value = value;
-        }
-
-    }
-
 }

@@ -23,7 +23,7 @@ import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
-import org.danann.cernunnos.ReturnValue;
+import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
@@ -69,30 +69,6 @@ public final class CernunnosPhrase implements Phrase {
 		
 		task.perform(req, res);
 		return rslt.getValue();
-
-	}
-	
-	/*
-	 * Nested Types.
-	 */
-
-	private static final class ReturnValueImpl implements ReturnValue {
-		
-		// Instance Members.
-		private Object value;
-		
-		
-		/*
-		 * Public API.
-		 */
-		
-		public Object getValue() {
-			return value;
-		}
-		
-		public void setValue(Object value) {
-			this.value = value;
-		}
 
 	}
 	

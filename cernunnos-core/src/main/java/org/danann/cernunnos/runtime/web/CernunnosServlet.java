@@ -27,22 +27,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.Grammar;
-import org.danann.cernunnos.ReturnValue;
-import org.danann.cernunnos.Task;
-import org.danann.cernunnos.runtime.XmlGrammar;
-import org.danann.cernunnos.runtime.RuntimeRequestResponse;
-import org.danann.cernunnos.runtime.ScriptRunner;
-import org.danann.cernunnos.runtime.web.Settings.Entry;
 
-import org.dom4j.io.SAXReader;
-import org.dom4j.Document;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.springframework.context.support.FileSystemXmlApplicationContext;
+import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.ReturnValueImpl;
+import org.danann.cernunnos.Task;
+import org.danann.cernunnos.runtime.RuntimeRequestResponse;
+import org.danann.cernunnos.runtime.ScriptRunner;
+import org.danann.cernunnos.runtime.XmlGrammar;
+import org.danann.cernunnos.runtime.web.Settings.Entry;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * 
@@ -262,32 +261,4 @@ public class CernunnosServlet extends HttpServlet {
         return rslt;
 
 	}
-	
-	
-	/*
-     * Nested Types.
-     */
-
-	// TODO: this is the same as for CernunnosPortlet.  Does it make sense to
-	// give this thing its own class with default access?
-    private static final class ReturnValueImpl implements ReturnValue {
-		
-		// Instance Members.
-		private Object value;
-		
-		
-		/*
-		 * Public API.
-		 */
-		
-		public Object getValue() {
-			return value;
-		}
-		
-		public void setValue(Object value) {
-			this.value = value;
-		}
-
-	}
-
 }

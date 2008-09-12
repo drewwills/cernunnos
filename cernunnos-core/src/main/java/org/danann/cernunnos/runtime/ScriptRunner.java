@@ -26,7 +26,7 @@ import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
-import org.danann.cernunnos.ReturnValue;
+import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
@@ -257,7 +257,7 @@ public class ScriptRunner {
             msg.append("** Invoking ScriptRunner.run(Task, TaskRequest)\n");
             msg.append("** TaskRequest contains ").append(tr.getAttributeNames().size()).append(" elements\n");
             for (String name : tr.getAttributeNames()) {
-                msg.append("**   - ").append(name).append("=").append(tr.getAttribute(name).toString()).append("\n");
+                msg.append("**   - ").append(name).append("=").append(String.valueOf(tr.getAttribute(name))).append("\n");
             }
             msg.append("**************************************************\n");
             log.info(msg.toString());
@@ -420,25 +420,4 @@ public class ScriptRunner {
         }
 
     }
-
-    private static final class ReturnValueImpl implements ReturnValue {
-        
-        // Instance Members.
-        private Object value;
-        
-        
-        /*
-         * Public API.
-         */
-        
-        public Object getValue() {
-            return value;
-        }
-        
-        public void setValue(Object value) {
-            this.value = value;
-        }
-
-    }
-
 }

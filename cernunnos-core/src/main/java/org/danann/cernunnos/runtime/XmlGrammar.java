@@ -28,21 +28,20 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
-
 import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReturnValue;
+import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.Task;
-import org.danann.cernunnos.EntityConfig;
+import org.dom4j.Document;
+import org.dom4j.DocumentFactory;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 /**
  * Represents a "task language" or syntax in Cernunnos.  <code>XmlGrammar</code>
@@ -411,29 +410,4 @@ public final class XmlGrammar implements Grammar {
 		}
 
     }
-
-    /*
-     * Nested Types.
-     */
-    
-    private static final class ReturnValueImpl implements ReturnValue {
-		
-		// Instance Members.
-		private Object value;
-		
-		
-		/*
-		 * Public API.
-		 */
-		
-		public Object getValue() {
-			return value;
-		}
-		
-		public void setValue(Object value) {
-			this.value = value;
-		}
-
-	}
-
 }
