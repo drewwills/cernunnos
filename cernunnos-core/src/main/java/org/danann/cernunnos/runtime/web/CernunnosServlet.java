@@ -204,22 +204,22 @@ public class CernunnosServlet extends HttpServlet {
     @SuppressWarnings("unchecked")
 	private void runScript(URL u, HttpServletRequest req, HttpServletResponse res, RuntimeRequestResponse rrr) throws ServletException {
 
-        // Choose the right Task...
-        Task k = getTask(u);
-
-        // Basic, guaranteed request attributes...
-    	rrr.setAttribute(WebAttributes.REQUEST, req);
-        rrr.setAttribute(WebAttributes.RESPONSE, res);
-
-        // Anything that should be included from the spring_context?
-        if (spring_context != null && spring_context.containsBean("requestAttributes")) {
-        	Map<String,Object> requestAttributes = (Map<String,Object>) spring_context.getBean("requestAttributes");
-        	for (Map.Entry entry : requestAttributes.entrySet()) {
-        		rrr.setAttribute((String) entry.getKey(), entry.getValue());
-        	}
-        }
-		
 		try {
+			// Choose the right Task...
+			Task k = getTask(u);
+
+			// Basic, guaranteed request attributes...
+			rrr.setAttribute(WebAttributes.REQUEST, req);
+			rrr.setAttribute(WebAttributes.RESPONSE, res);
+
+			// Anything that should be included from the spring_context?
+			if (spring_context != null && spring_context.containsBean("requestAttributes")) {
+				Map<String,Object> requestAttributes = (Map<String,Object>) spring_context.getBean("requestAttributes");
+				for (Map.Entry entry : requestAttributes.entrySet()) {
+					rrr.setAttribute((String) entry.getKey(), entry.getValue());
+				}
+			}
+		
 			runner.run(k, rrr);
 		} catch(Exception ex) {
 			
