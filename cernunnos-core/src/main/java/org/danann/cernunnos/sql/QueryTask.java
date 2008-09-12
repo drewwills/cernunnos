@@ -56,6 +56,7 @@ public final class QueryTask extends AbstractContainerTask {
 	private Phrase connectionPhrase;
 	private Phrase sql;
 	private List<Phrase> parameters;
+	private List<Task> emptyResult;
 
 	/*
 	 * Public API.
@@ -80,8 +81,11 @@ public final class QueryTask extends AbstractContainerTask {
 	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
 									"The set of tasks that are children of this query task.", new LinkedList<Task>());
 
+    public static final Reagent EMPTY_RESULT = new SimpleReagent("EMPTY_RESULT", "empty-result/*", ReagentType.NODE_LIST, List.class,
+            "The set of tasks that will be executed if the query returns no results.", new LinkedList<Task>());
+
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {DATA_SOURCE, CONNECTION, SQL, PARAMETERS, SUBTASKS};
+		Reagent[] reagents = new Reagent[] {DATA_SOURCE, CONNECTION, SQL, PARAMETERS, SUBTASKS, EMPTY_RESULT};
 		final Formula rslt = new SimpleFormula(QueryTask.class, reagents);
 		return rslt;
 	}
@@ -101,6 +105,7 @@ public final class QueryTask extends AbstractContainerTask {
         for (final Node n : nodes) {
             parameters.add(config.getGrammar().newPhrase(n));
         }
+        this.emptyResult = this.loadSubtasks(config, EMPTY_RESULT, false);
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
@@ -111,11 +116,15 @@ public final class QueryTask extends AbstractContainerTask {
         
         //Setup the parameter setter and row callback handler for this task and the request/response
         final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(this.parameters, req, res);
-        final RowCallbackHandler rowCallbackHandler = new ResponseMappingRowCallbackHandler(this, req, res);
+        final ResponseMappingRowCallbackHandler rowCallbackHandler = new ResponseMappingRowCallbackHandler(this, req, res);
         
         //Get the SQL and run the query
         final String finalSql = (String) sql.evaluate(req, res);
         jdbcOperations.query(finalSql, preparedStatementSetter, rowCallbackHandler);
+        
+        if (rowCallbackHandler.getRowCount() == 0) {
+            this.performSubtasks(req, res, this.emptyResult);
+        }
 	}
 	
 	/**
@@ -127,6 +136,7 @@ public final class QueryTask extends AbstractContainerTask {
 	    private final QueryTask queryTask;
         private final TaskRequest req;
         private final TaskResponse res;
+        private int rowCount = 0;
 
         private ResponseMappingRowCallbackHandler(QueryTask queryTask, TaskRequest req, TaskResponse res) {
             this.queryTask = queryTask;
@@ -138,6 +148,8 @@ public final class QueryTask extends AbstractContainerTask {
          * @see org.springframework.jdbc.core.RowCallbackHandler#processRow(java.sql.ResultSet)
          */
         public void processRow(ResultSet rs) throws SQLException {
+            this.rowCount++;
+            
             final ResultSetMetaData rsmd = rs.getMetaData();
             this.res.setAttribute(SqlAttributes.RESULT_SET_METADATA, rsmd);
             
@@ -152,6 +164,13 @@ public final class QueryTask extends AbstractContainerTask {
 
             // Invoke subtasks...
             this.queryTask.performSubtasks(this.req, this.res);
+        }
+
+        /**
+         * @return the rowCount
+         */
+        public int getRowCount() {
+            return this.rowCount;
         }
 	}
 }
