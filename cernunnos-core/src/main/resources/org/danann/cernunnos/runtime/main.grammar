@@ -82,6 +82,51 @@
             <description>
                 <p>Caches the object returned by the factory Phrase using the specified cache-key and makes it availbe under the key attribute.</p>
             </description>
+<example caption="Executues a SQL query and caches the result under a custom key">
+                <pre><xmp><cache key="STRUCTURE_STYLESHEET_ID" cache-key="STRUCTURE_STYLESHEET_ID.${STRUCTURE_STYLESHEET_NAME}">
+    <factory>
+        <sql-query>
+            <sql>
+                SELECT SS_ID AS STRUCTURE_STYLESHEET_ID
+                FROM UP_SS_STRUCT 
+                WHERE SS_NAME = ?
+            </sql>
+            <parameter value="${STRUCTURE_STYLESHEET_NAME}"/>
+            <subtasks>
+                <return value="${STRUCTURE_STYLESHEET_ID}" />
+            </subtasks>
+        </sql-query>    
+    </factory>
+    <subtasks>
+        <return value="${STRUCTURE_STYLESHEET_ID}" />
+    </subtasks>
+</cache></xmp></pre>
+            </example>
+          </entry>
+          
+          <entry name="concurrent" impl="org.danann.cernunnos.concurrent.ConcurrentTask">
+             <description>
+                 <p>Executes the subtasks concurrently using the thread pool from the request under the default attribute 
+                 name 'ConcurrentAttributes.EXECUTOR_SERVICE'.</p>
+                 <p>Use this task within a <a href="thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
+             </description>
+            <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
+                <pre><xmp><js>
+    <script>
+        var urls = ['http://www.google.com/', 'http://www.amazon.com/', 'http://www.yahoo.com/'];
+        ScriptAttributes.RESPONSE.setAttribute('urls', urls);
+    </script>
+    <subtasks>
+        <thread-pool threads="5">
+            <for-each items="${groovy([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])}" attribute-name="num">
+                <concurrent>
+                    <echo-ln>${num}=${checksum(${js(urls[num % 3])})}</echo-ln>
+                </concurrent>
+            </for-each>
+        </thread-pool>
+    </subtasks>
+</js></xmp></pre>
+            </example>
         </entry>
 
          <!--
