@@ -16,7 +16,6 @@
 
 package org.danann.cernunnos;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,9 +31,7 @@ import org.dom4j.Element;
 public abstract class AbstractContainerTask implements Task {
     protected final Log log = LogFactory.getLog(this.getClass());
 
-	// NB:  We're using the subtasks reference as a que, so we want the concrete 
-	// reference type, not the interface.
-	private LinkedList<Task> subtasks;
+	private List<Task> subtasks;
 
 	/*
 	 * Public API.
@@ -48,24 +45,7 @@ public abstract class AbstractContainerTask implements Task {
 	 * runtime.
 	 */
 	public void init(EntityConfig config) {
-
-		// The following fancy conversion is here to avoid type safety warnings...
-		final List<?> list = (List<?>) config.getValue(SUBTASKS);
-		this.subtasks = new LinkedList<Task>();
-		for (Iterator<?> it = list.iterator(); it.hasNext();) {
-			Element e = (Element) it.next();
-			this.subtasks.add(config.getGrammar().newTask(e, this));
-		}
-		
-		// There's likely an error in the Cernunnos XML 
-		// if we don't have any subtasks, issue a warning...
-		if (subtasks.size() == 0 && log.isWarnEnabled()) {
-			String msg = "POSSIBLE PROGRAMMING ERROR:  Class '" 
-								+ getClass().getName() 
-								+ "' has an empty collection of SUBTASKS.";
-			log.warn(msg);
-		}
-		
+	    this.subtasks = this.loadSubtasks(config, SUBTASKS, true);
 	}
 	
 	/*
@@ -88,10 +68,37 @@ public abstract class AbstractContainerTask implements Task {
 	 */
 	protected static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "*", ReagentType.NODE_LIST, List.class, 
 								"The set of tasks that are children of this task.", new LinkedList<Task>());
+	
+	/**
+	 * Abstracts the loading of subtasks for a Reagent into a single menthod
+	 * 
+	 * @param warnIfMissing If true a WARN level log message will be issued if no tasks are loaded for the Reagent 
+	 */
+	@SuppressWarnings("unchecked")
+    protected List<Task> loadSubtasks(EntityConfig config, Reagent subtasksPhrase, boolean warnIfMissing) {
+	    final List<Task> subtasks = new LinkedList<Task>();
+	    
+	    final List<Element> taskElements = (List<Element>) config.getValue(subtasksPhrase);
+	    final Grammar grammar = config.getGrammar();
+        for (final Element taskElement : taskElements) {
+            final Task task = grammar.newTask(taskElement, this);
+            subtasks.add(task);
+        }
+        
+        // There's likely an error in the Cernunnos XML 
+        // if we don't have any subtasks, issue a warning...
+        if (warnIfMissing && subtasks.size() == 0 && log.isWarnEnabled()) {
+            log.warn("POSSIBLE PROGRAMMING ERROR:  Class '" 
+                    + getClass().getName() 
+                    + "' has an empty collection of " + subtasksPhrase.getName());
+        }
+        
+        return subtasks;
+	}
 
 	/**
 	 * Subclasses <strong>must</strong> invoke 
-	 * <code>super.performChildren</code> within their own <code>perform</code> 
+	 * <code>super.performSubtasks</code> within their own <code>perform</code> 
 	 * method if child tasks are to be executed at all.  Naturally, subclasses 
 	 * may process their own operations before subtasks, after subtasks, or 
 	 * both.  Subclasses may also refrain from invoking child tasks if 
@@ -101,28 +108,33 @@ public abstract class AbstractContainerTask implements Task {
 	 * @param res Contains output information and operations.
 	 */
 	protected void performSubtasks(TaskRequest req, TaskResponse res) {
-
-		// Assertions...
-		if (req == null) {
-			String msg = "Argument 'req' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
-		if (res == null) {
-			String msg = "Argument 'res' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
-		if (subtasks == null) {
-			String msg = "Child tasks have not been initialized.  Subclasses "
-							+ "of AbstractContainerTask must call super.init() "
-							+ "within their own init() method.";
-			throw new IllegalStateException(msg);
-		}
-		
-		// Invoke each of our children...
-		for (Task k : subtasks) {
-			k.perform(req, res);
-		}
-		
+	    this.performSubtasks(req, res, this.subtasks);
+	}
+	
+	/**
+	 * Executes a List of Tasks as children of this Task
+	 */
+	protected void performSubtasks(TaskRequest req, TaskResponse res, List<Task> tasks) {
+        // Assertions...
+        if (req == null) {
+            String msg = "Argument 'req' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (res == null) {
+            String msg = "Argument 'res' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (tasks == null) {
+            String msg = "Child tasks have not been initialized.  Subclasses "
+                            + "of AbstractContainerTask must call super.init() "
+                            + "within their own init() method.";
+            throw new IllegalStateException(msg);
+        }
+        
+        // Invoke each of our children...
+        for (Task k : tasks) {
+            k.perform(req, res);
+        }
 	}
 
 }
