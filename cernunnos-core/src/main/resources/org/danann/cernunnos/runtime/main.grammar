@@ -248,12 +248,37 @@
             </deprecation>
         </entry>
 
-        <entry name="jexl" impl="org.danann.cernunnos.core.JexlPhrase">
+        <entry name="handle-error" impl="org.danann.cernunnos.core.ErrorHandlingTask">
             <description>
-                <p>Evaluates the specified JEXL expression and returns the result.  All current request attributes will be visible.</p>
+                <p>Executes the tasks defined by TRY.  If an error 
+                occurs, this task will attempt to match the runtime type of the 
+                error with a CATCH_CLASS.  If there is a match, this task will 
+                execute the associated CATCH_BLOCK;  if not, it will re-throw 
+                the original error.</p>
+                <p><strong>WARNING</strong>:  be careful using CATCH_CLASS.  It 
+                may be difficult to guess the actual runtime type of the error 
+                that will be caught, even if you understand where the Cernunnos 
+                XML is likely to fail, since the original error may be wrapped 
+                one or more times before it's compared to CATCH_CLASS.  The 
+                &lt;handle-error&gt; task will, however, unwrap a 
+                ManagedException and use its cause in comparisons.</p>
             </description>
-            <example caption="Writes 'Hello World!' to System.out">
-                <pre><xmp><echo>${jexl('Hello' + ' World!')}</echo></xmp></pre>
+            <example caption="Writes 'I caught something else...' to the console window">
+                <pre><xmp><handle-error>
+    <try>
+        <groovy>
+            <script>
+                throw new RuntimeException('Not good.');
+            </script>
+        </groovy>
+    </try>
+    <catch class="${groovy(IllegalArgumentException.class)}">
+        <echo-ln>I caught an IllegalArgumentException...</echo-ln>
+    </catch>
+    <catch>
+        <echo-ln>I caught something else...</echo-ln>
+    </catch>
+</handle-error></xmp></pre>
             </example>
         </entry>
 
@@ -264,6 +289,15 @@
             <deprecation since="1.0.0">
                 <p>Use <a href="groovy-TASK.html">&lt;groovy&gt;</a> and/or <a href="groovy-Phrase.html">${groovy}</a> instead, or another supported scripting language.</p>
             </deprecation>
+        </entry>
+
+        <entry name="jexl" impl="org.danann.cernunnos.core.JexlPhrase">
+            <description>
+                <p>Evaluates the specified JEXL expression and returns the result.  All current request attributes will be visible.</p>
+            </description>
+            <example caption="Writes 'Hello World!' to System.out">
+                <pre><xmp><echo>${jexl('Hello' + ' World!')}</echo></xmp></pre>
+            </example>
         </entry>
 
         <entry name="isNull" impl="org.danann.cernunnos.core.IsNullPhrase">
