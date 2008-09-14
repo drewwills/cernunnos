@@ -20,16 +20,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dom4j.Document;
+import org.dom4j.io.SAXReader;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.ReturnValueImpl;
@@ -38,10 +47,6 @@ import org.danann.cernunnos.runtime.RuntimeRequestResponse;
 import org.danann.cernunnos.runtime.ScriptRunner;
 import org.danann.cernunnos.runtime.XmlGrammar;
 import org.danann.cernunnos.runtime.web.Settings.Entry;
-import org.dom4j.Document;
-import org.dom4j.io.SAXReader;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * 
@@ -211,7 +216,42 @@ public class CernunnosServlet extends HttpServlet {
 			rrr.setAttribute(WebAttributes.REQUEST, req);
 			rrr.setAttribute(WebAttributes.RESPONSE, res);
 
-			// Anything that should be included from the spring_context?
+	        // Also let's check the request for multi-part form 
+	        // data & convert to request attributes if we find any...
+	        List<InputStream> streams = new LinkedList<InputStream>();
+	        if (ServletFileUpload.isMultipartContent(req)) {
+	            
+	            log.debug("Miltipart form data detected (preparing to process).");
+	            
+	            try {
+	                final DiskFileItemFactory fac = new DiskFileItemFactory();
+	                final ServletFileUpload sfu = new ServletFileUpload(fac);
+	                final long maxSize = sfu.getFileSizeMax();  // FixMe!!
+	                sfu.setFileSizeMax(maxSize);
+	                sfu.setSizeMax(maxSize);
+	                fac.setSizeThreshold((int) (maxSize + 1L));
+	                List<FileItem> items = sfu.parseRequest(req);
+	                for (FileItem f : items) {
+	                    if (log.isDebugEnabled()) {
+	                        log.debug("Processing file upload:  name='" + f.getName() 
+	                                    + "',fieldName='" + f.getFieldName() + "'");
+	                    }
+	                    InputStream inpt = f.getInputStream();
+	                    rrr.setAttribute(f.getFieldName(), inpt);
+	                    rrr.setAttribute(f.getFieldName() + "_FileItem", f);
+	                    streams.add(inpt);
+	                }
+	            } catch (Throwable t) {
+	                String msg = "Cernunnos servlet failed to process multipart " +
+	                                            "form data from the request.";
+	                throw new RuntimeException(msg, t);
+	            }
+	            
+	        } else {
+	            log.debug("Miltipart form data was not detected.");
+	        }
+
+	        // Anything that should be included from the spring_context?
 			if (spring_context != null && spring_context.containsBean("requestAttributes")) {
 				Map<String,Object> requestAttributes = (Map<String,Object>) spring_context.getBean("requestAttributes");
 				for (Map.Entry entry : requestAttributes.entrySet()) {
@@ -220,6 +260,19 @@ public class CernunnosServlet extends HttpServlet {
 			}
 		
 			runner.run(k, rrr);
+
+	        // Clean up resources...
+	        if (streams.size() > 0) {
+	            try {
+	                for (InputStream inpt : streams) {
+	                    inpt.close();
+	                }
+	            } catch (Throwable t) {
+	                String msg = "Cernunnos servlet failed to release resources.";
+	                throw new RuntimeException(msg, t);
+	            }
+	        }
+
 		} catch(Exception ex) {
 			
 			// Something went wrong in the Cernunnos script.  
