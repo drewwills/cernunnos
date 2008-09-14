@@ -232,10 +232,11 @@ public class CernunnosPortlet extends GenericPortlet {
                     }
                     InputStream inpt = f.getInputStream();
                     rrr.setAttribute(f.getFieldName(), inpt);
+                    rrr.setAttribute(f.getFieldName() + "_FileItem", f);
                     streams.add(inpt);
                 }
             } catch (Throwable t) {
-                String msg = "Cernunnos servlet failed to process multipart " +
+                String msg = "Cernunnos portlet failed to process multipart " +
                                             "form data from the request.";
                 throw new RuntimeException(msg, t);
             }
@@ -261,7 +262,7 @@ public class CernunnosPortlet extends GenericPortlet {
                     inpt.close();
                 }
             } catch (Throwable t) {
-                String msg = "Cernunnos servlet failed to release resources.";
+                String msg = "Cernunnos portlet failed to release resources.";
                 throw new RuntimeException(msg, t);
             }
         }
