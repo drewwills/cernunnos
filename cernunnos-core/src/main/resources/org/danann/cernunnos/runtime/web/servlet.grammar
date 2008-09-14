@@ -28,6 +28,12 @@
             </description>
         </entry>
 
+        <entry name="download" impl="org.danann.cernunnos.runtime.web.DownloadTask">
+            <description>
+                <p>Write the specified SOURCE content to the HTTP response.</p>
+            </description>
+        </entry>
+
     </entries>
 
     <subtasks>
