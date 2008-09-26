@@ -18,6 +18,7 @@ package org.danann.cernunnos.spring;
 
 import java.net.URL;
 
+import org.springframework.beans.factory.BeanIsAbstractException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
@@ -93,7 +94,12 @@ public final class ApplicationContextTask extends AbstractContainerTask {
 			ApplicationContext beans = getApplicationContext(config, 
 							(Boolean) cache.evaluate(req, res));
 			for (String name : beans.getBeanDefinitionNames()) {
-				res.setAttribute(name, beans.getBean(name));
+			    try {
+	                res.setAttribute(name, beans.getBean(name));
+			    } catch (BeanIsAbstractException biae) {
+			        // This is normal -- we can't ask for abstract beans...
+			        log.debug("Skipping the following bean because it is abstract:  " + name);
+			    }
 			}
 
 		} catch (Throwable t) {
