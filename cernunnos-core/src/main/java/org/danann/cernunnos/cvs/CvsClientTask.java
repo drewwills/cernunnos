@@ -39,6 +39,8 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.netbeans.lib.cvsclient.connection.Connection;
+import org.netbeans.lib.cvsclient.connection.ExtConnection;
 
 public class CvsClientTask extends AbstractContainerTask {
 	
@@ -47,8 +49,17 @@ public class CvsClientTask extends AbstractContainerTask {
 	private Phrase cvsroot;
 	private Phrase encoded_password;
 	private Phrase adapter;
+	private Phrase cvs_ext;
+	
 	private final Log log = LogFactory.getLog(getClass());
 
+	// Used to detect when a setting necessary for a protocol
+	// was not set.  This is static so == tests can be done below.
+	private static final LiteralPhrase DEFAULT_PHRASE = 
+			new LiteralPhrase("");
+	
+	private static final String DEFAULT_VALUE = "";
+	
 	/*
 	 * Public API.
 	 */
@@ -61,13 +72,16 @@ public class CvsClientTask extends AbstractContainerTask {
 					"CVSRoot string for connecting to the CVS server (e.g. ':pserver:user@host:/usr/local/cvsroot').");
 	
 	public static final Reagent ENCODED_PASSWORD = new SimpleReagent("ENCODED_PASSWORD", "@encoded-password", 
-					ReagentType.PHRASE, String.class, "The CVS password encoded appropriately.");
+					ReagentType.PHRASE, String.class, "The CVS password encoded appropriately.", DEFAULT_PHRASE);
 
+	public static final Reagent CVS_EXT = new SimpleReagent("CVS_EXT", "@cvs-ext", ReagentType.PHRASE, String.class,
+					"External command to use when :ext protocol is specified.", DEFAULT_PHRASE);
+	
     public static final Reagent ADAPTER = new SimpleReagent("ADAPTER", "@adapter", ReagentType.PHRASE, CVSAdapter.class,
             "Event handling adapter class (this must be coded in Java)", new LiteralPhrase(new CVSAdapterImpl()));
 
     public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CVSROOT, ENCODED_PASSWORD, ADAPTER, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CVSROOT, ENCODED_PASSWORD, CVS_EXT, ADAPTER, AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
@@ -80,6 +94,7 @@ public class CvsClientTask extends AbstractContainerTask {
 		this.attribute_name = (Phrase) config.getValue(ATTRIBUTE_NAME);
 		this.cvsroot = (Phrase) config.getValue(CVSROOT);
 		this.encoded_password = (Phrase) config.getValue(ENCODED_PASSWORD);
+		this.cvs_ext = (Phrase) config.getValue(CVS_EXT);
 		this.adapter = (Phrase) config.getValue(ADAPTER);
 		
 	}
@@ -88,20 +103,49 @@ public class CvsClientTask extends AbstractContainerTask {
 		
 		String cvsr = (String) cvsroot.evaluate(req, res);
 		String passwd = (String) encoded_password.evaluate(req, res);
-
-		PServerConnection conn = null;
+		String cvsExt = (String) cvs_ext.evaluate(req, res);
+		CVSAdapter cvsAdapter = (CVSAdapter) adapter.evaluate(req, res);
+		
+		Connection conn = null;
 		try {
 			
 			// Analyze CVSRoot...
 			CVSRoot root = CVSRoot.parse(cvsr);
 			
+			if (root.getMethod().equals(CVSRoot.METHOD_PSERVER)) {
+				
+				if (passwd == DEFAULT_VALUE) {
+					throw new RuntimeException("@encrypted-password not set " +
+							"for :pserver: cvsroot.  @cvsroot=" + cvsr);
+				}
+				
+				PServerConnection psconn = new PServerConnection(root);
+				psconn.setEncodedPassword(passwd);
+				
+				conn = psconn;
+			} else if (root.getMethod().equals(CVSRoot.METHOD_EXT)) {
+				
+				if (cvsExt == DEFAULT_VALUE) {
+					throw new RuntimeException("@cvs-ext not set for " +
+							":ext: cvsroot.  @cvsroot=" +cvsr);
+				}
+				
+				ExtConnection extconn = new ExtConnection(cvsExt);
+				extconn.setRepository(root.getRepository());
+				
+				conn = extconn;
+			} else {
+				
+				throw new RuntimeException("Unable to build connection for " +
+						cvsr);
+			}
+			
+			
 			// Open connection/create client...
-			conn = new PServerConnection(root);
-		    conn.setEncodedPassword(passwd);
 		    conn.open();
 		    
 			Client client = new Client(conn, new StandardAdminHandler());
-			client.getEventManager().addCVSListener((CVSAdapter) adapter.evaluate(req, res));
+			client.getEventManager().addCVSListener(cvsAdapter);
 						
 			// Execute Children...
 			res.setAttribute((String) attribute_name.evaluate(req, res), client);
@@ -111,7 +155,9 @@ public class CvsClientTask extends AbstractContainerTask {
 		} catch (Throwable t) {
 			String msg = "Error creating the specified CVS client:" +
 							"\n\t\tCVSROOT:  " + cvsr +
-							"\n\t\tENCODED_PASSWORD:  " + passwd;
+							"\n\t\tENCODED_PASSWORD:  " + passwd +
+							"\n\t\tCVS_EXT:  " + cvsExt +
+							"\n\t\tADAPTER:  " + cvsAdapter.getClass().getName();
 			throw new RuntimeException(msg, t);
 		} finally {
 			try {
@@ -151,5 +197,5 @@ public class CvsClientTask extends AbstractContainerTask {
         }
         
     }
-
+	
 }
