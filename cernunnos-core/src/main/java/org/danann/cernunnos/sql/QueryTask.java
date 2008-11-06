@@ -16,6 +16,8 @@
 
 package org.danann.cernunnos.sql;
 
+import java.io.IOException;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -26,6 +28,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.io.IOUtils;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
@@ -155,11 +158,25 @@ public final class QueryTask extends AbstractContainerTask {
             
             //Make all the data on the current row available to subtasks...
             for (int columnIndex = 1; columnIndex <= rsmd.getColumnCount(); columnIndex++) {
-                final Object value = rs.getObject(columnIndex);
+                if (rsmd.getColumnType(columnIndex) == java.sql.Types.CLOB) {
+                    try {
+                        final Object value = IOUtils.toString(rs.getClob(columnIndex).getCharacterStream());
 
-                // Access either by column name or column index...
-                this.res.setAttribute(String.valueOf(columnIndex), value);
-                this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
+                        // Access either by column name or column index...
+                        this.res.setAttribute(String.valueOf(columnIndex), value);
+                        this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
+                    }
+                    catch (IOException ex) {
+                		throw new SQLException("Error converting CLOB value to String");
+                	}
+                }
+                else {
+                    final Object value = rs.getObject(columnIndex);
+
+                    // Access either by column name or column index...
+                    this.res.setAttribute(String.valueOf(columnIndex), value);
+                    this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
+                }
             }
 
             // Invoke subtasks...
