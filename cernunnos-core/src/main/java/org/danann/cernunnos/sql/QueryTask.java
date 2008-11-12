@@ -37,6 +37,7 @@ import org.danann.cernunnos.LiteralPhrase;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.SimpleDeprecation;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
@@ -70,9 +71,10 @@ public final class QueryTask extends AbstractContainerTask {
             		"'SqlAttributes.DATA_SOURCE' will be used", new AttributePhrase(SqlAttributes.DATA_SOURCE, new LiteralPhrase(null)));
 
 	public static final Reagent CONNECTION = new SimpleReagent("CONNECTION", "@connection", ReagentType.PHRASE, Connection.class,
-					"**DEPRECATED:  Use DATA_SOURCE instead.**  Optional Connection object.  The default is the value of the " +
+					"Optional Connection object.  The default is the value of the " +
 					"'SqlAttributes.CONNECTION' request attribute (if specified) or null.", 
-					new AttributePhrase(SqlAttributes.CONNECTION, new LiteralPhrase(null)));
+					new AttributePhrase(SqlAttributes.CONNECTION, new LiteralPhrase(null)), 
+					new SimpleDeprecation("1.0.1", "Use DATA_SOURCE instead"));
 	
 	public static final Reagent SQL = new SimpleReagent("SQL", "sql", ReagentType.PHRASE, String.class,
 										"The SQL query statement that will be executed.");
@@ -164,7 +166,7 @@ public final class QueryTask extends AbstractContainerTask {
 
                         // Access either by column name or column index...
                         this.res.setAttribute(String.valueOf(columnIndex), value);
-                        this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
+                        this.res.setAttribute(rsmd.getColumnLabel(columnIndex).toUpperCase(), value);
                     }
                     catch (IOException ex) {
                 		throw new SQLException("Error converting CLOB value to String");
@@ -177,6 +179,7 @@ public final class QueryTask extends AbstractContainerTask {
                     this.res.setAttribute(String.valueOf(columnIndex), value);
                     this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
                 }
+
             }
 
             // Invoke subtasks...
