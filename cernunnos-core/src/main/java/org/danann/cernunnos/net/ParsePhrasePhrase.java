@@ -90,7 +90,7 @@ public final class ParsePhrasePhrase implements Phrase {
 			rslt = text.evaluate(req, res);
 
 		} catch (Throwable t) {
-			String msg = "UrlPhrase terminated unexpectedly.";
+			String msg = "ParsePhrasePhrase terminated unexpectedly.";
 			throw new RuntimeException(msg, t);
 		} finally {
 			if (inpt != null) {
