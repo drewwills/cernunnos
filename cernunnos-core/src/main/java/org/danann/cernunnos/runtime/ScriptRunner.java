@@ -19,6 +19,7 @@ package org.danann.cernunnos.runtime;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,45 +48,45 @@ import org.dom4j.io.SAXReader;
  */
 public class ScriptRunner {
 
-	// Instance Members.
-	private final Grammar grammar;
-	private final Log log;	// Don't declare as static in general libraries
+    // Instance Members.
+    private final Grammar grammar;
+    private final Log log;  // Don't declare as static in general libraries
 
-	/*
-	 * Public API.
-	 */
+    /*
+     * Public API.
+     */
 
-	/**
-	 * Creates a <code>ScriptRunner</code> based on the default
-	 * <code>Grammar</code>.
-	 */
-	public ScriptRunner() {
-		this(XmlGrammar.getMainGrammar());
-	}
+    /**
+     * Creates a <code>ScriptRunner</code> based on the default
+     * <code>Grammar</code>.
+     */
+    public ScriptRunner() {
+        this(XmlGrammar.getMainGrammar());
+    }
 
-	/**
-	 * Creates a <code>ScriptRunner</code> based on the specified
-	 * <code>Grammar</code>.
-	 */
-	public ScriptRunner(Grammar g) {
+    /**
+     * Creates a <code>ScriptRunner</code> based on the specified
+     * <code>Grammar</code>.
+     */
+    public ScriptRunner(Grammar g) {
 
-		// Assertions.
-		if (g == null) {
-			String msg = "Argument 'g [Grammar]' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (g == null) {
+            String msg = "Argument 'g [Grammar]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		// Instance Members.
-		this.grammar = g;
-		this.log = LogFactory.getLog(ScriptRunner.class);
+        // Instance Members.
+        this.grammar = g;
+        this.log = LogFactory.getLog(ScriptRunner.class);
 
-	}
+    }
 
-	/**
-	 * Prepares a <code>Task</code> for (subsequent) execution.
-	 *
-	 * @param location Absolute or relative location of a Cernunnos script file.
-	 */
+    /**
+     * Prepares a <code>Task</code> for (subsequent) execution.
+     *
+     * @param location Absolute or relative location of a Cernunnos script file.
+     */
     public Task compileTask(String location) {
 
         // Assertions.
@@ -109,114 +110,133 @@ public class ScriptRunner {
 
     }
 
-	/**
-	 * Prepares a <code>Task</code> for (subsequent) execution.
-	 *
-	 * @param m A pre-parsed Cernunnos script file.
-	 */
-	public Task compileTask(Element m) {
+    /**
+     * Prepares a <code>Task</code> for (subsequent) execution.
+     *
+     * @param m A pre-parsed Cernunnos script file.
+     */
+    public Task compileTask(Element m) {
 
-		// Assertions.
-		if (m == null) {
-			String msg = "Argument 'm [Element]' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (m == null) {
+            String msg = "Argument 'm [Element]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		return grammar.newTask(m, null);
+        return grammar.newTask(m, null);
 
-	}
+    }
 
-	/**
-	 * Invokes the script found at the specified location (file system or URL).
-	 *
-	 * @param location A file on the file system or a URL.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
-	 */
-	public TaskResponse run(String location) {
-		return run(location, new RuntimeRequestResponse());
-	}
+    /**
+     * Invokes the script found at the specified location (file system or URL).
+     *
+     * @param location A file on the file system or a URL.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified script.
+     */
+    public TaskResponse run(String location) {
+        return run(location, new RuntimeRequestResponse());
+    }
 
-	/**
-	 * Invokes the script found at the specified location (file system or URL).
-	 *
-	 * @param location A file on the file system or a URL.
-	 * @param req A <code>TaskRequest</code> prepared externally.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
-	 */
-	public TaskResponse run(String location, TaskRequest req) {
+    /**
+     * Invokes the script found at the specified location (file system or URL).
+     *
+     * @param location A file on the file system or a URL.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified script.
+     */
+    public TaskResponse run(String location, TaskRequest req) {
 
-		// Assertions.
-		if (location == null) {
-			String msg = "Argument 'location' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (location == null) {
+            String msg = "Argument 'location' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		return run(compileTask(location), req);
+        return run(compileTask(location), req);
 
-	}
+    }
 
-	/**
-	 * Invokes the script defined by the specified element with the specified
-	 * <code>TaskRequest</code>.
-	 *
-	 * @param m An <code>Element</code> that defines a Task.
-	 * @param req A <code>TaskRequest</code> prepared externally.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified script.
-	 */
-	public TaskResponse run(Element m, TaskRequest req) {
+    /**
+     * Invokes the script defined by the specified element with the specified
+     * <code>TaskRequest</code>.
+     *
+     * @param m An <code>Element</code> that defines a Task.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified script.
+     */
+    public TaskResponse run(Element m, TaskRequest req) {
 
-		// Assertions.
-		if (m == null) {
-			String msg = "Argument 'm [Element]' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        // Assertions.
+        if (m == null) {
+            String msg = "Argument 'm [Element]' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 
-		return run(compileTask(m), req);
+        return run(compileTask(m), req);
 
-	}
+    }
 
-	/**
-	 * Invokes the specified <code>Task</code>.
-	 *
-	 * @param k A fully-bootstrapped <code>Task</code> object.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified task.
-	 */
-	public TaskResponse run(Task k) {
-		return run(k, new RuntimeRequestResponse());
-	}
+    /**
+     * Invokes the specified <code>Task</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified task.
+     */
+    public TaskResponse run(Task k) {
+        return run(k, new RuntimeRequestResponse());
+    }
 
-	/**
-	 * Invokes the specified <code>Task</code> with the specified
-	 * <code>TaskRequest</code>.  Use this overload of the <code>run</code>
-	 * method if you need to pre-load information into the
-	 * <code>TaskRequest</code>.
-	 *
-	 * @param k A fully-bootstrapped <code>Task</code> object.
-	 * @param req A <code>TaskRequest</code> prepared externally.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified task.
-	 */
+    /**
+     * Invokes the specified <code>Task</code> with the specified
+     * request attributes.  Use this overload of the <code>run</code>
+     * method if you need to pre-load information into the
+     * <code>TaskRequest</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @param req A <code>Map</code> of request attributes.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified task.
+     */
+    public TaskResponse run(Task k, Map<String,Object> requestAttributes) {
+        RuntimeRequestResponse req = new RuntimeRequestResponse();
+        for (Map.Entry<String,Object> y : requestAttributes.entrySet()) {
+            req.setAttribute(y.getKey(), y.getValue());
+        }
+        return run(k, req, new RuntimeRequestResponse());
+    }
+
+    /**
+     * Invokes the specified <code>Task</code> with the specified
+     * <code>TaskRequest</code>.  Use this overload of the <code>run</code>
+     * method if you need to pre-load information into the
+     * <code>TaskRequest</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified task.
+     */
     public TaskResponse run(Task k, TaskRequest req) {
-    	return run(k, req, new RuntimeRequestResponse());
+        return run(k, req, new RuntimeRequestResponse());
     }
     
-	/**
-	 * Invokes the specified <code>Task</code> with the specified
-	 * <code>TaskRequest</code> and <code>TaskResponse</code>.  Use this 
-	 * overload of the <code>run</code> method when you may need to 
-	 * pre-load information into both the <code>TaskRequest</code> and 
-	 * the <code>TaskResponse</code>.
-	 *
-	 * @param k A fully-bootstrapped <code>Task</code> object.
-	 * @param req A <code>TaskRequest</code> prepared externally.
-	 * @param req A <code>TaskResponse</code> prepared externally.
-	 * @return The <code>TaskResponse</code> that results from invoking the
-	 * specified task.
-	 */
+    /**
+     * Invokes the specified <code>Task</code> with the specified
+     * <code>TaskRequest</code> and <code>TaskResponse</code>.  Use this 
+     * overload of the <code>run</code> method when you may need to 
+     * pre-load information into both the <code>TaskRequest</code> and 
+     * the <code>TaskResponse</code>.
+     *
+     * @param k A fully-bootstrapped <code>Task</code> object.
+     * @param req A <code>TaskRequest</code> prepared externally.
+     * @param req A <code>TaskResponse</code> prepared externally.
+     * @return The <code>TaskResponse</code> that results from invoking the
+     * specified task.
+     */
     public TaskResponse run(Task k, TaskRequest req, TaskResponse res) {
 
         // Assertions.
@@ -372,8 +392,8 @@ public class ScriptRunner {
     }
 
     /*
-	 * Nested Types.
-	 */
+     * Nested Types.
+     */
 
     private static final class TaskDecorator implements Task {
 
@@ -420,4 +440,5 @@ public class ScriptRunner {
         }
 
     }
+
 }
