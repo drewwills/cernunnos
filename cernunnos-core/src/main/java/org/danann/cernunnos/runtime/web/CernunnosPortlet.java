@@ -183,12 +183,19 @@ public class CernunnosPortlet extends GenericPortlet {
 
         // Render...
         try {
+            
             res.setContentType(req.getResponseContentType());
             String viewPath = settings.getValue(Settings.Entry.VIEW_PREFIX)
                                 + view
                                 + settings.getValue(Settings.Entry.VIEW_SUFFIX);
-            URL url = getPortletConfig().getPortletContext().getResource(viewPath);
+            URL url = getPortletConfig().getPortletContext().getResource(viewPath);            
+            if (url == null) {
+                // This won't work at all...
+                String msg = "The specified viewPath is not found:  " + viewPath;
+                throw new RuntimeException(msg);
+            }            
             runScript(url, req, res);
+            
         } catch (Throwable t) {
             String msg = "Rendering failure in CernunnosPortlet.doView()";
             throw new PortletException(msg, t);
