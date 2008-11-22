@@ -56,18 +56,18 @@ public final class IfTask extends AbstractContainerTask {
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		Boolean b = (Boolean) test.evaluate(req, res);
-
-		if (b.equals(Boolean.TRUE)) {
-			super.performSubtasks(req, res);
+		if (isApplicable(req, res)) {
+		    this.performSubtasks(req, res);
 		}
 
 	}
-
+	
 	public boolean isApplicable(TaskRequest req, TaskResponse res) {
-
-		return ((Boolean) test.evaluate(req, res)).booleanValue();
-
+        return (Boolean) test.evaluate(req, res);
+    }
+	
+	public void performSubtasks(TaskRequest req, TaskResponse res) {
+	    super.performSubtasks(req, res);
 	}
 
 }

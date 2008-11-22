@@ -99,7 +99,7 @@ public final class ChooseTask implements Task {
 	
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		Task runme = null;
+		IfTask runme = null;
 		for (IfTask k : whenList) {
 			if (k.isApplicable(req, res)) {
 				runme = k;
@@ -109,7 +109,7 @@ public final class ChooseTask implements Task {
 		runme = runme != null ? runme : otherwise;
 
 		if (runme != null) {
-			runme.perform(req, res);
+			runme.performSubtasks(req, res);
 		}
 		
 	}
