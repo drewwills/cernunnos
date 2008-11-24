@@ -53,8 +53,8 @@ public final class ValueOfPhrase implements Phrase {
 					+ "provided, the value of the 'Attributes.NODE' request attribute will be used.", 
 					new AttributePhrase(Attributes.NODE));
 
-	public static final Reagent EXPRESSION = new SimpleReagent("LOCATION", "descendant-or-self::text()", 
-										ReagentType.PHRASE, String.class, "An XPATH expression.");
+	public static final Reagent EXPRESSION = new SimpleReagent("EXPRESSION", "descendant-or-self::text()", 
+										ReagentType.PHRASE, String.class, "An XPath expression that describes a node.");
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, SOURCE, EXPRESSION};
