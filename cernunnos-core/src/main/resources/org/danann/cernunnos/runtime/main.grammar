@@ -427,7 +427,9 @@ Response:</pre>
 
         <entry name="properties" impl="org.danann.cernunnos.core.PropertiesTask">
             <description>
-                <p>Reads the .properties file specified by LOCATION and registers its contents as request attributes for SUBTASKS.</p>
+                <p>Reads the properties file specified by <code>LOCATION</code> 
+                and registers its contents as request attributes visible to 
+                <code>SUBTASKS</code>.</p>
             </description>
             <example caption="Reads database connection information from a properties file, makes a connection, writes each name from the 'users' table to the screen">
                 <pre><xmp><properties location="build/WEB-INF/classes/properties/rdbm.properties">
@@ -691,7 +693,10 @@ Response:</pre>
 
         <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosPhrase">
             <description>
-                <p>Returns the value of the specified Cernunnos script;  use the <a href="return-TASK.html">&lt;return&gt;</a> task to set the return value within the specified script.</p>
+                <p>Returns the product of evaluating the Cernunnos script 
+                specified by <code>LOCATION</code>;  use the 
+                <a href="return-TASK.html">&lt;return&gt;</a> task to set the 
+                return value within the specified script.</p>
             </description>
             <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
                 <pre><xmp><choose>
@@ -709,7 +714,7 @@ Response:</pre>
 
         <entry name="crn" impl="org.danann.cernunnos.flow.CernunnosTask">
             <description>
-                <p>Reads, bootstrapps, and exececutes the specified Cernunnos script.</p>
+                <p>Reads, bootstrapps, and exececutes the Cernunnos script specified by <code>LOCATION</code>.</p>
             </description>
             <example caption="Invokes the 'go-to-south-park.crn' file once for each of the specified characters">
                 <pre><xmp><for-each items="${groovy(['Stan', 'Kyle', 'Cartman', 'Kenny'])}">
@@ -770,14 +775,16 @@ Response:</pre>
 
         <entry name="archive-iterator" impl="org.danann.cernunnos.io.ArchiveIteratorTask">
             <description>
-                <p>Iterates over the entries found in the specified archive.  Each entry name will be registered as the request attribute 'Attributes.LOCATION' for subtasks.</p>
+                <p>Iterates over the entries found in the archive specified by 
+                <code>LOCATION</code>.  Each entry name will be registered as 
+                the request attribute 'Attributes.LOCATION' for subtasks.</p>
             </description>
         </entry>
 
         <entry name="checksum" impl="org.danann.cernunnos.io.ChecksumPhrase">
             <description>
-                <p>Returns the <code>Checksum</code> value of the specified 
-                resource.  The ${checksum} phrase currently uses the 
+                <p>Returns the <code>Checksum</code> value of the resource specified 
+                by <code>LOCATION</code>.  This component currently uses the 
                 <a href="http://en.wikipedia.org/wiki/Adler-32" target="_new">Adler32 
                 algorythim</a>.</p>
             </description>
@@ -801,7 +808,11 @@ Response:</pre>
 
         <entry name="copy-file" impl="org.danann.cernunnos.io.CopyFileTask">
             <description>
-                <p>Copies the specified file to the specified location, creating missing directories as necessary.  None of this task's reagents are required, but you will usually want to specify either TO_DIR or TO_FILE.</p>
+                <p>Copies the resource specified by <code>LOCATION</code> to the 
+                chosen location, creating missing directories as necessary.  None 
+                of this task's reagents are strictly required, but you will 
+                normally want to specify either <code>TO_DIR</code> or 
+                <code>TO_FILE</code> at a minimum.</p>
             </description>
             <example caption="Copies the document at 'http://www.google.com' to the file 'google_home.html'">
                 <pre><xmp><copy-file location="http://www.google.com" to-file="google_home.html"/></xmp></pre>
@@ -833,7 +844,8 @@ Response:</pre>
 
         <entry name="extract-archive" impl="org.danann.cernunnos.io.ExtractArchiveTask">
             <description>
-                <p>Extracts the contents of the specified archive and writes them to the specified directory.</p>
+                <p>Extracts the contents of the archive specified by <code>LOCATION</code> 
+                and writes them to the chosen directory.</p>
             </description>
             <example caption="Extracts Apache Tomcat version 6.0.16 to the current user's home directory">
                 <pre><xmp><extract-archive location="apache-tomcat-6.0.16.zip" to-dir="${sysprop(user.home)}"/></xmp></pre>
@@ -1144,7 +1156,10 @@ Response:</pre>
 
         <entry name="spring-beans" impl="org.danann.cernunnos.spring.ApplicationContextTask">
             <description>
-                <p>Creates a spring context from the specified XML bean definition file, registers all the beans contained therein as request attributes, then invokes SUBTASKS.</p>
+                <p>Creates a spring context from the XML bean definition file 
+                specified by <code>LOCATION</code>, registers all the beans 
+                contained therein as request attributes, then invokes 
+                <code>SUBTASKS</code>.</p>
             </description>
             <example caption="Loads a Spring bean container defined in 'datasourceContext.xml' which contains a DataSource, then begins a transaction, then queries that DataSource for the 'user_id' associated with the 'admin' account, then performs an 'upsert' operation on the 'up_user_profile' table">
                 <pre><xmp><spring-beans location="datasourceContext.xml">
