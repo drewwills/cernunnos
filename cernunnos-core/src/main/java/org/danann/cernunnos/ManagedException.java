@@ -34,29 +34,37 @@ public class ManagedException extends RuntimeException {
 	 * Creates a new <code>ManagedException</code> that originated from the 
 	 * specified source.
 	 * 
-	 * @param source The origin of the problem within the Cernunnos XML.
+     * @param source The origin of the problem within the Cernunnos XML.
+     * @param source The <code>TaskRequest</code> at the time the issue occured.
 	 * @param cause The cause of this exception.
 	 */
-	public ManagedException(EntityConfig config, Throwable cause) {
-		super(prepareMessage(config), cause);
+	public ManagedException(EntityConfig config, TaskRequest req, Throwable cause) {
+		super(prepareMessage(config, req), cause);
 	}
 	
 	/*
 	 * Implementation.
 	 */
 
-	private static String prepareMessage(EntityConfig config) {
+	private static String prepareMessage(EntityConfig config, TaskRequest req) {
 		
 		// Assertions...
-		if (config == null) {
-			String msg = "Argument 'config' cannot be null.";
-			throw new IllegalArgumentException(msg);
-		}
+        if (config == null) {
+            String msg = "Argument 'config' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (req == null) {
+            String msg = "Argument 'req' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
 		
 		StringBuilder rslt = new StringBuilder();
-		rslt.append(PREAMBLE)
-				.append("\n\t\tEntity Name:  ").append(config.getEntryName())
-				.append("\n\t\tSource:  ").append(config.getSource());
+		rslt.append(PREAMBLE);
+		if (req.hasAttribute(Attributes.ORIGIN)) {
+	        rslt.append("\n\t\tOrigin Document:  ").append(req.getAttribute(Attributes.ORIGIN));
+		}
+	    rslt.append("\n\t\tSource:  ").append(config.getSource())
+	            .append("\n\t\tEntity Name:  ").append(config.getEntryName());
 
 		return rslt.toString();
 		

@@ -90,7 +90,7 @@ public final class RuntimeTaskDecorator implements Task {
 				}
 			}
 			
-			throw new ManagedException(config, re);
+			throw new ManagedException(config, rrr, re);
 
 		} catch (Throwable t) {
 			
@@ -102,7 +102,7 @@ public final class RuntimeTaskDecorator implements Task {
 				}
 			}
 			
-			throw new ManagedException(config, t);
+			throw new ManagedException(config, rrr, t);
 		}
 
 	}

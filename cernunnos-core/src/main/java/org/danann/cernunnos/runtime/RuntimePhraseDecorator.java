@@ -88,7 +88,7 @@ public final class RuntimePhraseDecorator implements Phrase {
 				}
 			}
 			
-			throw new ManagedException(config, re);
+			throw new ManagedException(config, rrr, re);
 
 		} catch (Throwable t) {
 			
@@ -100,7 +100,7 @@ public final class RuntimePhraseDecorator implements Phrase {
 				}
 			}
 			
-			throw new ManagedException(config, t);
+			throw new ManagedException(config, rrr, t);
 		}
 
 		return rslt;
