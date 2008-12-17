@@ -23,87 +23,71 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.danann.cernunnos.AbstractContainerTask;
-import org.danann.cernunnos.AttributePhrase;
-import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.SimpleFormula;
-import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class PropertiesTask extends AbstractContainerTask {
 
-	// Instance Members.
-	private Phrase context;
-	private Phrase location;
+    // Instance Members.
+    private final ResourceHelper resource = new ResourceHelper();
 
-	/*
-	 * Public API.
-	 */
+    /*
+     * Public API.
+     */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
-					"The context from which missing elements of the LOCATION can be inferred if it "
-					+ "is relative.  The default is the value of the 'Attributes.ORIGIN' request attribute.",
-					new AttributePhrase(Attributes.ORIGIN));
+    public Formula getFormula() {
+        Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_TASK, 
+                                                            AbstractContainerTask.SUBTASKS};
+        final Formula rslt = new SimpleFormula(getClass(), reagents);
+        return rslt;
+    }
 
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
-					"Location of a .properties file.  May be a filesystem path (absolute or relative), or a URL.  If "
-					+ "relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
-					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
+    public void init(EntityConfig config) {
 
-	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
-		final Formula rslt = new SimpleFormula(PropertiesTask.class, reagents);
-		return rslt;
-	}
+        super.init(config);
 
-	public void init(EntityConfig config) {
+        // Instance Members.
+        this.resource.init(config);
 
-		super.init(config);
+    }
 
-		// Instance Members.
-		this.context = (Phrase) config.getValue(CONTEXT);
-		this.location = (Phrase) config.getValue(LOCATION);
+    public void perform(TaskRequest req, TaskResponse res) {
 
-	}
+        URL loc = resource.evaluate(req, res);
 
-	public void perform(TaskRequest req, TaskResponse res) {
+        InputStream inpt = null;
+        try {
 
-		String loc = (String) location.evaluate(req, res);
+            inpt = loc.openStream();
 
-		InputStream inpt = null;
-		try {
+            Properties p = new Properties();
+            p.load(inpt);
 
-			URL ctx = new URL((String) context.evaluate(req, res));
-			URL u = new URL(ctx, loc);
-			inpt = u.openStream();
+            for (Entry<?,?> e : p.entrySet()) {
+                res.setAttribute((String) e.getKey(), e.getValue());
+            }
 
-			Properties p = new Properties();
-			p.load(inpt);
+            super.performSubtasks(req, res);
 
-			for (Entry e : p.entrySet()) {
-				res.setAttribute((String) e.getKey(), e.getValue());
-			}
+        } catch (Throwable t) {
+            String msg = "Unable to read the specified properties file:  " 
+                                                + loc.toExternalForm();
+            throw new RuntimeException(msg, t);
+        } finally {
+            if (inpt != null) {
+                try {
+                    inpt.close();
+                } catch (IOException ioe) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+        }
 
-			super.performSubtasks(req, res);
-
-		} catch (Throwable t) {
-			String msg = "Unable to read the specified properties file:  " + loc;
-			throw new RuntimeException(msg, t);
-		} finally {
-			if (inpt != null) {
-				try {
-					inpt.close();
-				} catch (IOException ioe) {
-					throw new RuntimeException(ioe);
-				}
-			}
-		}
-
-	}
+    }
 
 }

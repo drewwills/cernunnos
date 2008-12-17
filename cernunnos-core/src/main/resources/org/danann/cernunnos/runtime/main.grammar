@@ -1363,7 +1363,9 @@ Response:</pre>
 
         <entry name="doc" impl="org.danann.cernunnos.xml.ReadDocumentPhrase">
             <description>
-                <p>Reads an XML Document from the specified location and returns the root element.  The identified resource must be parsable XML.</p>
+                <p>Parses an XML Document from the specified <code>LOCATION</code> 
+                and returns the root element.  The identified resource must be 
+                parsable XML.</p>
             </description>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
                 <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">

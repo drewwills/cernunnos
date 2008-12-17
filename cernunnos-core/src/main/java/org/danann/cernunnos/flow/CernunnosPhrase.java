@@ -16,16 +16,14 @@
 
 package org.danann.cernunnos.flow;
 
-import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.SimpleFormula;
-import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
@@ -39,13 +37,8 @@ public final class CernunnosPhrase implements Phrase {
 	 * Public API.
 	 */
 
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "descendant-or-self::text()", ReagentType.PHRASE, String.class,
-					"Location of a Cernunnos script.  May be a filesystem path (absolute or relative), or a URL.  If "
-					+ "relative, the location will be evaluated from the CONTEXT.  If omitted, the value of the "
-					+ "'Attributes.LOCATION' request attribute will be used.", new AttributePhrase(Attributes.LOCATION));
-
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CernunnosTask.CONTEXT, LOCATION};
+		Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_PHRASE};
 		final Formula rslt = new SimpleFormula(CernunnosPhrase.class, reagents);
 		return rslt;
 	}

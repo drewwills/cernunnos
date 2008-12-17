@@ -23,43 +23,27 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.danann.cernunnos.AbstractContainerTask;
-import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
-import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.SimpleFormula;
-import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ArchiveIteratorTask extends AbstractContainerTask {
 
 	// Instance Members.
-	private Phrase context;
-	private Phrase location;
+    private final ResourceHelper resource = new ResourceHelper();
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
-				"Optional context from which missing elements of the LOCATION will be inferred if it is "
-				+ "relative.  If omitted, this task will use either: (1) the value of the 'Attributes.CONTEXT' "
-				+ "request attribute if present; or (2) the directory within which Java is executing.",
-				new AttributePhrase(Attributes.CONTEXT, new CurrentDirectoryUrlPhrase()));
-
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "@location", ReagentType.PHRASE, String.class,
-				"Optional location of the archive that will be iterated over.  It may be a filesystem path or "
-				+ "a URL, and may be absolute or relative.  If relative, the location will be evaluated "
-				+ "from the CONTEXT.  If omitted, the value of the 'Attributes.LOCATION' request "
-				+ "attribute will be used.", new AttributePhrase(Attributes.LOCATION));
-
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION, AbstractContainerTask.SUBTASKS};
+		Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_TARGET, ResourceHelper.LOCATION_TASK, 
+		                                                AbstractContainerTask.SUBTASKS};
 		final Formula rslt = new SimpleFormula(ArchiveIteratorTask.class, reagents);
 		return rslt;
 	}
@@ -69,27 +53,22 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 		super.init(config);
 
 		// Instance Members.
-		this.context = (Phrase) config.getValue(CONTEXT);
-		this.location = (Phrase) config.getValue(LOCATION);
+		resource.init(config);
 
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		String loc = (String) location.evaluate(req, res);
-
+        URL url = resource.evaluate(req, res);
 		InputStream inpt = null;
 		ZipInputStream zip = null;
 		try {
-
-			URL ctx = new URL((String) context.evaluate(req, res));
-			URL url = new URL(ctx, loc);
 
 			inpt = url.openStream();
 			zip = new ZipInputStream(inpt);
 
 			// Set the default CONTEXT for subtasks...
-			res.setAttribute(Attributes.CONTEXT, "jar:" + url.toString() + "!/");
+			res.setAttribute(Attributes.CONTEXT, "jar:" + url.toExternalForm() + "!/");
 
 			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
 				if (entry.isDirectory()) {
@@ -103,7 +82,7 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 			}
 
 		} catch (Throwable t) {
-			String msg = "Unable to read the specified archive:  " + loc;
+			String msg = "Unable to read the specified archive:  " + url.toExternalForm();
 			throw new RuntimeException(msg, t);
 		} finally {
 			if (zip != null) {
