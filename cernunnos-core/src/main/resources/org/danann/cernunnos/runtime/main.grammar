@@ -221,7 +221,7 @@
             </description>
             <content-model suffix="&#13;&#10;"/>
             <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
-                <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+                <pre><xmp><node-iterator source="${parseXml(properties/db/data.xml)}" xpath="//table/name">
   <echo-ln>${valueOf(.)}</echo-ln>
 </node-iterator></xmp></pre>
             </example>
@@ -1308,7 +1308,7 @@ Response:</pre>
 </with-attribute></xmp></pre>
             </example>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
     <append-node>
         <book author="George Eliot">
             <title>Middlemarch</title>
@@ -1343,7 +1343,7 @@ Response:</pre>
                 <p>Creates a new XML comment node from the specified VALUE.</p>
             </description>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
     <append-node>
         <book author="George Eliot">
             <title>Middlemarch</title>
@@ -1367,22 +1367,9 @@ Response:</pre>
                 and returns the root element.  The identified resource must be 
                 parsable XML.</p>
             </description>
-            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
-    <append-node>
-        <book author="George Eliot">
-            <title>Middlemarch</title>
-        </book>
-    </append-node>
-    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
-    <write-document file="books.xml"/>
-</with-attribute></xmp></pre>
-            </example>
-            <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
-                <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
-  <echo-ln>${valueOf(.)}</echo-ln>
-</node-iterator></xmp></pre>
-            </example>
+            <deprecation since="1.1.0">
+                <p>Use <a href="parseXml-PHRASE.html">${parseXml}</a> instead.</p>
+            </deprecation>
         </entry>
 
         <entry name="newDoc" impl="org.danann.cernunnos.xml.NewDocumentPhrase">
@@ -1402,7 +1389,34 @@ Response:</pre>
                 <p>Iterates over the node list resulting from the specified XPath expression.  For each node in the list, this task will set the specified request attribute and then execute its subtasks.</p>
             </description>
             <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
-                <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+                <pre><xmp><node-iterator source="${parseXml(properties/db/data.xml)}" xpath="//table/name">
+  <echo-ln>${valueOf(.)}</echo-ln>
+</node-iterator></xmp></pre>
+            </example>
+        </entry>
+
+        <entry name="parseXml" impl="org.danann.cernunnos.xml.ParseXmlPhrase">
+            <description>
+                <p>Parses an XML Document from the specified <code>LOCATION</code> 
+                and returns the root element.  The identified resource must be 
+                parsable XML.</p>
+                <p>This task leverages the <code>ResourceHelper</code> API and 
+                is a replacement for <code>${doc}</code>, which will not use that 
+                API for reasons of backward compatability.</p>
+            </description>
+            <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
+    <append-node>
+        <book author="George Eliot">
+            <title>Middlemarch</title>
+        </book>
+    </append-node>
+    <prepend-node node="${commentNode(This is a great book!)}" sibling="${singleNode(book)}"/>
+    <write-document file="books.xml"/>
+</with-attribute></xmp></pre>
+            </example>
+            <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
+                <pre><xmp><node-iterator source="${parseXml(properties/db/data.xml)}" xpath="//table/name">
   <echo-ln>${valueOf(.)}</echo-ln>
 </node-iterator></xmp></pre>
             </example>
@@ -1414,7 +1428,7 @@ Response:</pre>
                 <p>See also: <a href="append-node-TASK.html">&lt;append-node&gt;</a></p>
             </description>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
     <append-node>
         <book author="George Eliot">
             <title>Middlemarch</title>
@@ -1431,7 +1445,7 @@ Response:</pre>
                 <p>Returns the first node that matches the specified XPATH expression when evaluated against the SOURCE node.</p>
             </description>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
     <append-node>
         <book author="George Eliot">
             <title>Middlemarch</title>
@@ -1454,7 +1468,7 @@ Response:</pre>
                 <p>Returns the textual value of the specified XPath expression when evaluated against the specified node.</p>
             </description>
             <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
-                <pre><xmp><node-iterator source="${doc(properties/db/data.xml)}" xpath="//table/name">
+                <pre><xmp><node-iterator source="${parseXml(properties/db/data.xml)}" xpath="//table/name">
   <echo-ln>${valueOf(.)}</echo-ln>
 </node-iterator></xmp></pre>
         </example>
@@ -1471,7 +1485,7 @@ Response:</pre>
 </with-attribute></xmp></pre>
             </example>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
-                <pre><xmp><with-attribute key="Attributes.NODE" value="${doc(example.xml)}">
+                <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">
     <append-node>
         <book author="George Eliot">
             <title>Middlemarch</title>
