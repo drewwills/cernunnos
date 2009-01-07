@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
@@ -68,8 +69,8 @@ public final class XslTransformTask extends AbstractContainerTask {
     public static final String STYLESHEET_LOCAL_CACHE_KEY = XslTransformTask.class.getSimpleName() + ".STYLESHEET_LOCAL";
 
 	// Instance Members.
-    private final Factory<Tuple<String, String>, Transformer> transformerFactory = new CachedTransformerFactory();
-	private CacheHelper<Tuple<String, String>, Transformer> transformerCache;
+    private final Factory<Tuple<String, String>, Templates> transformerFactory = new CachedTransformerFactory();
+	private CacheHelper<Tuple<String, String>, Templates> transformerCache;
 	private Phrase entityResolver;
 	private Phrase context;
 	private Phrase stylesheet;
@@ -126,7 +127,7 @@ public final class XslTransformTask extends AbstractContainerTask {
 		super.init(config);
 
 		// Instance Members.
-		this.transformerCache = new DynamicCacheHelper<Tuple<String, String>, Transformer>(config);
+		this.transformerCache = new DynamicCacheHelper<Tuple<String, String>, Templates>(config);
 		this.entityResolver = (Phrase) config.getValue(ENTITY_RESOLVER);
 		this.context = (Phrase) config.getValue(CONTEXT);
 		this.stylesheet = (Phrase) config.getValue(STYLESHEET);
@@ -140,7 +141,7 @@ public final class XslTransformTask extends AbstractContainerTask {
         final String contextLocation = (String) context.evaluate(req, res);
         final String stylesheetLocation = (String) stylesheet.evaluate(req, res);
         final Tuple<String, String> transformerKey = new Tuple<String, String>(contextLocation, stylesheetLocation);
-        final Transformer trans = this.transformerCache.getCachedObject(req, res, transformerKey, this.transformerFactory);
+        final Templates templates = this.transformerCache.getCachedObject(req, res, transformerKey, this.transformerFactory);
 
         try {
 			Element srcElement = null;
@@ -168,6 +169,8 @@ public final class XslTransformTask extends AbstractContainerTask {
 			DOMWriter dwriter = new DOMWriter();
 
 			DocumentResult rslt = new DocumentResult();
+			
+			final Transformer trans = templates.newTransformer();
 			trans.transform(new DOMSource(dwriter.write(ddoc)), rslt);
 
 			if (to_file != null) {
@@ -195,13 +198,13 @@ public final class XslTransformTask extends AbstractContainerTask {
     /**
      * Factory to create new Transformer instances
      */
-    protected static class CachedTransformerFactory implements CacheHelper.Factory<Tuple<String, String>, Transformer> {
+    protected static class CachedTransformerFactory implements CacheHelper.Factory<Tuple<String, String>, Templates> {
         private TransformerFactory transformerFactory = TransformerFactory.newInstance();
         
         /* (non-Javadoc)
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
          */
-        public Transformer createObject(Tuple<String, String> key) {
+        public Templates createObject(Tuple<String, String> key) {
             final URL xslUrl;
             try {
                 final URL contextUrl = new URL(key.first);
@@ -212,7 +215,7 @@ public final class XslTransformTask extends AbstractContainerTask {
             }
             
             try {
-                return this.transformerFactory.newTransformer(new StreamSource(xslUrl.toExternalForm()));
+                return this.transformerFactory.newTemplates(new StreamSource(xslUrl.toExternalForm()));
             }
             catch (TransformerConfigurationException tce) {
                 throw new RuntimeException("Failed to create Transformer for XSL='" + xslUrl.toExternalForm() + "'", tce);
@@ -222,8 +225,8 @@ public final class XslTransformTask extends AbstractContainerTask {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
          */
-        public boolean isThreadSafe(Tuple<String, String> key, Transformer instance) {
-            return false;
+        public boolean isThreadSafe(Tuple<String, String> key, Templates instance) {
+            return true;
         }
 
         /* (non-Javadoc)
