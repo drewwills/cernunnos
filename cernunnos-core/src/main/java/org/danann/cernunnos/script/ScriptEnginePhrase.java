@@ -35,6 +35,9 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ScriptEnginePhrase implements Phrase {
+    //Hide factory mutex to avoid unforseen sync problems
+    private static final Object FACTORY_MUTEX = new Object();
+    
     private static final Log LOG = LogFactory.getLog(ScriptEnginePhrase.class); // Don't declare as static in general libraries
     private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
     private static final CachedScriptEngineFactory cachedScriptEngineFactory = new CachedScriptEngineFactory();
@@ -120,7 +123,12 @@ public final class ScriptEnginePhrase implements Phrase {
             final Object threadingAbility = factory.getParameter("THREADING");
             return threadingAbility != null;
         }
-        
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+         */
+        public Object getMutex(String key) {
+            return FACTORY_MUTEX;
+        }
     }
-    
 }

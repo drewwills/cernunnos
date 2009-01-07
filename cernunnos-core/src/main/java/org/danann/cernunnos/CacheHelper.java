@@ -63,5 +63,10 @@ public interface CacheHelper<K, V> {
          * If the object is thread-safe. If not the object will be cached but bound to just the current thread.
          */
         public boolean isThreadSafe(K key, V instance);
+        
+        /**
+         * Gets the best mutex to use for synchronizing on when creating the object. This can NEVER return null.
+         */
+        public Object getMutex(K key);
     }
 }

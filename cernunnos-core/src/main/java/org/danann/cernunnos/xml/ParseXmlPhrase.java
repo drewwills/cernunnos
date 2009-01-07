@@ -38,7 +38,9 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.EntityResolver;
 
 public final class ParseXmlPhrase implements Phrase {
-    
+    //Hide factory mutex to avoid unforseen sync problems
+    private static final Object FACTORY_MUTEX = new Object();
+
     // Instance Members.
     private final ResourceHelper resource = new ResourceHelper();
     private CacheHelper<String, Element> documentCache;
@@ -114,6 +116,13 @@ public final class ParseXmlPhrase implements Phrase {
          */
         public boolean isThreadSafe(String key, Element instance) {
             return false;
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+         */
+        public Object getMutex(String key) {
+            return FACTORY_MUTEX;
         }
     }
 }

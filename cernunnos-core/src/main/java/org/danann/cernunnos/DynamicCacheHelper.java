@@ -64,13 +64,7 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
         }
         
         //Determine the object to synchronize around
-        final Object syncTarget;
-        if (cache == null) {
-            syncTarget = this;
-        }
-        else {
-            syncTarget = cache;
-        }
+        final Object syncTarget = factory.getMutex(key);
 
         //get or create & cache the target object
         V instance = null;
@@ -88,7 +82,10 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
             }
             //Look in the passed cache for the instance
             else {
-                final Object object = cache.get(key);
+                final Object object;
+                synchronized (cache) {
+                    object = cache.get(key);
+                }
                 
                 //If the cached object is a ThreadLocal use it for the instance
                 if (object instanceof ThreadLocal<?>) {
@@ -119,13 +116,17 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
                 //Cache available store there
                 else {
                     if (threadSafe) {
-                        cache.put(key, instance);
+                        synchronized (cache) {
+                            cache.put(key, instance);
+                        }
                     }
                     else {
-                        ThreadLocal<V> threadInstanceHolder = (ThreadLocal<V>)cache.get(key);
-                        if (threadInstanceHolder == null) {
-                            threadInstanceHolder = new ThreadLocal<V>();
-                            cache.put(key, threadInstanceHolder);
+                        synchronized (cache) {
+                            ThreadLocal<V> threadInstanceHolder = (ThreadLocal<V>)cache.get(key);
+                            if (threadInstanceHolder == null) {
+                                threadInstanceHolder = new ThreadLocal<V>();
+                                cache.put(key, threadInstanceHolder);
+                            }
                         }
 
                         threadInstanceHolder.set(instance);

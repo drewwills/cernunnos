@@ -153,5 +153,12 @@ public final class CacheTask extends AbstractContainerTask {
         public boolean isThreadSafe(Object key, Object instance) {
             return Boolean.valueOf((String) CacheTask.this.threadSafePhrase.evaluate(this.req, this.res));
         }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+         */
+        public Object getMutex(Object key) {
+            return CacheTask.this;
+        }
 	}
 }

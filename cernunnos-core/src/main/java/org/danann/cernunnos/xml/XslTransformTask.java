@@ -62,6 +62,9 @@ import org.xml.sax.EntityResolver;
  * stylesheet through the (mandatory) STYLESHEET reagent.
  */
 public final class XslTransformTask extends AbstractContainerTask {
+    //Hide factory mutex to avoid unforseen sync problems
+    private static final Object FACTORY_MUTEX = new Object();
+    
     public static final String STYLESHEET_LOCAL_CACHE_KEY = XslTransformTask.class.getSimpleName() + ".STYLESHEET_LOCAL";
 
 	// Instance Members.
@@ -221,6 +224,13 @@ public final class XslTransformTask extends AbstractContainerTask {
          */
         public boolean isThreadSafe(Tuple<String, String> key, Transformer instance) {
             return false;
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+         */
+        public Object getMutex(Tuple<String, String> key) {
+            return FACTORY_MUTEX;
         }
     }
 }

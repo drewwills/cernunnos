@@ -26,8 +26,15 @@ import org.dom4j.xpath.DefaultXPath;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class XPathCacheFactory implements Factory<String, XPath> {
+public final class XPathCacheFactory implements Factory<String, XPath> {
+    //Hide factory mutex to avoid unforseen sync problems
+    private static final Object FACTORY_MUTEX = new Object();
+    
     public static final XPathCacheFactory INSTANCE = new XPathCacheFactory();
+    
+    private XPathCacheFactory() {
+    }
+    
 
     /* (non-Javadoc)
      * @see org.danann.cernunnos.CacheHelper.Factory#createObject(java.lang.Object)
@@ -41,5 +48,13 @@ public class XPathCacheFactory implements Factory<String, XPath> {
      */
     public boolean isThreadSafe(String key, XPath instance) {
         return false;
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+     */
+    public Object getMutex(String key) {
+        return FACTORY_MUTEX;
     }
 }

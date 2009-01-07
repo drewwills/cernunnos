@@ -40,6 +40,9 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.EntityResolver;
 
 public final class ReadDocumentPhrase implements Phrase {
+    //Hide factory mutex to avoid unforseen sync problems
+    private static final Object FACTORY_MUTEX = new Object();
+    
 	// Instance Members.
     private CacheHelper<Tuple<String, String>, Element> documentCache;
     private Phrase entityResolver;
@@ -157,6 +160,13 @@ public final class ReadDocumentPhrase implements Phrase {
          */
         public boolean isThreadSafe(Tuple<String, String> key, Element instance) {
             return false;
+        }
+
+        /* (non-Javadoc)
+         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
+         */
+        public Object getMutex(Tuple<String, String> key) {
+            return FACTORY_MUTEX;
         }
     }
 }
