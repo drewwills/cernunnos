@@ -18,12 +18,17 @@ package org.danann.cernunnos;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * @author Eric Dalquist
  * @version $Revision$
  */
 public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
+    protected final Log logger = LogFactory.getLog(this.getClass());
+
     private final Phrase cachePhrase;
     private final Phrase cacheModelPhrase;
     
@@ -43,6 +48,10 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
      */
     public V getCachedObject(TaskRequest req, TaskResponse res, K key, Factory<K, V> factory) {
         final CacheMode cacheMode = CacheMode.valueOf((String) this.cacheModelPhrase.evaluate(req, res));
+        
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Getting cached object for '" + key + "' using cache mode " + cacheMode + " and factory " + factory);
+        }
         
         //Load the cache only if cache-all is enabled
         final Map<Object, Object> cache;
@@ -102,6 +111,10 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
                 instance = factory.createObject(key);
                 final boolean threadSafe = factory.isThreadSafe(key, instance);
                 
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Cache miss for '" + key + "' created '" + instance + "' threadSafe=" + threadSafe);
+                }
+                
                 //If no cache is available store the instance in the local variables
                 if (cache == null) {
                     if (threadSafe) {
@@ -132,6 +145,9 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
                         threadInstanceHolder.set(instance);
                     }
                 }
+            }
+            else if (this.logger.isDebugEnabled()) {
+                this.logger.debug("Cache hit for '" + key + "' using '" + instance + "'");
             }
         }
         
