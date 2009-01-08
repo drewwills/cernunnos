@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
@@ -21,6 +23,8 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
  * @version $Revision$
  */
 class PhraseParameterPreparedStatementSetter implements PreparedStatementSetter {
+    protected final Log logger = LogFactory.getLog(this.getClass());
+    
     private final List<Phrase> parameters;
     private final TaskRequest req;
     private final TaskResponse res;
@@ -35,6 +39,10 @@ class PhraseParameterPreparedStatementSetter implements PreparedStatementSetter 
      * @see org.springframework.jdbc.core.PreparedStatementSetter#setValues(java.sql.PreparedStatement)
      */
     public final void setValues(PreparedStatement ps) throws SQLException {
+        if (this.logger.isDebugEnabled()) {
+            this.logger.debug("Setting parameters " + this.parameters + " on prepared statement " + ps);
+        }
+        
         int parameterIndex = 0;
         for (final Phrase parameterPhrase : this.parameters) {
             final Object parameter = parameterPhrase.evaluate(this.req, this.res);

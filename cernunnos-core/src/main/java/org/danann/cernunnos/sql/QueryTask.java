@@ -28,6 +28,8 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
@@ -137,6 +139,8 @@ public final class QueryTask extends AbstractContainerTask {
 	 * is invoked.
 	 */
 	private static final class ResponseMappingRowCallbackHandler implements RowCallbackHandler {
+	    protected final Log logger = LogFactory.getLog(this.getClass());
+	    
 	    private final QueryTask queryTask;
         private final TaskRequest req;
         private final TaskResponse res;
@@ -159,26 +163,29 @@ public final class QueryTask extends AbstractContainerTask {
             
             //Make all the data on the current row available to subtasks...
             for (int columnIndex = 1; columnIndex <= rsmd.getColumnCount(); columnIndex++) {
+                final Object value;
                 if (rsmd.getColumnType(columnIndex) == java.sql.Types.CLOB) {
                     try {
-                        final Object value = IOUtils.toString(rs.getClob(columnIndex).getCharacterStream());
-
-                        // Access either by column name or column index...
-                        this.res.setAttribute(String.valueOf(columnIndex), value);
-                        this.res.setAttribute(rsmd.getColumnLabel(columnIndex).toUpperCase(), value);
+                        value = IOUtils.toString(rs.getClob(columnIndex).getCharacterStream());
                     }
                     catch (IOException ex) {
                 		throw new SQLException("Error converting CLOB value to String");
                 	}
                 }
                 else {
-                    final Object value = rs.getObject(columnIndex);
-
-                    // Access either by column name or column index...
-                    this.res.setAttribute(String.valueOf(columnIndex), value);
-                    this.res.setAttribute(rsmd.getColumnName(columnIndex).toUpperCase(), value);
+                    value = rs.getObject(columnIndex);
                 }
 
+                final String columnIndexAttr = String.valueOf(columnIndex);
+                final String columnLabelAttr = rsmd.getColumnLabel(columnIndex).toUpperCase();
+
+                if (this.logger.isDebugEnabled()) {
+                    this.logger.debug("Setting response attributes '" + columnIndexAttr + "' and '" + columnLabelAttr + "' with value '" + value + "'");
+                }
+                
+                // Access either by column name or column index...
+                this.res.setAttribute(columnIndexAttr, value);
+                this.res.setAttribute(columnLabelAttr, value);
             }
 
             // Invoke subtasks...
