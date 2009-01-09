@@ -18,13 +18,9 @@ package org.danann.cernunnos.ldap;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import javax.naming.directory.Attributes;
 import javax.naming.directory.SearchControls;
-
-import org.dom4j.Node;
-import org.springframework.ldap.core.AttributesMapper;
-import org.springframework.ldap.core.ContextSource;
-import org.springframework.ldap.core.LdapTemplate;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
@@ -39,6 +35,11 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
+import org.springframework.ldap.NamingException;
+import org.springframework.ldap.core.AttributesMapper;
+import org.springframework.ldap.core.ContextSource;
+import org.springframework.ldap.core.LdapTemplate;
 
 /**
  * Performs a specified LDAP query, then invokes child tasks once for each row 
@@ -182,15 +183,11 @@ public final class SearchTask extends AbstractContainerTask {
 		final String bdn = (String) baseDn.evaluate(req, res);
 		final String ftr = (String) filter.evaluate(req, res);
 		final AttributesMapper am = (AttributesMapper) attributesMapper.evaluate(req, res);
+		
+		final List<?> rslt;
 		try {
-			
-			final List<?> rslt = template.search(bdn, ftr, controls, am);
-			for (Object j : rslt) {
-				res.setAttribute(name, j);
-				super.performSubtasks(req, res);
-			}
-
-		} catch (Throwable t) {
+		    rslt = template.search(bdn, ftr, controls, am);
+		} catch (NamingException ne) {
 			String msg = "Error performing the specified LDAP search:"
 						+ "\n\t\tBASE_DN=" + bdn
 						+ "\n\t\tFILTER=" + ftr
@@ -201,9 +198,13 @@ public final class SearchTask extends AbstractContainerTask {
 						+ "\n\t\tRETURN_OBJECT=" + ro
 						+ "\n\t\t=DEREFERENCE_LINKS=" + dl
 						+ "\n\t\t=ATTRIBUTES_MAPPER (class)=" + am.getClass().getName();
-			throw new RuntimeException(msg, t);
+			throw new RuntimeException(msg, ne);
 		}
-				
+
+        for (Object j : rslt) {
+            res.setAttribute(name, j);
+            super.performSubtasks(req, res);
+        }
 	}
 	
 	/*

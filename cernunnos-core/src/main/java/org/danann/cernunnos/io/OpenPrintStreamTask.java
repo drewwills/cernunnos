@@ -17,8 +17,10 @@
 package org.danann.cernunnos.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
+import org.apache.commons.io.IOUtils;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
@@ -69,26 +71,29 @@ public final class OpenPrintStreamTask extends AbstractContainerTask {
 	public void perform(TaskRequest req, TaskResponse res) {
 		
 		String loc = (String) file.evaluate(req, res);
-		try {
 
-			File f = new File(loc);
-			if (f.getParentFile() != null) {
-				// Make sure the necessary directories are in place...
-				f.getParentFile().mkdirs();
-			}
-			PrintStream stream = new PrintStream(f);
-			
+		File f = new File(loc);
+		if (f.getParentFile() != null) {
+			// Make sure the necessary directories are in place...
+			f.getParentFile().mkdirs();
+		}
+		
+		PrintStream stream;
+        try {
+            stream = new PrintStream(f);
+        }
+        catch (FileNotFoundException fnfe) {
+            throw new RuntimeException("Could not open file '" + f + "' for writing", fnfe);
+        }
+        
+		try {
 			// Invoke subtasks...
 			res.setAttribute((String) attribute_name.evaluate(req, res), stream);
 			super.performSubtasks(req, res);
-			
-			stream.close();
-
-		} catch (Throwable t) {
-			String msg = "There was a problem writing to the specified location:  " + loc;
-			throw new RuntimeException(msg, t);
 		}
-		
+		finally {
+		    IOUtils.closeQuietly(stream);
+		}
 	}
 
 }

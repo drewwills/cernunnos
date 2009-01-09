@@ -72,23 +72,17 @@ public final class ApplicationContextTask extends AbstractContainerTask {
 	public void perform(TaskRequest req, TaskResponse res) {
 		
         URL loc = resource.evaluate(req, res);		
-		try {
 			
-			ApplicationContext beans = getApplicationContext(loc, 
-							(Boolean) cache.evaluate(req, res));
-			for (String name : beans.getBeanDefinitionNames()) {
-			    try {
-	                res.setAttribute(name, beans.getBean(name));
-			    } catch (BeanIsAbstractException biae) {
-			        // This is normal -- we can't ask for abstract beans...
-			        log.debug("Skipping the following bean because it is abstract:  " + name);
-			    }
-			}
-
-		} catch (Throwable t) {
-			String msg = "Unable to read the specified bean definition file:  " 
-			                                        + loc.toExternalForm();
-			throw new RuntimeException(msg, t);
+		ApplicationContext beans = getApplicationContext(loc, 
+						(Boolean) cache.evaluate(req, res));
+		
+		for (String name : beans.getBeanDefinitionNames()) {
+		    try {
+                res.setAttribute(name, beans.getBean(name));
+		    } catch (BeanIsAbstractException biae) {
+		        // This is normal -- we can't ask for abstract beans...
+		        log.debug("Not adding bean '" + name + "' to TaskResponse because it is abstract.");
+		    }
 		}
 
 		super.performSubtasks(req, res);

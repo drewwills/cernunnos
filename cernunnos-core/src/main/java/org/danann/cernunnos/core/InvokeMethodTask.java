@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos.core;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +24,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.dom4j.Node;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
@@ -39,6 +38,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
 
 @Deprecated
 public class InvokeMethodTask extends AbstractContainerTask {
@@ -118,89 +118,105 @@ public class InvokeMethodTask extends AbstractContainerTask {
 
 		String m = (String) method.evaluate(req, res);
 
+
+		// Evaluate the parameters...
+		Class<?>[] argTypes = new Class[parameters.size()];
+		Object[] argValues = new Object[parameters.size()];
 		try {
-
-			// Evaluate the parameters...
-			Class<?>[] argTypes = new Class[parameters.size()];
-			Object[] argValues = new Object[parameters.size()];
-			try {
-				for (int i=0; i < parameters.size(); i++) {
-					argValues[i] = parameters.get(i).evaluate(req, res);
-					if (parameter_types.get(i) != null) {
-						argTypes[i] = Class.forName((String) parameter_types.get(i).evaluate(req, res));
-					} else {
-						// Infer the type from the object at hand...
-						argTypes[i] = argValues[i].getClass();	// NB: NPE if one or more args is null...
-					}
+			for (int i=0; i < parameters.size(); i++) {
+				argValues[i] = parameters.get(i).evaluate(req, res);
+				if (parameter_types.get(i) != null) {
+				    final String className = (String) parameter_types.get(i).evaluate(req, res);
+                    try {
+                        argTypes[i] = Class.forName(className);
+                    }
+                    catch (ClassNotFoundException cnfe) {
+                        throw new RuntimeException("Could not find specified class: " + className, cnfe);
+                    }
+				} else {
+					// Infer the type from the object at hand...
+					argTypes[i] = argValues[i].getClass();	// NB: NPE if one or more args is null...
 				}
-			} catch (NullPointerException npe) {
-				String msg = "Arguments to InvokeMethodTask may not be null.";
-				throw new RuntimeException(msg, npe);
 			}
+		} catch (NullPointerException npe) {
+			String msg = "Arguments to InvokeMethodTask may not be null.";
+			throw new IllegalArgumentException(msg, npe);
+		}
 
-			// Find the method & target...
-			Method[] methods = null;
-			Object target = null;
-			if (object != null) {
-				target = object.evaluate(req, res);
-				methods = target.getClass().getMethods();
-			} else {
-				String c = (String) clazz.evaluate(req, res);
-				methods = Class.forName(c).getDeclaredMethods();
-			}
+		// Find the method & target...
+		Method[] methods = null;
+		Object target = null;
+		if (object != null) {
+			target = object.evaluate(req, res);
+			methods = target.getClass().getMethods();
+		} else {
+			String c = (String) clazz.evaluate(req, res);
+			final Class<?> clazzInstance;
+            try {
+                clazzInstance = Class.forName(c);
+            }
+            catch (ClassNotFoundException cnfe) {
+                throw new RuntimeException("Could not find specified class: " + c, cnfe);
+            }
+            methods = clazzInstance.getDeclaredMethods();
+		}
 
-			Method myMethod = null;
-			for (Method d : methods) {
-				if (d.getName().equals(m)) {
-					Class<?>[] params = d.getParameterTypes();
-					if (params.length == argTypes.length) {
-						boolean matches = true;
-						for (int i=0; i < params.length; i++) {
-							ArrayList<Class> types = new ArrayList<Class>();
-							types.add(argTypes[i]);
-							types.addAll(Arrays.asList(argTypes[i].getInterfaces()));
-							for (Class<?> sup = argTypes[i].getSuperclass(); sup != null; sup = sup.getSuperclass()) {
-								types.add(sup);
-								types.addAll(Arrays.asList(sup.getInterfaces()));
-							}
-							if (!types.contains(params[i])) {
-								matches = false;
-								break;
-							}
+		Method myMethod = null;
+		for (Method d : methods) {
+			if (d.getName().equals(m)) {
+				Class<?>[] params = d.getParameterTypes();
+				if (params.length == argTypes.length) {
+					boolean matches = true;
+					for (int i=0; i < params.length; i++) {
+						ArrayList<Class> types = new ArrayList<Class>();
+						types.add(argTypes[i]);
+						types.addAll(Arrays.asList(argTypes[i].getInterfaces()));
+						for (Class<?> sup = argTypes[i].getSuperclass(); sup != null; sup = sup.getSuperclass()) {
+							types.add(sup);
+							types.addAll(Arrays.asList(sup.getInterfaces()));
 						}
-						if (matches) {
-							myMethod = d;
+						if (!types.contains(params[i])) {
+							matches = false;
 							break;
 						}
 					}
+					if (matches) {
+						myMethod = d;
+						break;
+					}
 				}
 			}
-			if (myMethod == null) {
-				StringBuffer msg = new StringBuffer();
-				msg.append("Unable to locate method '").append(m).append("' on ");
-				if (target != null) {
-					msg.append("object of class '").append(target.getClass().getName()).append("' ");
-				} else {
-					msg.append("class '").append(clazz.evaluate(req, res)).append("' ");
-				}
-				msg.append("(argument types follow):");
-				for (Class<?> z : argTypes) {
-					msg.append("\n\t\targ type=").append(z.getName());
-				}
-				throw new RuntimeException(msg.toString());
+		}
+		if (myMethod == null) {
+			StringBuffer msg = new StringBuffer();
+			msg.append("Unable to locate method '").append(m).append("' on ");
+			if (target != null) {
+				msg.append("object of class '").append(target.getClass().getName()).append("' ");
+			} else {
+				msg.append("class '").append(clazz.evaluate(req, res)).append("' ");
 			}
-
-			Object rslt = myMethod.invoke(target, argValues);
-			String attr = (String) attribute_name.evaluate(req, res);
-			res.setAttribute(attr, rslt);
-
-			super.performSubtasks(req, res);
-
-		} catch (Throwable t) {
-			String msg = "Error invoking the specified method:  " + m;
-			throw new RuntimeException(msg, t);
+			msg.append("(argument types follow):");
+			for (Class<?> z : argTypes) {
+				msg.append("\n\t\targ type=").append(z.getName());
+			}
+			throw new RuntimeException(msg.toString());
 		}
 
+		final Object rslt;
+        try {
+            rslt = myMethod.invoke(target, argValues);
+        }
+        catch (IllegalAccessException iae) {
+            throw new RuntimeException("Failed to invoke method " + myMethod + " on " + target, iae);
+        }
+        catch (InvocationTargetException ite) {
+            throw new RuntimeException("Failed to invoke method " + myMethod + " on " + target, ite);
+        }
+        
+		String attr = (String) attribute_name.evaluate(req, res);
+		res.setAttribute(attr, rslt);
+
+		super.performSubtasks(req, res);
 	}
 
 }

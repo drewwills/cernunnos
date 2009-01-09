@@ -169,7 +169,7 @@ public final class QueryTask extends AbstractContainerTask {
                         value = IOUtils.toString(rs.getClob(columnIndex).getCharacterStream());
                     }
                     catch (IOException ex) {
-                		throw new SQLException("Error converting CLOB value to String");
+                		throw new SQLException("Error converting CLOB value to String", ex);
                 	}
                 }
                 else {

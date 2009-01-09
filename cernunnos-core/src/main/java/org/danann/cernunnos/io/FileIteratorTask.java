@@ -17,6 +17,9 @@
 package org.danann.cernunnos.io;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +28,6 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
@@ -103,68 +105,80 @@ public final class FileIteratorTask extends AbstractContainerTask {
 
 		String incl = (String) includes.evaluate(req, res);
 		String[] inclTokens = incl.split(",");
-		List[] inclStacks = new List[inclTokens.length];
+		List<String>[] inclStacks = new List[inclTokens.length];
 		for (int i=0; i < inclTokens.length; i++) {
 			inclStacks[i] = Arrays.asList(inclTokens[i].split("/"));
 		}
 
 		String excl = "[Not Evaluated]";
-		try {
 
-			Set<File> fileSet = getMatchingDescendants(baseDir, inclStacks);
+		Set<File> fileSet = getMatchingDescendants(baseDir, inclStacks);
 
-			if (excludes != null) {
-				excl = (String) excludes.evaluate(req, res);
-				String[] exclTokens = excl.split(",");
-				List[] exclStacks = new List[exclTokens.length];
-				for (int i=0; i < exclTokens.length; i++) {
-					exclStacks[i] = Arrays.asList(exclTokens[i].split("/"));
-				}
-				Set<File> exclSet = getMatchingDescendants(baseDir, exclStacks);
-				fileSet.removeAll(exclSet);
+		if (excludes != null) {
+			excl = (String) excludes.evaluate(req, res);
+			String[] exclTokens = excl.split(",");
+			List<String>[] exclStacks = new List[exclTokens.length];
+			for (int i=0; i < exclTokens.length; i++) {
+				exclStacks[i] = Arrays.asList(exclTokens[i].split("/"));
 			}
+			Set<File> exclSet = getMatchingDescendants(baseDir, exclStacks);
+			fileSet.removeAll(exclSet);
+		}
 
-			// Report on the # of matched files...
-			if (log.isTraceEnabled()) {
-				StringBuilder msg = new StringBuilder();
-				msg.append("FileIteratorTask details:")
-						.append("\n\t\tDIR=").append(d)
-						.append("\n\t\tINCLUDES=").append(incl)
-						.append("\n\t\tEXCLUDES=").append(excl)
-						.append("\n\t\tfound ").append(fileSet.size())
-						.append(" matching files\n");
-				log.trace(msg.toString());
-			}
+		// Report on the # of matched files...
+		if (log.isTraceEnabled()) {
+			StringBuilder msg = new StringBuilder();
+			msg.append("FileIteratorTask details:")
+					.append("\n\t\tDIR=").append(d)
+					.append("\n\t\tINCLUDES=").append(incl)
+					.append("\n\t\tEXCLUDES=").append(excl)
+					.append("\n\t\tfound ").append(fileSet.size())
+					.append(" matching files\n");
+			log.trace(msg.toString());
+		}
 
-			// Set the default CONTEXT for subtasks...
-			res.setAttribute(Attributes.CONTEXT, baseDir.toURL().toString());
-
-			// Iterate over the results, setting each one to the specified request attribute...
-			String name = (String) attribute_name.evaluate(req, res);
-			String mask = baseDir.getCanonicalPath();
-			if (!mask.endsWith(File.separator)) {
-				mask = mask + File.separator;
-			}
-			for (File f : fileSet) {
-				String location = f.getCanonicalPath().substring(mask.length());
-				res.setAttribute(name, location);
-				super.performSubtasks(req, res);
-			}
-        } catch (Throwable t) {
-            String msg = "Unable to iterate files in the specified way."
-                + "\n\tdir=" + d
-                + "\n\tincludes=" + incl
-                + "\n\texcludes=" + excl;
-            throw new RuntimeException(msg, t);
+		// Set the default CONTEXT for subtasks...
+		final URL contextUrl;
+        try {
+            contextUrl = baseDir.toURL();
         }
+        catch (MalformedURLException mue) {
+            throw new RuntimeException("Failed to convert dir attribute into URL: " + baseDir, mue);
+        }
+        res.setAttribute(Attributes.CONTEXT, contextUrl.toString());
 
+		// Iterate over the results, setting each one to the specified request attribute...
+		String name = (String) attribute_name.evaluate(req, res);
+		String mask;
+        try {
+            mask = baseDir.getCanonicalPath();
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException("Could not convert dir attribute into canonical path: " + baseDir, ioe);
+        }
+		if (!mask.endsWith(File.separator)) {
+			mask = mask + File.separator;
+		}
+		for (File f : fileSet) {
+			final String canonicalPath;
+            try {
+                canonicalPath = f.getCanonicalPath();
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException("Could not convert file into canonical path: " + f, ioe);
+            }
+            
+            String location = canonicalPath.substring(mask.length());
+			res.setAttribute(name, location);
+			super.performSubtasks(req, res);
+		}
 	}
 
 	/*
 	 * Implementation.
 	 */
 
-	private static Set<File> getMatchingDescendants(File f, List[] stackLists) {
+	private static Set<File> getMatchingDescendants(File f, List<String>[] stackLists) {
 
 		Set<File> rslt = new TreeSet<File>();
 

@@ -17,11 +17,10 @@
 package org.danann.cernunnos.core;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.dom4j.Node;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
@@ -36,6 +35,7 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Node;
 
 public final class PromptTask extends AbstractContainerTask {
 
@@ -103,62 +103,55 @@ public final class PromptTask extends AbstractContainerTask {
 			list.add((String) p.evaluate(req, res));
 		}
 		
-		try {
-			
-			// Add some visual space...
-			System.out.println();
+		// Add some visual space...
+		System.out.println();
 
-			final InputStreamReader inpt = new InputStreamReader(System.in);
-			final BufferedReader reader = new BufferedReader(inpt);
-			String response = null;
-			boolean done = false;
-			while (!done) {
-				
-				final StringBuilder bldr = new StringBuilder();
-				bldr.append(m);
-				
-				// List allowable responses...
-				if (list.size() > 0) {
-					bldr.append("\nAllowable responses (must match one of " +
-										"these regular expressions):");
-					for (String s : list) {
-						bldr.append("\n\t- ").append(s);
-					}
+		final InputStreamReader inpt = new InputStreamReader(System.in);
+		final BufferedReader reader = new BufferedReader(inpt);
+		String response = null;
+		boolean done = false;
+		while (!done) {
+			
+			final StringBuilder bldr = new StringBuilder();
+			bldr.append(m);
+			
+			// List allowable responses...
+			if (list.size() > 0) {
+				bldr.append("\nAllowable responses (must match one of " +
+									"these regular expressions):");
+				for (String s : list) {
+					bldr.append("\n\t- ").append(s);
 				}
-				
+			}
+			
+			if (d != null) {
+				bldr.append("\nDefault response:  ").append(d);
+			}
+			
+			bldr.append("\nResponse:  ");
+
+			System.out.print(bldr.toString());
+			try {
+                response = reader.readLine();
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException("Failed to read a line of input", ioe);
+            }
+			
+			if (response == null || response.trim().length() == 0) {
+				// No response is only allowable when there's a default...
 				if (d != null) {
-					bldr.append("\nDefault response:  ").append(d);
+					response = d;
+					done = true;
 				}
-				
-				bldr.append("\nResponse:  ");
-
-				System.out.print(bldr.toString());
-				response = reader.readLine();
-				
-				if (response == null || response.trim().length() == 0) {
-					// No response is only allowable when there's a default...
-					if (d != null) {
-						response = d;
-						done = true;
-					}
-				} else {
-					done = isValid(response, list);
-				}
-				
-			} 
+			} else {
+				done = isValid(response, list);
+			}
 			
-			res.setAttribute(name, response);
-			super.performSubtasks(req, res);
-			
-
-		} catch (Throwable t) {
-			final String msg = "Error prompting user for the following input:"
-							+ "\n\t\tATTRIBUTE_NAME=" + name
-							+ "\n\t\tMESSAGE=" + m
-							+ "\n\t\tDEFAULT=" + d;
-			throw new RuntimeException(msg, t);
-		}
+		} 
 		
+		res.setAttribute(name, response);
+		super.performSubtasks(req, res);
 	}
 	
 	/*

@@ -19,13 +19,6 @@ package org.danann.cernunnos.cvs;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.netbeans.lib.cvsclient.Client;
-import org.netbeans.lib.cvsclient.CVSRoot;
-import org.netbeans.lib.cvsclient.admin.StandardAdminHandler;
-import org.netbeans.lib.cvsclient.connection.PServerConnection;
-import org.netbeans.lib.cvsclient.event.CVSAdapter;
-import org.netbeans.lib.cvsclient.event.MessageEvent;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.danann.cernunnos.AbstractContainerTask;
@@ -39,8 +32,16 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.netbeans.lib.cvsclient.CVSRoot;
+import org.netbeans.lib.cvsclient.Client;
+import org.netbeans.lib.cvsclient.admin.StandardAdminHandler;
+import org.netbeans.lib.cvsclient.command.CommandAbortedException;
+import org.netbeans.lib.cvsclient.connection.AuthenticationException;
 import org.netbeans.lib.cvsclient.connection.Connection;
 import org.netbeans.lib.cvsclient.connection.ExtConnection;
+import org.netbeans.lib.cvsclient.connection.PServerConnection;
+import org.netbeans.lib.cvsclient.event.CVSAdapter;
+import org.netbeans.lib.cvsclient.event.MessageEvent;
 
 public class CvsClientTask extends AbstractContainerTask {
 	
@@ -142,7 +143,23 @@ public class CvsClientTask extends AbstractContainerTask {
 			
 			
 			// Open connection/create client...
-		    conn.open();
+		    try {
+                conn.open();
+            }
+            catch (CommandAbortedException cae) {
+                throw new RuntimeException("Error opening CVS connection: " +
+                          "\n\t\tCVSROOT:  " + cvsr +
+                          "\n\t\tENCODED_PASSWORD:  " + passwd +
+                          "\n\t\tCVS_EXT:  " + cvsExt +
+                          "\n\t\tADAPTER:  " + cvsAdapter.getClass().getName(), cae);
+            }
+            catch (AuthenticationException ae) {
+                throw new RuntimeException("Error authenticating CVS connection: " +
+                        "\n\t\tCVSROOT:  " + cvsr +
+                        "\n\t\tENCODED_PASSWORD:  " + passwd +
+                        "\n\t\tCVS_EXT:  " + cvsExt +
+                        "\n\t\tADAPTER:  " + cvsAdapter.getClass().getName(), ae);
+            }
 		    
 			Client client = new Client(conn, new StandardAdminHandler());
 			client.getEventManager().addCVSListener(cvsAdapter);
@@ -151,21 +168,18 @@ public class CvsClientTask extends AbstractContainerTask {
 			res.setAttribute((String) attribute_name.evaluate(req, res), client);
 			res.setAttribute(CvsAttributes.CVSROOT, cvsr);
 			super.performSubtasks(req, res);
-			
-		} catch (Throwable t) {
-			String msg = "Error creating the specified CVS client:" +
-							"\n\t\tCVSROOT:  " + cvsr +
-							"\n\t\tENCODED_PASSWORD:  " + passwd +
-							"\n\t\tCVS_EXT:  " + cvsExt +
-							"\n\t\tADAPTER:  " + cvsAdapter.getClass().getName();
-			throw new RuntimeException(msg, t);
 		} finally {
 			try {
 				if (conn != null) {
 					conn.close();
 				}
 			} catch (IOException ioe) {
-				log.warn("PServerConnection failed to close() properly.");
+			    if (log.isDebugEnabled()) {
+			        log.debug("Failed to close CVS connection properly, this can be ignored", ioe);
+			    }
+			    else {
+			        log.warn("Failed to close CVS connection properly, this can be ignored, set logging to DEBUG for stack trace.");
+			    }
 			}
 		}
 		

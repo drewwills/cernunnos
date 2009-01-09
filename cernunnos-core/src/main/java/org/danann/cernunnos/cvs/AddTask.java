@@ -23,11 +23,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.netbeans.lib.cvsclient.Client;
-import org.netbeans.lib.cvsclient.command.GlobalOptions;
-import org.netbeans.lib.cvsclient.command.KeywordSubstitutionOptions;
-import org.netbeans.lib.cvsclient.command.add.AddCommand;
-
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -40,6 +35,10 @@ import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.netbeans.lib.cvsclient.Client;
+import org.netbeans.lib.cvsclient.command.GlobalOptions;
+import org.netbeans.lib.cvsclient.command.KeywordSubstitutionOptions;
+import org.netbeans.lib.cvsclient.command.add.AddCommand;
 
 public class AddTask implements Task {
 
@@ -158,41 +157,46 @@ public class AddTask implements Task {
 			m = (String) message.evaluate(req, res);
 		}		
 
-		try {
 
-			GlobalOptions optns = new GlobalOptions();
-			optns.setCVSRoot(cvsr);
-			
-			// Normal Files...
-			if (!normalFiles.isEmpty()) {
-				AddCommand normal = new AddCommand();
-				if (m != null) normal.setMessage(m);
-				normal.setFiles(normalFiles.toArray(new File[normalFiles.size()]));
-				c.executeCommand(normal, optns);
-			}
-
-			// Binary Files...
-			if (!binaryFiles.isEmpty()) {
-				AddCommand binary = new AddCommand();
-				binary.setKeywordSubst(KeywordSubstitutionOptions.BINARY);
-				if (m != null) binary.setMessage(m);
-				binary.setFiles(binaryFiles.toArray(new File[binaryFiles.size()]));
-				c.executeCommand(binary, optns);
-			}
-
-		} catch (Throwable t) {
-			StringBuilder msg = new StringBuilder();
-			msg.append("Unable to perform the specified CVS add:")
-						.append("\n\t\tLOCAL_PATH:  ").append(path)
-						.append("\n\t\tRECURSE:  ").append(r)
-						.append("\n\t\tMESSAGE:  ").append(m)
-						.append("\n\t\tMatching Files:  (below)");
-			for (File f : fList) {
-				msg.append("\n\t\t\t").append(f.getAbsolutePath());
-			}
-			throw new RuntimeException(msg.toString(), t);
+		GlobalOptions optns = new GlobalOptions();
+		optns.setCVSRoot(cvsr);
+		
+		// Normal Files...
+		if (!normalFiles.isEmpty()) {
+			AddCommand normal = new AddCommand();
+			if (m != null) normal.setMessage(m);
+			normal.setFiles(normalFiles.toArray(new File[normalFiles.size()]));
+			executeCommand(c, normal, optns, m, path, r, fList);
 		}
 
+		// Binary Files...
+		if (!binaryFiles.isEmpty()) {
+			AddCommand binary = new AddCommand();
+			binary.setKeywordSubst(KeywordSubstitutionOptions.BINARY);
+			if (m != null) binary.setMessage(m);
+			binary.setFiles(binaryFiles.toArray(new File[binaryFiles.size()]));
+			executeCommand(c, binary, optns, m, path, r, fList);
+		}
 	}
+
+    private void executeCommand(Client c, AddCommand cmd, GlobalOptions optns, String message,
+            String path, Boolean recurse, List<File> fList) {
+        
+        try {
+            c.executeCommand(cmd, optns);
+        }
+        catch (Exception e) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("Unable to perform the specified CVS add:")
+                        .append("\n\t\tLOCAL_PATH:  ").append(path)
+                        .append("\n\t\tRECURSE:  ").append(recurse)
+                        .append("\n\t\tMESSAGE:  ").append(message)
+                        .append("\n\t\tMatching Files:  (below)");
+            for (File f : fList) {
+                msg.append("\n\t\t\t").append(f.getAbsolutePath());
+            }
+            throw new RuntimeException(msg.toString(), e);
+        }
+    }
 
 }

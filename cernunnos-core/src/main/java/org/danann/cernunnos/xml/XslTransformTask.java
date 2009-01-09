@@ -17,13 +17,17 @@
 package org.danann.cernunnos.xml;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -47,6 +51,7 @@ import org.danann.cernunnos.TaskResponse;
 import org.danann.cernunnos.Tuple;
 import org.danann.cernunnos.CacheHelper.Factory;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -143,52 +148,101 @@ public final class XslTransformTask extends AbstractContainerTask {
         final Tuple<String, String> transformerKey = new Tuple<String, String>(contextLocation, stylesheetLocation);
         final Templates templates = this.transformerCache.getCachedObject(req, res, transformerKey, this.transformerFactory);
 
+		Element srcElement = null;
+		Node nodeReagentEvaluated = node != null ? (Node) node.evaluate(req, res) : null;
+		if (nodeReagentEvaluated != null) {
+			// Reading from the NODE reagent is preferred...
+			srcElement = (Element) nodeReagentEvaluated;
+		} else {
+			// But read from LOCATION if NODE isn't set...
+		    final String locationStr = (String) location.evaluate(req, res);
+            final URL loc;
+                try {
+                    final URL ctx;
+                    try {
+                        ctx = new URL(contextLocation);
+                    }
+                    catch (MalformedURLException mue) {
+                        throw new RuntimeException("Failed to parse context '" + contextLocation + "' into URL", mue);
+                }
+                
+                loc = new URL(ctx, locationStr);
+            }
+            catch (MalformedURLException mue) {
+                throw new RuntimeException("Failed to parse location '" + locationStr + "' with context '" + contextLocation + "' into URL", mue);
+            }
+
+			// Use an EntityResolver if provided...
+			SAXReader rdr = new SAXReader();
+			EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
+			if (resolver != null) {
+				rdr.setEntityResolver(resolver);
+			}
+
+			final Document document;
+            try {
+                document = rdr.read(loc);
+            }
+            catch (DocumentException de) {
+                throw new RuntimeException("Failed to read XML Document for XSLT from " + loc.toExternalForm(), de);
+            }
+            srcElement = document.getRootElement();
+		}
+
+		DocumentFactory dfac = new DocumentFactory();
+		Document ddoc = dfac.createDocument((Element) srcElement.clone());
+		DOMWriter dwriter = new DOMWriter();
+
+		DocumentResult rslt = new DocumentResult();
+		
+		final Transformer trans;
         try {
-			Element srcElement = null;
-			Node nodeReagentEvaluated = node != null ? (Node) node.evaluate(req, res) : null;
-			if (nodeReagentEvaluated != null) {
-				// Reading from the NODE reagent is preferred...
-				srcElement = (Element) nodeReagentEvaluated;
-			} else {
-				// But read from LOCATION if NODE isn't set...
-			    URL ctx = new URL(contextLocation);
-				URL loc = new URL(ctx, (String) location.evaluate(req, res));
+            trans = templates.newTransformer();
+        }
+        catch (TransformerConfigurationException tce) {
+            throw new RuntimeException("Failed to retrieve Transformer for XSLT", tce);
+        }
+        
+		try {
+            trans.transform(new DOMSource(dwriter.write(ddoc)), rslt);
+        }
+        catch (TransformerException te) {
+            throw new RuntimeException("Failed to perform XSL transformation", te);
+        }
+        catch (DocumentException de) {
+            throw new RuntimeException("Failed to translate JDOM Document to W3C Document", de);
+        }
 
-				// Use an EntityResolver if provided...
-				SAXReader rdr = new SAXReader();
-				EntityResolver resolver = (EntityResolver) entityResolver.evaluate(req, res);
-				if (resolver != null) {
-					rdr.setEntityResolver(resolver);
-				}
-
-				srcElement = rdr.read(loc).getRootElement();
+		final Element rootElement = rslt.getDocument().getRootElement();
+		
+        if (to_file != null) {
+			File f = new File((String) to_file.evaluate(req, res));
+			if (f.getParentFile() != null) {
+				// Make sure the necessary directories are in place...
+				f.getParentFile().mkdirs();
 			}
-
-			DocumentFactory dfac = new DocumentFactory();
-			Document ddoc = dfac.createDocument((Element) srcElement.clone());
-			DOMWriter dwriter = new DOMWriter();
-
-			DocumentResult rslt = new DocumentResult();
 			
-			final Transformer trans = templates.newTransformer();
-			trans.transform(new DOMSource(dwriter.write(ddoc)), rslt);
-
-			if (to_file != null) {
-				File f = new File((String) to_file.evaluate(req, res));
-				if (f.getParentFile() != null) {
-					// Make sure the necessary directories are in place...
-					f.getParentFile().mkdirs();
-				}
-				XMLWriter writer = new XMLWriter(new FileOutputStream(f),
-										new OutputFormat("  ", true));
-				writer.write(rslt.getDocument().getRootElement());
-			} else {
-				// default behavior...
-				res.setAttribute(Attributes.NODE, rslt.getDocument().getRootElement());
-			}
-
-		} catch (Throwable t) {
-			throw new RuntimeException("Unable to perform the requested transformation with XSL from scriptEngine='" + contextLocation + "' and script='" + stylesheetLocation + "'", t);
+			final XMLWriter writer;
+            try {
+                writer = new XMLWriter(new FileOutputStream(f),
+                						new OutputFormat("  ", true));
+            }
+            catch (UnsupportedEncodingException uee) {
+                throw new RuntimeException("Failed to create XML writer", uee);
+            }
+            catch (FileNotFoundException fnfe) {
+                throw new RuntimeException("Could not create file for XML output: " + f, fnfe);
+            }
+            
+			try {
+                writer.write(rootElement);
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException("Failed to write transformed XML document to: " + f, ioe);
+            }
+		} else {
+			// default behavior...
+			res.setAttribute(Attributes.NODE, rootElement);
 		}
 
 		super.performSubtasks(req, res);

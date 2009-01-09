@@ -123,7 +123,7 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		String rslt = null;
 
 		try {
-			rslt = new File(".").toURI().toURL().toString();
+			rslt = new File(".").toURL().toString();
 		} catch (MalformedURLException mue) {
 			String msg = "Unable to create a URL representation of the current directory.";
 			throw new RuntimeException(msg, mue);

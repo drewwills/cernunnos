@@ -16,12 +16,13 @@
 
 package org.danann.cernunnos.io;
 
-import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.io.IOUtils;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
@@ -60,45 +61,40 @@ public final class ArchiveIteratorTask extends AbstractContainerTask {
 	public void perform(TaskRequest req, TaskResponse res) {
 
         URL url = resource.evaluate(req, res);
-		InputStream inpt = null;
 		ZipInputStream zip = null;
 		try {
-
-			inpt = url.openStream();
-			zip = new ZipInputStream(inpt);
+			final String urlExternalForm = url.toExternalForm();
+            
+			try {
+                zip = new ZipInputStream(new BufferedInputStream(url.openStream()));
+            }
+            catch (IOException ioe) {
+                throw new RuntimeException("Failed to open input stream for URL: " + urlExternalForm, ioe);
+            }
 
 			// Set the default CONTEXT for subtasks...
-			res.setAttribute(Attributes.CONTEXT, "jar:" + url.toExternalForm() + "!/");
+			res.setAttribute(Attributes.CONTEXT, "jar:" + urlExternalForm + "!/");
 
-			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
-				if (entry.isDirectory()) {
-					// We need to skip these b/c many possible subtasks will
-					// choke on them.  Hope that doesn't become a problem.
-					continue;
-				}
-				res.setAttribute(Attributes.LOCATION, entry.getName());
-				super.performSubtasks(req, res);
-				zip.closeEntry();
+			try {
+    			for (ZipEntry entry = zip.getNextEntry(); entry != null; entry = zip.getNextEntry()) {
+    				if (entry.isDirectory()) {
+    					// We need to skip these b/c many possible subtasks will
+    					// choke on them.  Hope that doesn't become a problem.
+    					continue;
+    				}
+    				
+    				res.setAttribute(Attributes.LOCATION, entry.getName());
+    				super.performSubtasks(req, res); //Outer try/catch should never see an IOException from performSubtasks
+    				
+    				zip.closeEntry();
+    			}
 			}
-
-		} catch (Throwable t) {
-			String msg = "Unable to read the specified archive:  " + url.toExternalForm();
-			throw new RuntimeException(msg, t);
+			catch (IOException ioe) {
+			    throw new RuntimeException("Failed to read specified archive:  " + urlExternalForm, ioe);
+			}
 		} finally {
-			if (zip != null) {
-				try {
-					zip.close();
-				} catch (IOException ioe) {
-					throw new RuntimeException(ioe);
-				}
-			}
-			if (inpt != null) {
-				try {
-					inpt.close();
-				} catch (IOException ioe) {
-					throw new RuntimeException(ioe);
-				}
-			}
+		    //Problems closing an InputStream can be ignored
+		    IOUtils.closeQuietly(zip);
 		}
 
 	}

@@ -59,7 +59,12 @@ public class ConcurrentTask extends AbstractContainerTask {
         //Submit the sub-tasks to the thread pool
         executorService.submit(new Runnable() {
             public void run() {
-                ConcurrentTask.this.performSubtasks(req, res);                
+                try {
+                    ConcurrentTask.this.performSubtasks(req, res);
+                }
+                catch (Throwable t) {
+                    log.error("Exception thrown while performing subtask in its own thread.", t);
+                }
             }
         });
         

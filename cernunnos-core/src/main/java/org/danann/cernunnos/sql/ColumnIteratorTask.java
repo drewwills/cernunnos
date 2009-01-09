@@ -17,6 +17,7 @@
 package org.danann.cernunnos.sql;
 
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.EntityConfig;
@@ -25,8 +26,11 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 
 public final class ColumnIteratorTask extends AbstractContainerTask {
+    private static final SQLExceptionTranslator SQL_EXCEPTION_TRANSLATOR = new SQLStateSQLExceptionTranslator();
 
 	/*
 	 * Public API.
@@ -44,17 +48,27 @@ public final class ColumnIteratorTask extends AbstractContainerTask {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
+		ResultSetMetaData rsmd = (ResultSetMetaData) req.getAttribute(SqlAttributes.RESULT_SET_METADATA);
 		
-		try {
-			ResultSetMetaData rsmd = (ResultSetMetaData) req.getAttribute(SqlAttributes.RESULT_SET_METADATA);
-			for (int i=1; i <= rsmd.getColumnCount(); i++) {
-				res.setAttribute(SqlAttributes.COLUMN_NAME, rsmd.getColumnName(i));
-				super.performSubtasks(req, res);
-			}
-		} catch (Throwable t) {
-			String msg = "Error iterating the columns of a result set.";
-			throw new RuntimeException(msg, t);
+		final int columnCount;
+        try {
+            columnCount = rsmd.getColumnCount();
+        }
+        catch (SQLException sqle) {
+            throw SQL_EXCEPTION_TRANSLATOR.translate("Failed to get column count from ResultSetMetaData", "UNKNOWN", sqle);
+        }
+        
+		for (int i=1; i <= columnCount; i++) {
+			final String columnName;
+            try {
+                columnName = rsmd.getColumnLabel(i);
+            }
+            catch (SQLException sqle) {
+                throw SQL_EXCEPTION_TRANSLATOR.translate("Failed to get column name " + i + " from ResultSetMetaData", "UNKNOWN", sqle);
+            }
+			
+            res.setAttribute(SqlAttributes.COLUMN_NAME, columnName);
+			super.performSubtasks(req, res);
 		}
-		
 	}
 }

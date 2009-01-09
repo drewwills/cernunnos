@@ -16,12 +16,13 @@
 
 package org.danann.cernunnos.core;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Map.Entry;
 
+import org.apache.commons.io.IOUtils;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -60,34 +61,27 @@ public final class PropertiesTask extends AbstractContainerTask {
 
         URL loc = resource.evaluate(req, res);
 
+        
+        Properties p = new Properties();
+        
         InputStream inpt = null;
         try {
-
-            inpt = loc.openStream();
-
-            Properties p = new Properties();
-            p.load(inpt);
-
-            for (Entry<?,?> e : p.entrySet()) {
-                res.setAttribute((String) e.getKey(), e.getValue());
+            try {
+                inpt = loc.openStream();
+                p.load(inpt);
             }
-
-            super.performSubtasks(req, res);
-
-        } catch (Throwable t) {
-            String msg = "Unable to read the specified properties file:  " 
-                                                + loc.toExternalForm();
-            throw new RuntimeException(msg, t);
+            catch (IOException ioe) {
+                throw new RuntimeException("Unable to read the specified properties file: " + loc.toExternalForm(), ioe);
+            }
         } finally {
-            if (inpt != null) {
-                try {
-                    inpt.close();
-                } catch (IOException ioe) {
-                    throw new RuntimeException(ioe);
-                }
-            }
+            IOUtils.closeQuietly(inpt);
         }
 
+        for (Entry<?,?> e : p.entrySet()) {
+            res.setAttribute((String) e.getKey(), e.getValue());
+        }
+
+        super.performSubtasks(req, res);
     }
 
 }

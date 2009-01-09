@@ -97,14 +97,14 @@ public class ScriptTask extends AbstractContainerTask {
         final String engineName = scriptEngineFactory.getEngineName();
         try {
             scriptEvaluator.eval(scriptContext);
-
-            res.setAttribute(ScriptAttributes.ENGINE + "." + engineName, engine);
-            super.performSubtasks(req, res);
         }
         catch (ScriptException se) {
             throw new RuntimeException("Error while executing the specified script.  " +
                     "\n\t\tENGINE_NAME:  " + engineName +
                     "\n\t\tSCRIPT (follows):\n" + script + "\n", se);
         }
+        
+        res.setAttribute(ScriptAttributes.ENGINE + "." + engineName, engine);
+        super.performSubtasks(req, res);
 	}
 }

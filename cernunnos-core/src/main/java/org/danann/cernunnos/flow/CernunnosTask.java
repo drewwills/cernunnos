@@ -61,38 +61,37 @@ public final class CernunnosTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 
         final URL crn = resource.evaluate(req, res);
-		try {
 			
-			// Choose a Task...
-			final String taskPath = crn.toExternalForm();
-			Task k = null;
-			synchronized (loadedTasks) {
-				if (loadedTasks.containsKey(taskPath)) {
-					
-					// Use what we have...
-					k = loadedTasks.get(taskPath);
+		// Choose a Task...
+		final String taskPath = crn.toExternalForm();
+		Task k = null;
+		synchronized (loadedTasks) {
+			if (loadedTasks.containsKey(taskPath)) {
+				
+				// Use what we have...
+				k = loadedTasks.get(taskPath);
 
-				} else {
+			} else {
 
-					// Compile the Task at the specified location...
-					k = runner.compileTask(taskPath);
-					
-					// NB:  For now we're going to limit the size of loadedTasks 
-					// to 1 to prevent memory issues; 1 is enough for the 
-					// majority of cases.
-					loadedTasks.clear();
+				// Compile the Task at the specified location...
+				k = runner.compileTask(taskPath);
+				
+				// NB:  For now we're going to limit the size of loadedTasks 
+				// to 1 to prevent memory issues; 1 is enough for the 
+				// majority of cases.
+				loadedTasks.clear();
 
-					// Add the newly-compiled Task to loadedTasks...
-					loadedTasks.put(taskPath, k);
-					
-				}
+				// Add the newly-compiled Task to loadedTasks...
+				loadedTasks.put(taskPath, k);
+				
 			}
+		}
 
+		try {
 			// Run it...
 			runner.run(k, req, res);
-
 		} catch (Throwable t) {
-			String msg = "Unable to invoke the specified script:  " + crn.toExternalForm();
+			String msg = "Exception while to invoke the specified script:  " + crn.toExternalForm();
 			throw new RuntimeException(msg, t);
 		}
 
