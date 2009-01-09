@@ -17,6 +17,7 @@
 package org.danann.cernunnos.flow;
 
 import org.danann.cernunnos.Attributes;
+import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
@@ -38,7 +39,7 @@ public final class CernunnosPhrase implements Phrase {
 	 */
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_PHRASE};
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_PHRASE};
 		final Formula rslt = new SimpleFormula(CernunnosPhrase.class, reagents);
 		return rslt;
 	}
