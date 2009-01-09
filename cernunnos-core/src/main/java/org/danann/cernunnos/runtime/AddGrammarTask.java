@@ -17,16 +17,13 @@
 package org.danann.cernunnos.runtime;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.dom4j.Element;
-import org.dom4j.Node;
-import org.dom4j.io.SAXReader;
 
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Bootstrappable;
@@ -39,6 +36,11 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.io.SAXReader;
 
 @Deprecated
 public final class AddGrammarTask extends AbstractContainerTask {
@@ -73,19 +75,35 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		this.context = (String) config.getValue(CONTEXT);
 		this.location = (String) config.getValue(LOCATION);
 
-		Grammar g = null;
+		final URL loc;
 		try {
-			URL ctx = new URL(this.context);
-			URL loc = new URL(ctx, location);
-
-			// Read by passing a URL -- don't manage the URLConnection yourself...
-			g = AddGrammarTask.parse(new SAXReader().read(loc).getRootElement(), 
-													config.getGrammar());
-		} catch (Throwable t) {
-			String msg = "Unable to parse a grammar from the specified location:  " + this.location;
-			throw new RuntimeException(msg, t);
+		    final URL ctx;
+		    try {
+		        ctx = new URL(this.context);
+	        }
+	        catch (MalformedURLException mue) {
+	            throw new RuntimeException("Failed to parse context '" + this.context + "' into URL", mue);
+	        }
+	        
+			loc = new URL(ctx, this.location);
+		}
+		catch (MalformedURLException mue) {
+		    throw new RuntimeException("Failed to parse location '" + this.location + "' with context '" + this.context + "' into URL", mue);
 		}
 
+		// Read by passing a URL -- don't manage the URLConnection yourself...
+		final SAXReader saxReader = new SAXReader();
+		final Document doc;
+        try {
+            doc = saxReader.read(loc);
+        }
+        catch (DocumentException de) {
+            throw new RuntimeException("Failed to parse Document from loaction '" + loc + "'", de);
+        }
+        
+        final Grammar g = AddGrammarTask.parse(doc.getRootElement(), 
+													config.getGrammar());
+		
 		super.init(new SimpleEntityConfig(g, config.getEntryName(), 
 						config.getSource(), config.getFormula(), 
 						config.getValues()));
@@ -105,10 +123,10 @@ public final class AddGrammarTask extends AbstractContainerTask {
 		String rslt = null;
 
 		try {
-			rslt = new File(".").toURL().toString();
-		} catch (Throwable t) {
+			rslt = new File(".").toURI().toURL().toString();
+		} catch (MalformedURLException mue) {
 			String msg = "Unable to create a URL representation of the current directory.";
-			throw new RuntimeException(msg, t);
+			throw new RuntimeException(msg, mue);
 		}
 
 		return rslt;
@@ -179,51 +197,62 @@ public final class AddGrammarTask extends AbstractContainerTask {
 	                                + "attribute '@impl':  " + e.asXML();
 	            throw new IllegalArgumentException(msg);
 	        }
-	        try {
 	
-	            // Get the description, if present...
-	            String description = null;  // default...
-	            Element doc = (Element) e.selectSingleNode("following-sibling::doc[@entry = '" + name + "']");
-	            if (doc != null) {
-	                description = doc.selectSingleNode("description").getText();
-	            }
-	
-	            // Obtain the Formula...
-	            Class<?> c = g.getClassLoader().loadClass(impl);
-	            Bootstrappable b = (Bootstrappable) c.newInstance();
-	            Formula f = b.getFormula();
-	
-	            // Sanity check -- refuse the formula if the class doesn't match!
-	            if (!f.getImplementationClass().equals(c)) {
-	                String msg = "Invalid Formula Provided by Task Implementation:  class '"
-	                            + c.getName() + "' provided a formula specifying implementation class '"
-	                            + f.getImplementationClass().getName() + "'.";
-	                throw new RuntimeException(msg);
-	            }
-	
-	            // Evaluate the mappings...
-	            Map<Reagent,Object> mappings = new HashMap<Reagent,Object>();
-	            for (Reagent r : f.getReagents()) {
-	                Object value = r.getReagentType().evaluate(g, e, r.getXpath());
-	                if (value != null) {
-	                    mappings.put(r, value);
-	                }
-	            }
-	
-	            // Pull the examples as well...
-	            List<Node> examples = new LinkedList<Node>();
-	            for (Iterator<?> xItr = e.selectNodes("//doc[@entry = '" + name + "']/example").iterator(); xItr.hasNext();) {
-	                examples.add((Node) xItr.next());
-	            }
-	
-	            // Create the associated Entry...
-	            rslt.put(name, new Entry(name, Entry.Type.valueOf(e.getName().toUpperCase()), description, f, mappings, examples));
-	
-	        } catch (Throwable t) {
-	            String msg = "Unable to parse the specified entry.";
-	            throw new RuntimeException(msg, t);
-	        }
-	
+            // Get the description, if present...
+            String description = null;  // default...
+            Element doc = (Element) e.selectSingleNode("following-sibling::doc[@entry = '" + name + "']");
+            if (doc != null) {
+                description = doc.selectSingleNode("description").getText();
+            }
+
+            // Obtain the Formula...
+            final Class<?> c;
+            final ClassLoader grammarClassLoader = g.getClassLoader();
+            try {
+                c = grammarClassLoader.loadClass(impl);
+            }
+            catch (ClassNotFoundException cnfe) {
+                throw new RuntimeException("Failed to load class '" + impl + "' using grammar ClassLoader: " + grammarClassLoader, cnfe);
+            }
+            
+            final Bootstrappable b;
+            try {
+                b = (Bootstrappable) c.newInstance();
+            }
+            catch (InstantiationException ie) {
+                throw new RuntimeException("Failed to instantiate class: " + c, ie);
+            }
+            catch (IllegalAccessException iae) {
+                throw new RuntimeException("Failed to instantiate class: " + c, iae);
+            }
+            
+            Formula f = b.getFormula();
+
+            // Sanity check -- refuse the formula if the class doesn't match!
+            if (!f.getImplementationClass().equals(c)) {
+                String msg = "Invalid Formula Provided by Task Implementation:  class '"
+                            + c.getName() + "' provided a formula specifying implementation class '"
+                            + f.getImplementationClass().getName() + "'.";
+                throw new RuntimeException(msg);
+            }
+
+            // Evaluate the mappings...
+            Map<Reagent,Object> mappings = new HashMap<Reagent,Object>();
+            for (Reagent r : f.getReagents()) {
+                Object value = r.getReagentType().evaluate(g, e, r.getXpath());
+                if (value != null) {
+                    mappings.put(r, value);
+                }
+            }
+
+            // Pull the examples as well...
+            List<Node> examples = new LinkedList<Node>();
+            for (Iterator<?> xItr = e.selectNodes("//doc[@entry = '" + name + "']/example").iterator(); xItr.hasNext();) {
+                examples.add((Node) xItr.next());
+            }
+
+            // Create the associated Entry...
+            rslt.put(name, new Entry(name, Entry.Type.valueOf(e.getName().toUpperCase()), description, f, mappings, examples));
 	    }
 	
 	    return rslt;
