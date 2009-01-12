@@ -24,6 +24,7 @@ import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
+import org.danann.cernunnos.ManagedException;
 import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.SimpleFormula;
@@ -40,6 +41,7 @@ public final class CernunnosTask implements Task {
 	// Instance Members.
     private Factory<String, Task> taskFactory;
     private CacheHelper<String, Task> taskCache;
+    private EntityConfig config;
     
     
     private final ResourceHelper resource = new ResourceHelper();
@@ -64,6 +66,7 @@ public final class CernunnosTask implements Task {
 		this.grammar = config.getGrammar();
 		this.runner = new ScriptRunner(grammar);
 		this.taskFactory = new CachedTaskFactory(this.runner);
+		this.config = config;
 
 	}
 
@@ -79,8 +82,8 @@ public final class CernunnosTask implements Task {
 			// Run it...
 			runner.run(k, req, res);
 		} catch (Throwable t) {
-			String msg = "Exception while to invoke the specified script:  " + crn.toExternalForm();
-			throw new RuntimeException(msg, t);
+			//Always throw a managed-exception so tracing multi-file calls is easier
+			throw new ManagedException(this.config, req, t);
 		}
 
 	}
