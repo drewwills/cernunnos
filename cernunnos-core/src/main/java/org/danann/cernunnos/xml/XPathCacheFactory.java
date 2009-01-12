@@ -16,7 +16,7 @@
 
 package org.danann.cernunnos.xml;
 
-import org.danann.cernunnos.CacheHelper.Factory;
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.dom4j.XPath;
 import org.dom4j.xpath.DefaultXPath;
 
@@ -26,7 +26,7 @@ import org.dom4j.xpath.DefaultXPath;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public final class XPathCacheFactory implements Factory<String, XPath> {
+public final class XPathCacheFactory extends AbstractCacheHelperFactory<String, XPath> {
     //Hide factory mutex to avoid unforseen sync problems
     private static final Object FACTORY_MUTEX = new Object();
     
@@ -42,14 +42,6 @@ public final class XPathCacheFactory implements Factory<String, XPath> {
     public XPath createObject(String key) {
         return new DefaultXPath(key);
     }
-
-    /* (non-Javadoc)
-     * @see org.danann.cernunnos.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
-     */
-    public boolean isThreadSafe(String key, XPath instance) {
-        return false;
-    }
-
 
     /* (non-Javadoc)
      * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)

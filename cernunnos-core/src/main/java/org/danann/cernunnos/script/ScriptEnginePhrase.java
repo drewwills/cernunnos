@@ -22,6 +22,7 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
@@ -90,7 +91,7 @@ public final class ScriptEnginePhrase implements Phrase {
 		return scriptEngine;
 	}
 
-    protected final static class CachedScriptEngineFactory implements CacheHelper.Factory<String, ScriptEngine> {
+    protected final static class CachedScriptEngineFactory extends AbstractCacheHelperFactory<String, ScriptEngine> {
 
         /* (non-Javadoc)
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#createObject(java.lang.Object)
@@ -118,6 +119,7 @@ public final class ScriptEnginePhrase implements Phrase {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
          */
+        @Override
         public boolean isThreadSafe(String key, ScriptEngine instance) {
             final ScriptEngineFactory factory = instance.getFactory();
             final Object threadingAbility = factory.getParameter("THREADING");

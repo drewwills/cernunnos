@@ -20,6 +20,7 @@ import org.apache.commons.jexl.Expression;
 import org.apache.commons.jexl.ExpressionFactory;
 import org.apache.commons.jexl.JexlContext;
 import org.apache.commons.jexl.JexlHelper;
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
@@ -80,7 +81,7 @@ public final class JexlPhrase implements Phrase {
 	
 
     
-    protected static final class CachableExpressionFactory implements CacheHelper.Factory<String, Expression> {
+    protected static final class CachableExpressionFactory extends AbstractCacheHelperFactory<String, Expression> {
         public static final CachableExpressionFactory INSTANCE = new CachableExpressionFactory();
 
         /* (non-Javadoc)
@@ -93,13 +94,6 @@ public final class JexlPhrase implements Phrase {
             catch (Exception e) {
                 throw new RuntimeException("Failed to create Expression for '" + key + "'", e);
             }
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
-         */
-        public boolean isThreadSafe(String key, Expression instance) {
-            return false;
         }
 
         /* (non-Javadoc)

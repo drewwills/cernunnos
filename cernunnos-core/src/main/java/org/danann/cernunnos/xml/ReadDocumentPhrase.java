@@ -18,6 +18,7 @@ package org.danann.cernunnos.xml;
 
 import java.net.URL;
 
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CacheHelper;
@@ -121,7 +122,7 @@ public final class ReadDocumentPhrase implements Phrase {
         }
     }
     
-    protected static final class DocumentFactory implements CacheHelper.Factory<Tuple<String, String>, Element> {
+    protected static final class DocumentFactory extends AbstractCacheHelperFactory<Tuple<String, String>, Element> {
         private final EntityResolver resolver;
         
         public DocumentFactory(EntityResolver resolver) {
@@ -153,13 +154,6 @@ public final class ReadDocumentPhrase implements Phrase {
                         "\n\tCONTEXT=" + key.first + 
                         "\n\tLOCATION=" + key.second, t);
             }
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
-         */
-        public boolean isThreadSafe(Tuple<String, String> key, Element instance) {
-            return false;
         }
 
         /* (non-Javadoc)

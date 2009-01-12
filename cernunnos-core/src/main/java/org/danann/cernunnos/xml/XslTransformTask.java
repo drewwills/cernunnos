@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.Attributes;
@@ -252,7 +253,7 @@ public final class XslTransformTask extends AbstractContainerTask {
     /**
      * Factory to create new Transformer instances
      */
-    protected static class CachedTransformerFactory implements CacheHelper.Factory<Tuple<String, String>, Templates> {
+    protected static class CachedTransformerFactory extends AbstractCacheHelperFactory<Tuple<String, String>, Templates> {
         private TransformerFactory transformerFactory = TransformerFactory.newInstance();
         
         /* (non-Javadoc)
@@ -279,6 +280,7 @@ public final class XslTransformTask extends AbstractContainerTask {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
          */
+        @Override
         public boolean isThreadSafe(Tuple<String, String> key, Templates instance) {
             return true;
         }

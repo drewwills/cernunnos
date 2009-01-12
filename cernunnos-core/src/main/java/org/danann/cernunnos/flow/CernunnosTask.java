@@ -18,6 +18,7 @@ package org.danann.cernunnos.flow;
 
 import java.net.URL;
 
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
@@ -62,7 +63,7 @@ public final class CernunnosTask implements Task {
         resource.init(config);
 		this.grammar = config.getGrammar();
 		this.runner = new ScriptRunner(grammar);
-		this.taskFactory = new CachedTransformerFactory(this.runner);
+		this.taskFactory = new CachedTaskFactory(this.runner);
 
 	}
 
@@ -87,10 +88,10 @@ public final class CernunnosTask implements Task {
     /**
      * Factory to create new Task instances
      */
-    protected static class CachedTransformerFactory implements CacheHelper.Factory<String, Task> {
+    protected static class CachedTaskFactory extends AbstractCacheHelperFactory<String, Task> {
         private final ScriptRunner runner;
         
-        public CachedTransformerFactory(ScriptRunner runner) {
+        public CachedTaskFactory(ScriptRunner runner) {
             this.runner = runner;
         }
 
@@ -111,6 +112,7 @@ public final class CernunnosTask implements Task {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
          */
+        @Override
         public boolean isThreadSafe(String key, Task instance) {
             return true;
         }

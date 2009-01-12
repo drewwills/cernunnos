@@ -18,6 +18,7 @@ package org.danann.cernunnos.xml;
 
 import java.net.URL;
 
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.AttributePhrase;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
@@ -81,7 +82,7 @@ public final class ParseXmlPhrase implements Phrase {
         
     }
     
-    protected static final class DocumentFactory implements CacheHelper.Factory<String, Element> {
+    protected static final class DocumentFactory extends AbstractCacheHelperFactory<String, Element> {
         private final EntityResolver resolver;
         
         public DocumentFactory(EntityResolver resolver) {
@@ -93,7 +94,6 @@ public final class ParseXmlPhrase implements Phrase {
          */
         public Element createObject(String key) {
             try {
-
                 // Use an EntityResolver if provided...
                 SAXReader rdr = new SAXReader();
                 if (resolver != null) {
@@ -109,13 +109,6 @@ public final class ParseXmlPhrase implements Phrase {
             catch (Throwable t) {
                 throw new RuntimeException("Unable to read the specified document:  " + key);
             }
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
-         */
-        public boolean isThreadSafe(String key, Element instance) {
-            return false;
         }
 
         /* (non-Javadoc)

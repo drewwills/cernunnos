@@ -20,8 +20,6 @@ import java.io.Serializable;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * Simple object that contains two values who's references are immutable once initialized.
@@ -74,9 +72,6 @@ public class Tuple<A, B> implements Serializable {
      */
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-            .append("first", this.first)
-            .append("second", this.second)
-            .toString();
+        return "[" + this.first + "|" + this.second + "]";
     }
 }

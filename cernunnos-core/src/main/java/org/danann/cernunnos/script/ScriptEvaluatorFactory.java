@@ -8,14 +8,14 @@ package org.danann.cernunnos.script;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 
-import org.danann.cernunnos.CacheHelper;
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.Tuple;
 
 /**
  * @author Eric Dalquist
  * @version $Revision$
  */
-final class ScriptEvaluatorFactory implements CacheHelper.Factory<Tuple<ScriptEngine, String>, ScriptEvaluator> {
+final class ScriptEvaluatorFactory extends AbstractCacheHelperFactory<Tuple<ScriptEngine, String>, ScriptEvaluator> {
     //Hide factory mutex to avoid unforseen sync problems
     private static final Object FACTORY_MUTEX = new Object();
     
@@ -34,6 +34,7 @@ final class ScriptEvaluatorFactory implements CacheHelper.Factory<Tuple<ScriptEn
     /* (non-Javadoc)
      * @see org.danann.cernunnos.cache.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
      */
+    @Override
     public boolean isThreadSafe(Tuple<ScriptEngine, String> key, ScriptEvaluator instance) {
         final ScriptEngineFactory factory = key.first.getFactory();
         final Object threadingAbility = factory.getParameter("THREADING");

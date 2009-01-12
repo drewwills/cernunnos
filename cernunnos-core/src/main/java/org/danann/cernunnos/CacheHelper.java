@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
@@ -28,7 +29,7 @@ import java.util.Map;
  * @param <K>
  * @param <V>
  */
-public interface CacheHelper<K, V> {
+public interface CacheHelper<K extends Serializable, V> {
     public static final Reagent CACHE = new SimpleReagent("CACHE", "@cache", ReagentType.PHRASE, Map.class,
             "A shared Map to cache items in.  The default is the value of the 'Attributes.CACHE' " +
             "request attribute.",
@@ -52,7 +53,7 @@ public interface CacheHelper<K, V> {
     /**
      * Factory used to create new instances of a cached object when needed.
      */
-    public interface Factory<K, V> {
+    public interface Factory<K extends Serializable, V> {
         /**
          * Create a new object to cache and return. The key should contain any nessesary information to
          * create the object
@@ -68,5 +69,11 @@ public interface CacheHelper<K, V> {
          * Gets the best mutex to use for synchronizing on when creating the object. This can NEVER return null.
          */
         public Object getMutex(K key);
+        
+        /**
+         * Gets an optional namespace to use for caching to ensure keys with the same values for different objects don't
+         * conflict. If this returns null the object is cached in the global namespace.
+         */
+        public Serializable getCacheNamespace(K key);
     }
 }

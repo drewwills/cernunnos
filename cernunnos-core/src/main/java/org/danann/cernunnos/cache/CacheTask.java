@@ -16,9 +16,11 @@
 
 package org.danann.cernunnos.cache;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.CacheHelper;
@@ -47,7 +49,8 @@ import org.danann.cernunnos.TaskResponse;
 public final class CacheTask extends AbstractContainerTask {
 
 	// Instance Members.
-    private CacheHelper<Object, Object> cache;
+    private final Object factoryMutex = new Object();
+    private CacheHelper<Serializable, Object> cache;
     private Phrase keyPhrase;
 	private Phrase cacheKeyPhrase;
 	private Phrase threadSafePhrase;
@@ -61,7 +64,7 @@ public final class CacheTask extends AbstractContainerTask {
 	public static final Reagent KEY = new SimpleReagent("KEY", "@key", ReagentType.PHRASE, String.class,
                 "Attribute name the cached object will be bound to for subtasks.");
 
-	public static final Reagent CACHE_KEY = new SimpleReagent("CACHE_KEY", "@cache-key", ReagentType.PHRASE, Object.class,
+	public static final Reagent CACHE_KEY = new SimpleReagent("CACHE_KEY", "@cache-key", ReagentType.PHRASE, Serializable.class,
                 "The cache key to use for caching the object.");
 	
 	public static final Reagent THREAD_SAFE = new SimpleReagent("TRHEAD_SAFE", "@thread-safe", ReagentType.PHRASE, String.class,
@@ -89,7 +92,7 @@ public final class CacheTask extends AbstractContainerTask {
 	    super.init(config);        
         
 		// Instance Members.
-	    this.cache = new DynamicCacheHelper<Object, Object>(config);
+	    this.cache = new DynamicCacheHelper<Serializable, Object>(config);
 	    this.keyPhrase = (Phrase) config.getValue(KEY);
         this.cacheKeyPhrase = (Phrase) config.getValue(CACHE_KEY);
         this.threadSafePhrase = (Phrase) config.getValue(THREAD_SAFE);
@@ -98,14 +101,14 @@ public final class CacheTask extends AbstractContainerTask {
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-	    final Object cacheKey = this.cacheKeyPhrase.evaluate(req, res);
+	    final Serializable cacheKey = (Serializable)this.cacheKeyPhrase.evaluate(req, res);
 	    final Object rslt = this.cache.getCachedObject(req, res, cacheKey, new SubtaskCachedObjectFactory(req, res));
 	    
         res.setAttribute((String) this.keyPhrase.evaluate(req, res), rslt);
         super.performSubtasks(req, res);
 	}
 
-	private final class SubtaskCachedObjectFactory implements CacheHelper.Factory<Object, Object> {
+	private final class SubtaskCachedObjectFactory extends AbstractCacheHelperFactory<Serializable, Object> {
 	    private final TaskRequest req;
 	    private final TaskResponse res;
 	    
@@ -117,7 +120,7 @@ public final class CacheTask extends AbstractContainerTask {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.CacheHelper.Factory#createObject(java.lang.Object)
          */
-        public Object createObject(Object key) {
+        public Object createObject(Serializable key) {
             //If there are tasks use them
             if (CacheTask.this.factoryTasks != null && CacheTask.this.factoryTasks.size() > 0) {
                 //Handling to make sure we don't squash an existing RETURN_VALUE attribute
@@ -150,15 +153,16 @@ public final class CacheTask extends AbstractContainerTask {
         /* (non-Javadoc)
          * @see org.danann.cernunnos.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
          */
-        public boolean isThreadSafe(Object key, Object instance) {
+        @Override
+        public boolean isThreadSafe(Serializable key, Object instance) {
             return Boolean.valueOf((String) CacheTask.this.threadSafePhrase.evaluate(this.req, this.res));
         }
 
         /* (non-Javadoc)
          * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
          */
-        public Object getMutex(Object key) {
-            return CacheTask.this;
+        public Object getMutex(Serializable key) {
+            return CacheTask.this.factoryMutex;
         }
 	}
 }

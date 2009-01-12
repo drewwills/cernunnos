@@ -16,6 +16,7 @@
 
 package org.danann.cernunnos;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -26,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Eric Dalquist
  * @version $Revision$
  */
-public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
+public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelper<K, V> {
     protected final Log logger = LogFactory.getLog(this.getClass());
 
     private final Phrase cachePhrase;
@@ -54,7 +55,8 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
         }
         
         //Load the cache only if cache-all is enabled
-        final Map<Object, Object> cache;
+        final Map<Tuple<Serializable, K>, Object> cache;
+        final Tuple<Serializable, K> compoundCacheKey;
         switch (cacheMode) {
             case NONE: {
                 return factory.createObject(key);
@@ -63,11 +65,14 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
             default:
             case ONE: {
                 cache = null;
+                compoundCacheKey = null;
             }
             break;
             
             case ALL: {
-                cache = (Map<Object, Object>) this.cachePhrase.evaluate(req, res);
+                cache = (Map<Tuple<Serializable, K>, Object>) this.cachePhrase.evaluate(req, res);
+                final Serializable cacheNamespace = factory.getCacheNamespace(key);
+                compoundCacheKey = new Tuple<Serializable, K>(cacheNamespace, key);
             }
             break;
         }
@@ -93,7 +98,7 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
             else {
                 final Object object;
                 synchronized (cache) {
-                    object = cache.get(key);
+                    object = cache.get(compoundCacheKey);
                 }
                 
                 //If the cached object is a ThreadLocal use it for the instance
@@ -130,7 +135,7 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
                 else {
                     if (threadSafe) {
                         synchronized (cache) {
-                            cache.put(key, instance);
+                            cache.put(compoundCacheKey, instance);
                         }
                     }
                     else {
@@ -138,7 +143,7 @@ public class DynamicCacheHelper<K, V> implements CacheHelper<K, V> {
                             ThreadLocal<V> threadInstanceHolder = (ThreadLocal<V>)cache.get(key);
                             if (threadInstanceHolder == null) {
                                 threadInstanceHolder = new ThreadLocal<V>();
-                                cache.put(key, threadInstanceHolder);
+                                cache.put(compoundCacheKey, threadInstanceHolder);
                             }
                         }
 
