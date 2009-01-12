@@ -114,6 +114,16 @@ public final class Attributes {
 	 * Cernunnos operations to return a value where appropriate.
 	 */
 	public static final String RETURN_VALUE = Attributes.class.getSimpleName() + ".RETURN_VALUE";
+
+    /**
+     * The default name under which a {@link Throwable} object may be
+     * registered as a request attribute.  The <code>Throwable</code> allows 
+     * Cernunnos operations to act on an exception.
+     */
+    public static final String EXCEPTION = Attributes.class.getSimpleName() + ".EXCEPTION";
+	
+	
+	
 	
 	public static List<BindingsHelper> prepareBindings(TaskRequest req) {
 

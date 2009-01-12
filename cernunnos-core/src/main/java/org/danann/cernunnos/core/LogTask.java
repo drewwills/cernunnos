@@ -40,6 +40,7 @@ public final class LogTask implements Task {
 	private Phrase prefix;
 	private Phrase message;
 	private Phrase suffix;
+    private Phrase exception;
 
 	/*
 	 * Public API.
@@ -53,6 +54,9 @@ public final class LogTask implements Task {
 						"The log-level associated with MESSAGE.  From least to most serious, the available " +
 						"log levels are ['trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'].  The" +
 						" default is 'info'.", new LiteralPhrase("info"));
+    
+    public static final Reagent EXCEPTION = new SimpleReagent("EXCEPTION", "@exception", ReagentType.PHRASE, Throwable.class,
+                        "The optional exception to log with the message.", new LiteralPhrase(null));
 
 	public static final Reagent PREFIX = new SimpleReagent("PREFIX", "@prefix", ReagentType.PHRASE, String.class,
 						"Characters that preceed MESSAGE.  The default is an empty string.", new LiteralPhrase(""));
@@ -64,7 +68,7 @@ public final class LogTask implements Task {
 						"Characters that follow MESSAGE.  The default is an empty string.", new LiteralPhrase(""));
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {LOGGER_NAME, LEVEL, PREFIX, MESSAGE, SUFFIX};
+		Reagent[] reagents = new Reagent[] {LOGGER_NAME, LEVEL, PREFIX, MESSAGE, SUFFIX, EXCEPTION};
 		final Formula rslt = new SimpleFormula(LogTask.class, reagents);
 		return rslt;
 	}
@@ -77,6 +81,7 @@ public final class LogTask implements Task {
 		this.prefix = (Phrase) config.getValue(PREFIX);
 		this.message = (Phrase) config.getValue(MESSAGE);
 		this.suffix = (Phrase) config.getValue(SUFFIX);
+		this.exception = (Phrase) config.getValue(EXCEPTION);
 
 	}
 
@@ -85,20 +90,31 @@ public final class LogTask implements Task {
 		final String lvl = (String) level.evaluate(req, res);
         final String logger = (String) loggerName.evaluate(req, res);
 
-        String msg = null;
+        final StringBuilder msg = new StringBuilder();
 		try {
 			final Log log = LogFactory.getLog(logger);
 			final Method logEnabledMethod = Log.class.getMethod("is" + capitalize(lvl) + "Enabled", new Class[] { });
 			
 			final boolean enabled = (Boolean)logEnabledMethod.invoke(log);
             if (enabled) {
-    			final Method logMethod = Log.class.getMethod(lvl, new Class[] {Object.class});
+    			msg.append(prefix.evaluate(req, res));
+    			msg.append(message.evaluate(req, res));
+    			msg.append(suffix.evaluate(req, res));
     			
-    			msg = String.valueOf(prefix.evaluate(req, res));
-    			msg = msg + String.valueOf(message.evaluate(req, res));
-    			msg = msg + String.valueOf(suffix.evaluate(req, res));
-    
-    			logMethod.invoke(log, new Object[] {msg.toString()});
+    			final Throwable t = (Throwable) exception.evaluate(req, res);
+
+    			final Method logMethod;
+    			final Object[] args;
+    			if (t == null) {
+    			    logMethod = Log.class.getMethod(lvl, new Class[] {Object.class});
+    			    args = new Object[] {msg.toString()};
+    			}
+    			else {
+                    logMethod = Log.class.getMethod(lvl, new Class[] {Object.class, Throwable.class});
+                    args = new Object[] {msg.toString(), t};
+    			}
+			    
+			    logMethod.invoke(log, args);
             }
 		} catch (Throwable t) {
 			throw new RuntimeException("Error logging the specified message:  [" + lvl + "] " + msg, t);
