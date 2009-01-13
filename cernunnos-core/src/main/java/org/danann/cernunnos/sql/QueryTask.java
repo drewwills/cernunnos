@@ -45,6 +45,7 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.Node;
+import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -169,7 +170,7 @@ public final class QueryTask extends AbstractContainerTask {
                         value = IOUtils.toString(rs.getClob(columnIndex).getCharacterStream());
                     }
                     catch (IOException ex) {
-                		throw new SQLException("Error converting CLOB value to String", ex);
+                		throw new DataRetrievalFailureException("Error converting CLOB value to String", ex);
                 	}
                 }
                 else {

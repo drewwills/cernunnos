@@ -107,7 +107,7 @@ public final class ParseXmlPhrase implements Phrase {
                 return rslt;
             }
             catch (Throwable t) {
-                throw new RuntimeException("Unable to read the specified document:  " + key);
+                throw new RuntimeException("Unable to read the specified document:  " + key, t);
             }
         }
 
