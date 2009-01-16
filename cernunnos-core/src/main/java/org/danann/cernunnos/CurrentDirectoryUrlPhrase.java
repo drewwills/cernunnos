@@ -51,7 +51,7 @@ public final class CurrentDirectoryUrlPhrase implements Phrase {
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 		String rslt = null;
 		try {
-			rslt = new File(".").toURL().toString();
+			rslt = new File(".").toURI().toURL().toExternalForm();
 		} catch (Throwable t) {
 			String msg = "Unable to represent the current directory as a URL.";
 			throw new RuntimeException(msg, t);
