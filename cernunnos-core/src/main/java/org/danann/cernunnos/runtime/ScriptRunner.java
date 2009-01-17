@@ -276,7 +276,7 @@ public class ScriptRunner {
             msg.append("**************************************************\n");
             msg.append("** Invoking ScriptRunner.run(Task, TaskRequest)\n");
             msg.append("** TaskRequest contains ").append(tr.getAttributeNames().size()).append(" elements\n");
-            for (String name : tr.getAttributeNames()) {
+            for (String name : tr.getSortedAttributeNames()) {
                 msg.append("**   - ").append(name).append("=").append(String.valueOf(tr.getAttribute(name))).append("\n");
             }
             msg.append("**************************************************\n");

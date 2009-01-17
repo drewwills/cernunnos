@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
@@ -84,6 +86,11 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		return Collections.unmodifiableMap(this.mergedAttributes);
 	}
 
+	
+	SortedSet<String> getSortedAttributeNames() {
+		return Collections.unmodifiableSortedSet(new TreeSet<String>(this.mergedAttributes.keySet()));
+	}
+	
 	/*
 	 * Package API.
 	 */
