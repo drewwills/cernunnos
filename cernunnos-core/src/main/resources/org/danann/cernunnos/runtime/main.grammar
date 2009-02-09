@@ -219,7 +219,7 @@
             <description>
                 <p>Prints the specified MESSAGE, followed by a line feed, to the PrintStream specified by STREAM.  You may optionally provide a PREFIX.</p>
             </description>
-            <content-model suffix="&#13;&#10;"/>
+            <content-model suffix="${org.danann.cernunnos.core.SystemPropertyPhrase(line.separator)}"/>
             <example caption="Parses a document from the resource at 'properties/db/data.xml', creates a node list from the expression '//table/name', and writes the text value of each node to System.out">
                 <pre><xmp><node-iterator source="${parseXml(properties/db/data.xml)}" xpath="//table/name">
   <echo-ln>${valueOf(.)}</echo-ln>
@@ -328,7 +328,7 @@
             <description>
                 <p>Splits the specified STRING into lines (based on line feed character ASCII 10) and iterates over them, performing SUBTASKS once for each line in the collection.</p>
             </description>
-            <content-model regex="&#10;"/>
+            <content-model regex="${org.danann.cernunnos.core.SystemPropertyPhrase(line.separator)}"/>
         </entry>
 
         <entry name="log" impl="org.danann.cernunnos.core.LogTask">
