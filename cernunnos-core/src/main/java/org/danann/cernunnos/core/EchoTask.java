@@ -52,7 +52,7 @@ public final class EchoTask implements Task {
 	public static final Reagent PREFIX = new SimpleReagent("PREFIX", "@prefix", ReagentType.PHRASE, String.class,
 					"Characters that preceed the main message.  The default is an empty string.", new LiteralPhrase(""));
 	
-	public static final Reagent MESSAGE = new SimpleReagent("MESSAGE", "text()", ReagentType.PHRASE, String.class, 
+	public static final Reagent MESSAGE = new SimpleReagent("MESSAGE", "text()", ReagentType.PHRASE, Object.class, 
 					"Message to write to the specified PrintStream.  The default is an empty string.", new LiteralPhrase(""));
 
 	public static final Reagent SUFFIX = new SimpleReagent("SUFFIX", "@suffix", ReagentType.PHRASE, String.class,
