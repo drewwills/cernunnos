@@ -16,7 +16,6 @@
 
 package org.danann.cernunnos.script;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.script.Bindings;
@@ -36,7 +35,6 @@ import org.danann.cernunnos.Reagent;
 import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
-import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.danann.cernunnos.Tuple;
@@ -61,7 +59,7 @@ public class ScriptTask extends AbstractContainerTask {
 					"Script content to execute.  Must be placed within a child <script> element.");
 
 	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
-					"The set of tasks that are children of this task.", new LinkedList<Task>());
+					"The set of tasks that are children of this task.", AbstractContainerTask.SUPPRESS_EMPTY_SUBTASKS_WARNINGS);
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ENGINE, SCRIPT, SUBTASKS};

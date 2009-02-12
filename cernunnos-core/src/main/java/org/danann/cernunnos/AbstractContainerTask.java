@@ -16,11 +16,13 @@
 
 package org.danann.cernunnos;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
 
 /**
@@ -36,6 +38,14 @@ public abstract class AbstractContainerTask implements Task {
 	/*
 	 * Public API.
 	 */
+	
+	/**
+	 * Use this <code>List</code> to create a <code>SUBTASKS</code> reagent that 
+	 * will not cause <code>POSSIBLE PROGRAMMING ERROR...</code> warnings when 
+	 * empty.  
+	 */
+	public static final List<Element> SUPPRESS_EMPTY_SUBTASKS_WARNINGS = 
+	                        createSuppressEmptySubtasksWarningsList();
 	
 	/**
 	 * Subclasses <strong>must</strong> invoke <code>super.init</code> within 
@@ -135,6 +145,17 @@ public abstract class AbstractContainerTask implements Task {
         for (Task k : tasks) {
             k.perform(req, res);
         }
+	}
+	
+	/*
+	 * Implementation.
+	 */
+	
+    private static List<Element> createSuppressEmptySubtasksWarningsList() {
+        DocumentFactory fac = new DocumentFactory();
+        List<Element> list = new LinkedList<Element>();
+        list.add(fac.createElement("org.danann.cernunnos.NoOpTask"));
+        return Collections.unmodifiableList(list);
 	}
 
 }
