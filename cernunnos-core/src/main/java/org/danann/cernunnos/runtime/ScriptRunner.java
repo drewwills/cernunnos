@@ -98,7 +98,7 @@ public class ScriptRunner {
         Document doc = null;
         URL origin = null;
         try {
-            origin = new URL(new File(".").toURL(), location);
+            origin = new URL(new File(".").toURI().toURL(), location);
             doc = new SAXReader().read(origin);
         } catch (Throwable t) {
             String msg = "Error reading a script from the specified location:  " + location;
