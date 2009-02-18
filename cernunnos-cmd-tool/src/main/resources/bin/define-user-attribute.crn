@@ -1,0 +1,36 @@
+<!--
+ |
+ | Invoke this script from within the root source directory of a Maven web application 
+ | project (such as one created by the com.googlecode.cernunnos:cernunnos-webapp Maven 
+ | archetype).
+ |
+ | PARAMETERS:
+ |   $1: The name of the user attribute you want to define (e.g. 'user.login.id')
+ |
+ +-->
+  <choose>
+    <when test="${groovy(!(new File('pom.xml').exists()))}">
+    
+        <!-- We do not appear to be in an appropriate project... -->
+        <echo-ln>ERROR:  No pom.xml file found;  invoke this tool within a Maven web application project</echo-ln>
+    
+    </when>
+    <otherwise>
+    
+        <!-- Proceed... -->
+		<with-attribute key="Attributes.NODE" value="${parseXml(src/main/webapp/WEB-INF/portlet.xml)}">
+		   <!-- Adjust portlet.xml -->
+		   <append-node>
+		       <user-attribute>
+		           <name>${$1}</name>
+		       </user-attribute>
+		   </append-node>
+		   <write-document file="src/main/webapp/WEB-INF/portlet.xml"/>
+        </with-attribute>
+
+    </otherwise>
+ </choose>
+ 
+ 
+ 
+ 

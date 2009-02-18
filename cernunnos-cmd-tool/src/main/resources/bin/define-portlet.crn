@@ -1,0 +1,51 @@
+<!--
+ |
+ | Invoke this script from within the root source directory of a Maven web application 
+ | project (such as one created by the com.googlecode.cernunnos:cernunnos-webapp Maven 
+ | archetype).
+ |
+ | PARAMETERS:
+ |   $1: The name of the Portlet you want to define (e.g. 'AddressBook')
+ |
+ +-->
+ <choose>
+    <when test="${groovy(!(new File('pom.xml').exists()))}">
+    
+        <!-- We do not appear to be in an appropriate project... -->
+        <echo-ln>ERROR:  No pom.xml file found;  invoke this tool within a Maven web application project</echo-ln>
+    
+    </when>
+    <otherwise>
+    
+        <!-- Proceed... -->
+	    <if test="${groovy(!(new File('src/main/webapp/WEB-INF/portlet.xml').exists()))}">
+	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/portlet.xml)}" file="src/main/webapp/WEB-INF/portlet.xml"/>
+	    </if>
+    
+	    <with-attribute key="Attributes.NODE" value="${parseXml(src/main/webapp/WEB-INF/portlet.xml)}">
+	
+	        <!-- Copy needed files -->
+	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/context.xml)}" file="src/main/webapp/WEB-INF/${$1}-portlet.xml"/>
+	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/index.crn)}" file="src/main/webapp/WEB-INF/views/${$1}/index.crn"/>
+	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/portlet-index.jsp)}" file="src/main/webapp/WEB-INF/jsp/${$1}/index.jsp"/>
+	
+	        <!-- Adjust portlet.xml -->
+	        <prepend-node>
+	            <portlet>
+	                <portlet-name>${$1}</portlet-name>
+	                <portlet-class>org.danann.cernunnos.runtime.web.CernunnosPortlet</portlet-class>
+	                <supports>
+	                    <mime-type>text/html</mime-type>
+	                    <portlet-mode>view</portlet-mode>
+	                </supports>
+	                <portlet-info>
+	                    <title>${$1}</title>
+	                </portlet-info>
+	            </portlet>
+	        </prepend-node>
+	        <write-document file="src/main/webapp/WEB-INF/portlet.xml"/>
+	
+	    </with-attribute>
+
+    </otherwise>
+ </choose>

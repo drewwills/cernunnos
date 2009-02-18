@@ -34,6 +34,8 @@
                 <br/>
                 <a href="anatomy-of-a-task.html">Anatomy of a Task</a>
                 <br/>
+                <a href="cernunnos-and-maven.html">Cernunnos &amp; Maven</a>
+                <br/>
                 <br/>
                 <input id="hideDeprecated" type="checkbox">
                     <xsl:choose>

@@ -1,0 +1,110 @@
+<html>
+
+<head>
+<title>Cernunnos Manual - Cernunnos &amp; Maven</title>
+<link rel="stylesheet" type="text/css" href="structural.css"/>
+<link rel="stylesheet" type="text/css" href="classes.css"/>
+</head>
+
+<body>
+<div align="center">
+  <h1>Cernunnos Manual</h1>
+</div>
+
+<hr/>
+
+<h2>Cernunnos &amp; Maven</h2>
+
+<p>Using Cernunnos is easier with <a href="http://maven.apache.org/" target="_new">Apache Maven</a>.
+Cernunnos depends on several popular, third-party APIs;  the details surrounding which 
+libraries are required and which versions are compatible may change from release 
+to release of Cernunnos.  Maven saves you the trouble of keeping up with these 
+changes, as well as tracking these libraries down in the first place.</p>
+
+<h3>Adding Cernunnos to Your Maven Project</h3>
+
+<p>Use XML like the following to add a dependency on Cernunnos to the pom.xml 
+file of your Maven project:</p>
+
+<blockquote><code><pre><xmp><repository>
+    <id>jasig-repository</id>
+    <name>JA-SIG Maven2 Repository</name>
+    <url>http://developer.ja-sig.org/maven2</url>
+</repository>
+        
+...
+        
+<dependency>
+    <groupId>com.googlecode.cernunnos</groupId>
+    <artifactId>cernunnos</artifactId>
+    <version>${cernunnos.version}</version>
+    <scope>compile</scope>
+</dependency></xmp></pre></code></blockquote>
+
+<p>At the time of this writing, Cernunnos is not available from 
+<a href="http://repo1.maven.org/maven2/" target="_new">Maven's central repository</a>.
+But thanks to the vision and generosity of the leadership at 
+<a href="http://www.ja-sig.org/" target="_new">JA-SIG</a>, Cernunnos artifacts are hosted 
+within the <a href="http://developer.ja-sig.org/maven2/" target="_new">JA-SIG Maven repository</a>.
+You must, therefore, reference the JA-SIG repository in your pom.xml file (as shown 
+above).  Additionally, <em>you must either define the <code>${cernunnos.version}</code> 
+variable, or replace that expression with a valid version of Cernunnos.</em></p>
+
+<h3>Creating a New Project from Scratch</h3>
+
+<p>If you need to create a new Maven webapp project, there is a better way.  Navigate 
+your command prompt to an empty directory and issue the following Maven command:</p>
+
+<blockquote><code><pre>
+mvn archetype:create                                    \
+  -DarchetypeGroupId=com.googlecode.cernunnos           \
+  -DarchetypeArtifactId=cernunnos-webapp                \
+  -DarchetypeVersion=&lt;cernunnos.version&gt;                \
+  -DgroupId=&lt;your.groupId&gt;                              \
+  -DartifactId=&lt;your.artifactId&gt;
+</pre></code></blockquote>
+
+<p>This operation will spawn a new, basic webapp project with the JA-SIG 
+repository and Cernunnos dependency pre-configured.  Several other useful and 
+appropriate webapp settings will be pre-configured as well.</p>
+
+<h4>Defining a Servlet</h4>
+
+<p>Issue the following command to define a new Servlet in your Maven webapp 
+project (requires Cernunnos command line tool):</p>
+
+<blockquote><code><pre>
+&gt;crn define-servlet.crn &lt;servlet.name&gt;
+</pre></code></blockquote>
+
+<p>This tool will create a new Java Servlet -- with the name you specify -- based on 
+the implementation class <code>org.danann.cernunnos.runtime.web.CernunnosServlet</code>.  
+Check out <a href="http://www.unicon.net/node/822" target="_new">this article</a> 
+for information on developing Java Portlets and Servlets with Cernunnos.</p>
+
+<h4>Defining a Portlet</h4>
+
+<p>Defining Java Portlets works just like Servlets.  Use the following command:</p>
+
+<blockquote><code><pre>
+&gt;crn define-portlet.crn &lt;portlet.name&gt;
+</pre></code></blockquote>
+
+<h4>Defining a User Attribute</h4>
+
+<p>You can also define user attributes for Portlet applications.  Use the 
+following command:</p>
+
+<blockquote><code><pre>
+&gt;crn define-user-attribute.crn &lt;attribute.name&gt;
+</pre></code></blockquote>
+
+<p><strong>NOTE:</strong>  you don't have to create your project with the 
+<code>cernunnos-webapp</code> archetype to use these tools.  Any Maven webapp project 
+that uses the <code>src/main/webapp/</code> convention for web resources should 
+work.</p>
+
+<hr/>
+
+</body>
+</html>
