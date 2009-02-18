@@ -1,0 +1,15 @@
+<archetype>
+	<id>cernunnos-archetypes</id>
+	<allowPartial>true</allowPartial>
+	<!--
+	<sources>
+        <source>src/main/java/App.java</source>
+	</sources>
+	<testSources>
+        <source>src/test/java/AppTest.java</source>
+	</testSources>
+	-->
+	<resources>
+        <resource>src/main/webapp/WEB-INF/web.xml</resource>
+	</resources>
+</archetype>
