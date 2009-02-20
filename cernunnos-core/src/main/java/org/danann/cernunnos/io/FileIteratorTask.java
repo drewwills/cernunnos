@@ -339,7 +339,11 @@ public final class FileIteratorTask extends AbstractContainerTask {
 				rslt.add(dir);
 			}
 
-			for (File child : dir.listFiles()) {
+			final File[] listFiles = dir.listFiles();
+			if (listFiles == null) {
+                throw new IllegalArgumentException("Could not get listing of files under '" + dir + "'");
+			}
+            for (File child : listFiles) {
 
 				boolean addIt = (grabDirectories == child.isDirectory());
 				if (addIt && startsWith != null) {
