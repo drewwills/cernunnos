@@ -36,10 +36,10 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.Node;
-import org.springframework.ldap.NamingException;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.ldap.core.ContextSource;
 import org.springframework.ldap.core.LdapTemplate;
+import org.springframework.ldap.core.ContextMapper;
 
 /**
  * Performs a specified LDAP query, then invokes child tasks once for each row 
@@ -58,8 +58,14 @@ public final class SearchTask extends AbstractContainerTask {
 	private List<Phrase> attributes;
 	private Phrase returnObject;
 	private Phrase dereferenceLinks;
+    private Phrase mapperType;
 	private Phrase attributesMapper;
+    private Phrase contextMapper;
 
+    private static Phrase DEFAULT_ATTR_MAPPER = 
+                new LiteralPhrase(new DefaultAttributesMapper());
+    private static Phrase DEFAULT_CTX_MAPPER = 
+                new LiteralPhrase(new DefaultContextMapper());
 	/*
 	 * Public API.
 	 */
@@ -110,19 +116,27 @@ public final class SearchTask extends AbstractContainerTask {
     				ReagentType.PHRASE, Boolean.class, "If true, dereference links during search.  The default " +
     				"is Boolean.FALSE.", new LiteralPhrase(Boolean.FALSE));
 
+    public static final Reagent MAPPER_TYPE = new SimpleReagent("MAPPER_TYPE", "@mapper-type", ReagentType.PHRASE,
+            String.class, "The type of LDAP mapper to use.  Possible values include 'attribute' or 'context'." +
+            "The default is (attribute).",
+            new LiteralPhrase("attribute"));
+
     public static final Reagent ATTRIBUTES_MAPPER = new SimpleReagent("ATTRIBUTES_MAPPER", "@attributes-mapper", 
 					ReagentType.PHRASE, AttributesMapper.class, "Interface defined by Spring LDAP for mapping " +
 					"LDAP Attributes to beans.  The default ATTRIBUTES_MAPPER simply returns an instance of " +
-					"javax.naming.directory.Attributes.", new LiteralPhrase(new DefaultAttributesMapper()));
+            "javax.naming.directory.Attributes.", DEFAULT_ATTR_MAPPER);
 
-	public static final Reagent SUBTASKS = new SimpleReagent("SUBTASKS", "subtasks/*", ReagentType.NODE_LIST, List.class,
-					"The set of tasks that are children of this search task.", new LinkedList<Task>());
+    public static final Reagent CONTEXT_MAPPER = new SimpleReagent("CONTEXT_MAPPER", "@context-mapper",
+            ReagentType.PHRASE, ContextMapper.class, "Interface defined by Spring LDAP for mapping " +
+            "LDAP Context to bean.  The default CONTEXT_MAPPER simply returns an instance of " +
+            "javax.naming.directory.Context.", DEFAULT_CTX_MAPPER);
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {ATTRIBUTE_NAME, CONTEXT_SOURCE, 
 						BASE_DN, FILTER, SCOPE, LIMIT, TIMEOUT, ATTRIBUTES, 
-						RETURN_OBJECT, DEREFERENCE_LINKS, ATTRIBUTES_MAPPER, 
-						SUBTASKS};
+            RETURN_OBJECT, DEREFERENCE_LINKS, MAPPER_TYPE, ATTRIBUTES_MAPPER,
+            CONTEXT_MAPPER, SUBTASKS
+        };
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
@@ -153,13 +167,15 @@ public final class SearchTask extends AbstractContainerTask {
         }
 		this.returnObject = (Phrase) config.getValue(RETURN_OBJECT);
 		this.dereferenceLinks = (Phrase) config.getValue(DEREFERENCE_LINKS);
+        this.mapperType = (Phrase) config.getValue(MAPPER_TYPE);
 		this.attributesMapper = (Phrase) config.getValue(ATTRIBUTES_MAPPER);
+        this.contextMapper = (Phrase) config.getValue(CONTEXT_MAPPER);
 
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
 
-		// Construct the LdapRemplate...
+        // Construct the LdapTemplate...
 		final ContextSource cs = (ContextSource) contextSource.evaluate(req, res);
 		final LdapTemplate template = new LdapTemplate(cs);
 		
@@ -182,12 +198,19 @@ public final class SearchTask extends AbstractContainerTask {
 		final String name = (String) attributeName.evaluate(req, res);
 		final String bdn = (String) baseDn.evaluate(req, res);
 		final String ftr = (String) filter.evaluate(req, res);
+        final String mt = (String) mapperType.evaluate(req, res);
 		final AttributesMapper am = (AttributesMapper) attributesMapper.evaluate(req, res);
+        final ContextMapper cm = (ContextMapper) contextMapper.evaluate(req, res);
 		
-		final List<?> rslt;
-		try {
-		    rslt = template.search(bdn, ftr, controls, am);
-		} catch (NamingException ne) {
+        if (mt.equals("attribute")) {
+		    try {
+                final List<?> rslt = template.search(bdn, ftr, controls, am);
+                for (Object j : rslt) {
+                    res.setAttribute(name, j);
+                    super.performSubtasks(req, res);
+                }
+
+            } catch (Throwable t) {
 			String msg = "Error performing the specified LDAP search:"
 						+ "\n\t\tBASE_DN=" + bdn
 						+ "\n\t\tFILTER=" + ftr
@@ -197,16 +220,40 @@ public final class SearchTask extends AbstractContainerTask {
 						+ "\n\t\tATTRIBUTES=" + a
 						+ "\n\t\tRETURN_OBJECT=" + ro
 						+ "\n\t\t=DEREFERENCE_LINKS=" + dl
-						+ "\n\t\t=ATTRIBUTES_MAPPER (class)=" + am.getClass().getName();
-			throw new RuntimeException(msg, ne);
-		}
+                        + "\n\t\t=MAPPER_TYPE=" + mt
+                        + "\n\t\t=ATTRIBUTES_MAPPER (class)=" + am.getClass().getName()
+                        + "\n\t\t=CONTEXT_MAPPER (class)=" + cm.getClass().getName();
+                throw new RuntimeException(msg, t);
+		    }
+        } else if (mt.equals("context")) {
+            try {
+                final List<?> rslt = template.search(bdn, ftr, controls, cm);
+                for (Object j : rslt) {
+                    res.setAttribute(name, j);
+                    super.performSubtasks(req, res);
+                }
 
-        for (Object j : rslt) {
-            res.setAttribute(name, j);
-            super.performSubtasks(req, res);
-        }
-	}
+            } catch (Throwable t) {
+                String msg = "Error performing the specified LDAP search:"
+                           + "\n\t\tBASE_DN=" + bdn
+                           + "\n\t\tFILTER=" + ftr
+                           + "\n\t\tSCOPE=" + p
+                           + "\n\t\tLIMIT=" + m
+                           + "\n\t\tTIMEOUT=" + o
+                           + "\n\t\tATTRIBUTES=" + a
+                           + "\n\t\tRETURN_OBJECT=" + ro
+                           + "\n\t\t=DEREFERENCE_LINKS=" + dl
+                           + "\n\t\t=MAPPER_TYPE=" + mt
+                           + "\n\t\t=ATTRIBUTES_MAPPER (class)=" + am.getClass().getName()
+                           + "\n\t\t=CONTEXT_MAPPER (class)=" + cm.getClass().getName();
+                throw new RuntimeException(msg, t);
+	        }
 	
+        } else {
+            throw new RuntimeException("Must specify either mapper-type as 'attribute' or 'context'");
+        }
+    }
+
 	/*
 	 * Nested Types.
 	 */
@@ -217,4 +264,10 @@ public final class SearchTask extends AbstractContainerTask {
 		}
 	}
 	
+    private static final class DefaultContextMapper implements ContextMapper {
+
+        public Object mapFromContext(Object ctx) {
+            return ctx;
+        }
+    }
 }
