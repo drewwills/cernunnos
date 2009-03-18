@@ -239,6 +239,18 @@
             </example>
         </entry>
 
+        <entry name="escape" impl="org.danann.cernunnos.core.EscapePhrase">
+            <description>
+                <p>Returns the specified <code>EXPRESSION</code> as-is, without checking for or 
+                evaluating nested phrases.  This feature is useful for manipulating file types 
+                and syntaxes that also use '${}' delimiters for dynamic content (<i>e.g.</i> 
+                pom.xml, build.xml, *.jsp).</p>
+            </description>
+            <example caption="Echos text that would fail to parse without ${escape}">
+                <pre><xmp><echo-ln>${escape(This is ${some(text)} that ${includes} delimiters...)}</echo-ln></xmp></pre>
+            </example>
+        </entry>
+
         <entry name="false" impl="org.danann.cernunnos.core.FalsePhrase">
             <description>
                 <p>Returns <code>Boolean.FALSE</code>.</p>
