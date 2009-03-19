@@ -16,7 +16,7 @@
 
 <xsl:transform xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
-    <xsl:import href="contents.xsl"/>
+    <xsl:import href="reference.xsl"/>
 
     <xsl:template match="/grammar">
         <xsl:call-template name="main">
