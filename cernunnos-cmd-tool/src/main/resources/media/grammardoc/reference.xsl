@@ -20,31 +20,21 @@
         <xsl:param name="showdeprecated"/>
         <html>
             <head>
-                <title>Cernunnos Task &amp; Phrase Reference</title>
+                <title>Cernunnos Manual:  Reference Frame</title>
                 <link rel="stylesheet" type="text/css" href="structural.css"/>
                 <link rel="stylesheet" type="text/css" href="classes.css"/>
                 <base target="mainFrame"/>
             </head>
             <body>
-                <h1><img height="96" width="96" src="Cernunnos.jpg" alt="Cernunnos logo"/>Cernunnos</h1>
-                <h2>Table of Contents</h2>
-                <a href="introduction.html">Introduction</a>
-                <br/>
-                <a href="request-attributes.html">Request Attributes</a>
-                <br/>
-                <a href="anatomy-of-a-task.html">Anatomy of a Task</a>
-                <br/>
-                <a href="cernunnos-and-maven.html">Cernunnos &amp; Maven</a>
-                <br/>
-                <br/>
+                <h2>Reference</h2>
                 <input id="hideDeprecated" type="checkbox">
                     <xsl:choose>
                         <xsl:when test="$showdeprecated = 'true'">
-                            <xsl:attribute name="onclick">window.location = 'contents-hidedeprecated.html'</xsl:attribute>
+                            <xsl:attribute name="onclick">window.location = 'reference-hidedeprecated.html'</xsl:attribute>
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:attribute name="checked">true</xsl:attribute>
-                            <xsl:attribute name="onclick">window.location = 'contents-showdeprecated.html'</xsl:attribute>
+                            <xsl:attribute name="onclick">window.location = 'reference-showdeprecated.html'</xsl:attribute>
                         </xsl:otherwise>
                     </xsl:choose>
                 </input>

@@ -20,6 +20,10 @@
         <copy-file to-dir="docs/grammardoc"/>
     </file-iterator>
 
+    <xslt stylesheet="media/grammardoc/contents.xsl">
+        <write-document file="docs/grammardoc/contents.html"/>
+    </xslt>
+    
     <xslt stylesheet="media/grammardoc/reference-showdeprecated.xsl">
         <write-document file="docs/grammardoc/reference-showdeprecated.html"/>
     </xslt>
