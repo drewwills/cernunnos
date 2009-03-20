@@ -23,11 +23,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Required;
 
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.ReturnValueImpl;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
@@ -37,7 +39,7 @@ import org.danann.cernunnos.TaskResponse;
  * Task implementation that's easy to use with dependency-injection strategies 
  * like the Spring Framework.
  */
-public class PojoTask implements Task {
+public class PojoTask implements Task, InitializingBean {
 
     // Static Members.
     private static final String DEFAULT_CONTEXT = PojoTask.class.getResource("PojoTask.class").toExternalForm();
@@ -108,6 +110,43 @@ public class PojoTask implements Task {
     public void setRequestAttributes(final Map<String,Object> requestAttributes) {
         this.requestAttributes = new HashMap<String,Object>(requestAttributes);
     }
+    
+    /**
+     * This method <em>must</em> be invoked after all POJO properties have been 
+     * supplied.  If this <code>Task</code> has been defined using Spring 
+     * Dependency Injection, this method will be called for you by the Spring 
+     * context.  Additional calls to this method are no-ops.
+     */
+    public synchronized void afterPropertiesSet() {
+
+        // Subsequent calls are no-ops...
+        if (task == null) {
+            
+            // Be sure we have what we need...
+            if (location == null) {
+                String msg = "Property 'location' not set.  You must specify " +
+                                                "a Cernunnos XML document.";
+                throw new IllegalStateException(msg);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Bootstrapping Cernunnos XML [context=" 
+                                + context + " location=" + location);
+            }
+            
+            try {
+                URL u = ResourceHelper.evaluate(context, location);
+                task = runner.compileTask(u.toExternalForm());
+            } catch (Throwable t) {
+                String msg = "Unable to read the specified Cernunnos XML"
+                                    + "\n\t\tcontext=" + context
+                                    + "\n\t\tlocation=" + location;
+                throw new RuntimeException(msg, t);
+            }
+
+        }
+
+    }
 
     public Formula getFormula() {
         throw new UnsupportedOperationException();
@@ -119,41 +158,13 @@ public class PojoTask implements Task {
     
     public void perform(TaskRequest req, TaskResponse res) {
         
-        // Bootstrap the task, if applicable...
+        // Assertions...
         if (task == null) {
-            
-            // Be sure we have what we need...
-            if (location == null) {
-                String msg = "Property 'location' not set.  You must specify " +
-                                                "a Cernunnos XML document.";
-                throw new RuntimeException(msg);
-            }
-
-            // Make sure we bootstrap once...
-            synchronized(this) {
-                if (task == null) {
-                    
-                    if (log.isDebugEnabled()) {
-                        log.debug("Bootstrapping Cernunnos XML [context=" 
-                                        + context + " location=" + location);
-                    }
-                    
-                    try {
-                        URL ctx = new URL(context);
-                        URL u = new URL(ctx, location);
-                        task = runner.compileTask(u.toExternalForm());
-                    } catch (Throwable t) {
-                        String msg = "Unable to read the specified Cernunnos XML"
-                                            + "\n\t\tcontext=" + context
-                                            + "\n\t\tlocation=" + location;
-                        throw new RuntimeException(msg, t);
-                    }
-                    
-                }
-            }                        
-            
-        }   // end bootstrap...
-        
+            String msg = "Task not initialized;  you must invoke " +
+            		    "PojoTask.afterPropertiesSet() before using this Task.";
+            throw new IllegalStateException(msg);
+        }
+                
         RuntimeRequestResponse tr = new RuntimeRequestResponse();
         tr.enclose(req);
         for (Map.Entry<String,Object> y : requestAttributes.entrySet()) {

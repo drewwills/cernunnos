@@ -74,8 +74,8 @@ public final class ResourceHelper {
     }
     
     // Instance Members.
-    private Phrase context;
-    private Phrase location;
+    private Phrase contextPhrase;
+    private Phrase locationPhrase;
 
     /*
      * Public API.
@@ -118,28 +118,25 @@ public final class ResourceHelper {
         // Instance Members.
         // NB:  Doesn't matter which CONTEXT & LOCATION reagents 
         // we use since they have the same name...
-        this.context = (Phrase) config.getValue(CONTEXT_SOURCE);
-        this.location = (Phrase) config.getValue(LOCATION_TASK);
+        this.contextPhrase = (Phrase) config.getValue(CONTEXT_SOURCE);
+        this.locationPhrase = (Phrase) config.getValue(LOCATION_TASK);
 
     }
     
     public boolean isSpecified(TaskRequest req, TaskResponse res) {
-        return context.evaluate(req, res) != null;
+        return contextPhrase.evaluate(req, res) != null;
     }
+    
+    public static URL evaluate(String context, String location) {
 
-    public URL evaluate(TaskRequest req, TaskResponse res) {
-        
         URL rslt = null;
-        
-        String ctx = (String) context.evaluate(req, res);
-        String loc = (String) location.evaluate(req, res);
         try {
-                        
+            
             // LOCATION
             for (ProtocolTranslator r : translators) {
-                if (r.appliesTo(loc)) {
+                if (r.appliesTo(location)) {
                     // Translate a custom protocol...
-                    rslt = r.translate(loc);
+                    rslt = r.translate(location);
                 }
             }
             if (rslt == null) {
@@ -147,29 +144,35 @@ public final class ResourceHelper {
                 // CONTEXT
                 URL u = null;
                 for (ProtocolTranslator r : translators) {
-                    if (r.appliesTo(ctx)) {
+                    if (r.appliesTo(context)) {
                         // Translate a custom protocol...
-                        u = r.translate(ctx);
+                        u = r.translate(context);
                     }
                 }
                 if (u == null) {
                     // Use a standard protocol...
-                    u = new URL(ctx);
+                    u = new URL(context);
                 }
 
-                rslt = new URL(u, loc);
+                rslt = new URL(u, location);
 
             }
 
         } catch (Throwable t) {
             String msg = "Unable to construct a URL to the specified resource:" +
-                            "\n\t\tCONTEXT=" + ctx +
-                            "\n\t\tLOCATION=" + loc;
+                            "\n\t\tCONTEXT=" + context +
+                            "\n\t\tLOCATION=" + location;
             throw new RuntimeException(msg, t);
         }
         
         return rslt;
 
+    }
+
+    public URL evaluate(TaskRequest req, TaskResponse res) {
+        String ctx = (String) contextPhrase.evaluate(req, res);
+        String loc = (String) locationPhrase.evaluate(req, res);
+        return ResourceHelper.evaluate(ctx, loc);
     }
     
     /*
