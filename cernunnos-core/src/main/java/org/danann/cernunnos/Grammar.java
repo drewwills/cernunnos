@@ -30,6 +30,14 @@ public interface Grammar {
 	 * is not indicated either by name or by class name.
 	 */
 	static Class<?> DEFAULT_PHRASE_IMPL = AttributePhrase.class;
+	
+	/**
+	 * Provides a short name for this <code>Grammar</code> that describes it and 
+	 * its entries.  One-word names are preferred.
+	 * 
+	 * @return A name for this grammar
+	 */
+	String getName();
 
 	/**
 	 * Creates a new <code>Task</code> based on the information found in the

@@ -14,34 +14,128 @@
    limitations under the License.
 -->
 
-<serialize-grammar>
-
-    <file-iterator dir="media/grammardoc" excludes="**/*.xsl">
-        <copy-file to-dir="docs/grammardoc"/>
-    </file-iterator>
-
-    <xslt stylesheet="media/grammardoc/contents.xsl">
-        <write-document file="docs/grammardoc/contents.html"/>
-    </xslt>
-    
-    <xslt stylesheet="media/grammardoc/reference-showdeprecated.xsl">
-        <write-document file="docs/grammardoc/reference-showdeprecated.html"/>
-    </xslt>
-    
-    <xslt stylesheet="media/grammardoc/reference-hidedeprecated.xsl">
-        <write-document file="docs/grammardoc/reference-hidedeprecated.html"/>
-    </xslt>
-    
-    <node-iterator xpath="entry">
-        <with>
-            <attribute key="NAME">${valueOf(name)}</attribute>
-            <attribute key="TYPE">${valueOf(@type)}</attribute>
+<with>
+    <attribute key="nameList">${groovy([])}</attribute>
+    <subtasks>
+		    	    
+	    <!-- Main Grammar -->
+        <grammar location="classpath:/org/danann/cernunnos/runtime/main.grammar">
             <subtasks>
-                <xslt stylesheet="media/grammardoc/entry.xsl">
-                    <write-document file="docs/grammardoc/entries/${NAME}-${TYPE}.html"/>
-                </xslt>
-            </subtasks>
-        </with>
-    </node-iterator>
+	            <serialize-grammar recursive="${jexl(false)}">
+                    <with-attribute key="GRAMMAR_NAME" value="${valueOf(@name)}">
+		                <groovy><script>nameList.add(GRAMMAR_NAME)</script></groovy>
+					    <xslt stylesheet="media/grammardoc/reference-showdeprecated.xsl">
+					        <write-document file="docs/grammardoc/${GRAMMAR_NAME}-showdeprecated.html"/>
+					    </xslt>
+					    <xslt stylesheet="media/grammardoc/reference-hidedeprecated.xsl">
+					        <write-document file="docs/grammardoc/${GRAMMAR_NAME}-hidedeprecated.html"/>
+					    </xslt>
+					    <node-iterator xpath="entry">
+					        <with>
+					            <attribute key="NAME">${valueOf(name)}</attribute>
+					            <attribute key="TYPE">${valueOf(@type)}</attribute>
+					            <subtasks>
+					                <xslt stylesheet="media/grammardoc/entry.xsl">
+                                        <write-document file="docs/grammardoc/entries/${GRAMMAR_NAME}-${NAME}-${TYPE}.html"/>
+					                </xslt>
+					            </subtasks>
+					        </with>
+					    </node-iterator>
+					</with-attribute>
+	            </serialize-grammar>
+	        </subtasks>
+        </grammar>
 
-</serialize-grammar>
+        <!-- Portlet Grammar -->
+        <grammar location="classpath:/org/danann/cernunnos/runtime/web/portlet.grammar">
+            <subtasks>
+                <serialize-grammar recursive="${jexl(false)}">
+                    <with-attribute key="GRAMMAR_NAME" value="${valueOf(@name)}">
+                        <groovy><script>nameList.add(GRAMMAR_NAME)</script></groovy>
+                        <xslt stylesheet="media/grammardoc/reference-showdeprecated.xsl">
+                            <write-document file="docs/grammardoc/${GRAMMAR_NAME}-showdeprecated.html"/>
+                        </xslt>
+                        <xslt stylesheet="media/grammardoc/reference-hidedeprecated.xsl">
+                            <write-document file="docs/grammardoc/${GRAMMAR_NAME}-hidedeprecated.html"/>
+                        </xslt>
+                        <node-iterator xpath="entry">
+                            <with>
+                                <attribute key="NAME">${valueOf(name)}</attribute>
+                                <attribute key="TYPE">${valueOf(@type)}</attribute>
+                                <subtasks>
+                                    <xslt stylesheet="media/grammardoc/entry.xsl">
+                                        <write-document file="docs/grammardoc/entries/${GRAMMAR_NAME}-${NAME}-${TYPE}.html"/>
+                                    </xslt>
+                                </subtasks>
+                            </with>
+                        </node-iterator>
+                    </with-attribute>
+                </serialize-grammar>
+            </subtasks>
+        </grammar>
+
+        <!-- Servlet Grammar -->
+        <grammar location="classpath:/org/danann/cernunnos/runtime/web/servlet.grammar">
+            <subtasks>
+                <serialize-grammar recursive="${jexl(false)}">
+                    <with-attribute key="GRAMMAR_NAME" value="${valueOf(@name)}">
+                        <groovy><script>nameList.add(GRAMMAR_NAME)</script></groovy>
+                        <xslt stylesheet="media/grammardoc/reference-showdeprecated.xsl">
+                            <write-document file="docs/grammardoc/${GRAMMAR_NAME}-showdeprecated.html"/>
+                        </xslt>
+                        <xslt stylesheet="media/grammardoc/reference-hidedeprecated.xsl">
+                            <write-document file="docs/grammardoc/${GRAMMAR_NAME}-hidedeprecated.html"/>
+                        </xslt>
+                        <node-iterator xpath="entry">
+                            <with>
+                                <attribute key="NAME">${valueOf(name)}</attribute>
+                                <attribute key="TYPE">${valueOf(@type)}</attribute>
+                                <subtasks>
+                                    <xslt stylesheet="media/grammardoc/entry.xsl">
+                                        <write-document file="docs/grammardoc/entries/${GRAMMAR_NAME}-${NAME}-${TYPE}.html"/>
+                                    </xslt>
+                                </subtasks>
+                            </with>
+                        </node-iterator>
+                    </with-attribute>
+                </serialize-grammar>
+            </subtasks>
+        </grammar>
+
+        <file-iterator dir="media/grammardoc" excludes="**/*.xsl">
+            <copy-file to-dir="docs/grammardoc"/>
+        </file-iterator>
+    
+        <with-attribute key="Attributes.NODE" value="${newDoc(html)}">
+            <append-node>
+	            <head>
+	                <title>Cernunnos Manual:  Contents Frame</title>
+	                <link rel="stylesheet" type="text/css" href="structural.css"/>
+	                <link rel="stylesheet" type="text/css" href="classes.css"/>
+	                <base target="mainFrame"/>
+	            </head>
+	            <body>
+	                <h2><img height="96" width="96" src="Cernunnos.jpg" alt="Cernunnos logo"/>Contents</h2>
+	                <a href="introduction.html">Introduction</a>
+	                <br/>
+	                <a href="request-attributes.html">Request Attributes</a>
+	                <br/>
+	                <a href="anatomy-of-a-task.html">Anatomy of a Task</a>
+	                <br/>
+	                <a href="cernunnos-and-maven.html">Cernunnos &amp; Maven</a>
+	                <br/>
+
+                    <h3>Reference</h3>
+	            </body>
+            </append-node>
+            <for-each items="${nameList}">
+                <append-node parent="${singleNode(body)}">
+                    <a href="${Attributes.OBJECT}-showdeprecated.html" target="navFrameBottom">${Attributes.OBJECT} Grammar</a>
+                    <br/>
+                </append-node>
+            </for-each>
+            <write-document file="docs/grammardoc/contents.html"/>
+        </with-attribute>
+
+    </subtasks>
+</with>

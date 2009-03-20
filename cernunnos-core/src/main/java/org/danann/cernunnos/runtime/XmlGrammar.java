@@ -51,11 +51,14 @@ import org.dom4j.io.SAXReader;
 public final class XmlGrammar implements Grammar {
 
     // Static Members.
+    public static final String DEFAULT_GRAMMAR_NAME = "Unnamed";
     private static final DocumentFactory fac = new DocumentFactory();
     private static final String MAIN_GRAMMAR_LOCATION = "main.grammar";
     private static Grammar mainGrammar = null;
 
     // Instance Members.
+    private final String name;
+    private final String origin;
     private final Grammar parent;
     private final ClassLoader loader;
     private Map<String,List<Entry>> entries;
@@ -70,7 +73,7 @@ public final class XmlGrammar implements Grammar {
     	if (mainGrammar == null) {
     		// Create it...
     		try {
-            	final Grammar root = new XmlGrammar(null, XmlGrammar.class.getClassLoader());
+            	final Grammar root = new XmlGrammar("ROOT", null, null, XmlGrammar.class.getClassLoader());
             	final InputStream inpt = XmlGrammar.class.getResourceAsStream(MAIN_GRAMMAR_LOCATION);
                 final Document doc = new SAXReader().read(inpt);
                 final Task k = new ScriptRunner(root).compileTask(doc.getRootElement());
@@ -87,6 +90,14 @@ public final class XmlGrammar implements Grammar {
 
         return mainGrammar;
 
+    }
+    
+    public String getName() {
+        return name;
+    }
+
+    public String getOrigin() {
+        return origin;
     }
 
     public Task newTask(Element e, Task parent) {
@@ -231,8 +242,15 @@ public final class XmlGrammar implements Grammar {
      * Package API.
      */
 
-    XmlGrammar(Grammar parent) {
-        this(parent, ((XmlGrammar) parent).getClassLoader());
+	/**
+	 * @deprecated
+	 */
+	XmlGrammar(Grammar parent) {
+        this(XmlGrammar.DEFAULT_GRAMMAR_NAME, null, parent, ((XmlGrammar) parent).getClassLoader());
+    }
+
+    XmlGrammar(String name, String origin, Grammar parent) {
+        this(name, origin, parent, ((XmlGrammar) parent).getClassLoader());
     }
 
     ClassLoader getClassLoader() {
@@ -251,10 +269,14 @@ public final class XmlGrammar implements Grammar {
     }
     
     Set<Entry> getEntries() {
+        return getEntries(true);
+    }
+    
+    Set<Entry> getEntries(boolean recursive) {
 
     	Set<Entry> rslt = null;
-    	if (parent != null && parent instanceof XmlGrammar) {
-    		rslt = ((XmlGrammar) parent).getEntries();
+    	if (recursive && parent != null && parent instanceof XmlGrammar) {
+    		rslt = ((XmlGrammar) parent).getEntries(true);
     	} else {
     		rslt = new HashSet<Entry>();
     	}
@@ -273,16 +295,22 @@ public final class XmlGrammar implements Grammar {
      * Implementation.
      */
 
-    private XmlGrammar(Grammar parent, ClassLoader loader) {
+    private XmlGrammar(String name, String origin, Grammar parent, ClassLoader loader) {
 
         // Assertions...
-        // NB:  Parent may be null.
+        if (name == null) {
+            String msg = "Argument 'name' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        // NB:  origin & parent may be null.
         if (loader == null) {
             String msg = "Argument 'loader' cannot be null.";
             throw new IllegalArgumentException(msg);
         }
 
         // Instance Members.
+        this.name = name;
+        this.origin = origin;
         this.parent = parent;
         this.loader = loader;
 

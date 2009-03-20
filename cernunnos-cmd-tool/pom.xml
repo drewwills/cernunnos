@@ -20,6 +20,16 @@
             <version>${pom.parent.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.portlet</groupId>
+            <artifactId>portlet-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

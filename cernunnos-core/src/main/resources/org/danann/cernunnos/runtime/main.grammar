@@ -14,7 +14,7 @@
    limitations under the License.
 -->
 
-<org.danann.cernunnos.runtime.EncloseGrammarTask>
+<org.danann.cernunnos.runtime.EncloseGrammarTask name="Main">
 
     <entries>
     
@@ -24,7 +24,7 @@
         <org.danann.cernunnos.runtime.DefineEntryTask name="entry" impl="org.danann.cernunnos.runtime.DefineEntryTask">
             <description>
                 <p>Defines a new grammar entry of class IMPL with the specified NAME.</p>
-                <p>NOTE:  <b>This task may only appear as a direct child of a <a href="grammar-TASK.html">&lt;grammar&gt;</a> task</b>.</p>
+                <p>NOTE:  <b>This task may only appear as a direct child of a <a href="Main-grammar-TASK.html">&lt;grammar&gt;</a> task</b>.</p>
             </description>
             <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
                 <pre><xmp><grammar>
@@ -43,7 +43,7 @@
         </org.danann.cernunnos.runtime.DefineEntryTask>
         <entry name="grammar" impl="org.danann.cernunnos.runtime.EncloseGrammarTask">
             <description>
-                <p>Overlays a new, empty grammar on top of the current grammar.  Use his task in conjunction with one or more <a href="entry-TASK.html">&lt;entry&gt;</a> tasks.</p>
+                <p>Overlays a new, empty grammar on top of the current grammar.  Use his task in conjunction with one or more <a href="Main-entry-TASK.html">&lt;entry&gt;</a> tasks.</p>
             </description>
             <example caption="Creates a new Grammar object, adds the &lt;request-dispatcher&gt; entry, then returns it to the caller of this Cernunnos XML">
                 <pre><xmp><grammar>
@@ -108,7 +108,7 @@
              <description>
                  <p>Executes the subtasks concurrently using the thread pool from the request under the default attribute 
                  name 'ConcurrentAttributes.EXECUTOR_SERVICE'.</p>
-                 <p>Use this task within a <a href="thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
+                 <p>Use this task within a <a href="Main-thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
              </description>
             <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
                 <pre><xmp><js>
@@ -137,7 +137,7 @@
                  <p>Creates a thread pool (ExecutorService) with a default size of 4 threads and stores it in a request 
                  attribute named 'ConcurrentAttributes.EXECUTOR_SERVICE' by default. The task will wait for all tasks 
                  in the thread pool to complete before completing itself.</p>
-                 <p>Use a <a href="concurrent-TASK.html">&lt;concurrent&gt;</a> task within this task.</p>
+                 <p>Use a <a href="Main-concurrent-TASK.html">&lt;concurrent&gt;</a> task within this task.</p>
              </description>
             <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
                 <pre><xmp><js>
@@ -162,7 +162,7 @@
              <description>
                  <p>Executes the subtasks concurrently using the thread pool from the request under the default attribute 
                  name 'ConcurrentAttributes.EXECUTOR_SERVICE'.</p>
-                 <p>Use this task within a <a href="thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
+                 <p>Use this task within a <a href="Main-thread-pool-TASK.html">&lt;thread-pool&gt;</a> task.</p>
              </description>
             <example caption="Creates an array of three URLs in JavaScript, then computes a checksum value ten times for one of the URLs in the array (distributed evenly) using a pool of five threads, writing the current count and checksum value to the console each time">
                 <pre><xmp><js>
@@ -192,7 +192,7 @@
                 <p>Returns the value of the Java constant (<i>i.e.</i> static field) specified by FIELD.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(<i>&lt;field-name&gt;</i>)}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(<i>&lt;field-name&gt;</i>)}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -256,7 +256,7 @@
                 <p>Returns <code>Boolean.FALSE</code>.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(false)}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(false)}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -299,7 +299,7 @@
                 <p>Invokes the specified METHOD on the specified OBJECT or CLASS.  If the specified method has a non-void return type, the returned object will be registered as a request attribute under ATTRIBUTE_NAME.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-TASK.html">&lt;groovy&gt;</a> and/or <a href="groovy-Phrase.html">${groovy}</a> instead, or another supported scripting language.</p>
+                <p>Use <a href="Main-groovy-TASK.html">&lt;groovy&gt;</a> and/or <a href="Main-groovy-Phrase.html">${groovy}</a> instead, or another supported scripting language.</p>
             </deprecation>
         </entry>
 
@@ -317,7 +317,7 @@
                 <p>Returns <code>Boolean.TRUE</code> if the specified VALUE is null, otherwise <code>Boolean.FALSE</code>.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(<i>&lt;expression&gt;</i> == null)}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(<i>&lt;expression&gt;</i> == null)}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -361,7 +361,7 @@
                 <p>Attempts to create an instance of the specified class name using the default (zero-argument) constructor, then return it.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(new <i>&lt;type-name&gt;</i>())}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(new <i>&lt;type-name&gt;</i>())}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -370,7 +370,7 @@
                 <p>Returns the opposite of the Boolean specified by VALUE.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(!<i>&lt;expression&gt;</i>)}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(!<i>&lt;expression&gt;</i>)}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -379,7 +379,7 @@
                 <p>Returns <code>null</code>.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(null)}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(null)}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -388,7 +388,7 @@
                 <p>Evaluates the <code>Integer</code> value of the specified EXPRESSION and returns it.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="groovy-PHRASE.html">${groovy(Integer.parseInt(<i>&lt;expression&gt;</i>))}</a> instead.</p>
+                <p>Use <a href="Main-groovy-PHRASE.html">${groovy(Integer.parseInt(<i>&lt;expression&gt;</i>))}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -463,13 +463,13 @@ Response:</pre>
                 <p>${seq} was flawed by design, and therefore it's function was removed entirely.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="sequence-TASK.html">&lt;sequence&gt;</a> and <a href="sequence-PHRASE.html">${sequence}</a> instead.</p>
+                <p>Use <a href="Main-sequence-TASK.html">&lt;sequence&gt;</a> and <a href="Main-sequence-PHRASE.html">${sequence}</a> instead.</p>
             </deprecation>
         </entry>
 
         <entry name="sequence" impl="org.danann.cernunnos.core.SequencePhrase">
             <description>
-                <p>Obtains the next value from the specified sequence.  See also <a href="sequence-TASK.html">&lt;sequence&gt;</a>.</p>
+                <p>Obtains the next value from the specified sequence.  See also <a href="Main-sequence-TASK.html">&lt;sequence&gt;</a>.</p>
             </description>
             <example caption="Prints 'a=1' through 'z=26' to standard output">
                 <pre><xmp><sequence>
@@ -489,7 +489,7 @@ Response:</pre>
 
         <entry name="sequence" impl="org.danann.cernunnos.core.SequenceTask">
             <description>
-                <p>Creates a new sequence for use with <a href="sequence-PHRASE.html">${sequence}</a>.</p>
+                <p>Creates a new sequence for use with <a href="Main-sequence-PHRASE.html">${sequence}</a>.</p>
             </description>
             <example caption="Prints 'a=1' through 'z=26' to standard output">
                 <pre><xmp><sequence>
@@ -549,7 +549,7 @@ Response:</pre>
         <entry name="with" impl="org.danann.cernunnos.core.WithTask">
             <description>
                 <p>Creates one or more request attributes using KEYS and VALUES, then invokes subtasks.</p>
-                <p>See also: <a href="with-attribute-TASK.html">&lt;with-attribute&gt;</a></p>
+                <p>See also: <a href="Main-with-attribute-TASK.html">&lt;with-attribute&gt;</a></p>
             </description>
             <example caption="Creates request attributes named 'foo' and 'myPath' then displays the value of each.">
                 <pre><xmp><with>
@@ -566,7 +566,7 @@ Response:</pre>
         <entry name="with-attribute" impl="org.danann.cernunnos.core.SetAttributeTask">
             <description>
                 <p>Creates a request attribute with the specified KEY and VALUE, then invokes subtasks.</p>
-                <p>&lt;with-attribute&gt; can be thought of as a shorthand for <a href="with-TASK.html">&lt;with&gt;</a> where only one attribute is needed.</p>
+                <p>&lt;with-attribute&gt; can be thought of as a shorthand for <a href="Main-with-TASK.html">&lt;with&gt;</a> where only one attribute is needed.</p>
             </description>
             <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
                 <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
@@ -707,7 +707,7 @@ Response:</pre>
             <description>
                 <p>Returns the product of evaluating the Cernunnos script 
                 specified by <code>LOCATION</code>;  use the 
-                <a href="return-TASK.html">&lt;return&gt;</a> task to set the 
+                <a href="Main-return-TASK.html">&lt;return&gt;</a> task to set the 
                 return value within the specified script.</p>
             </description>
             <example caption="Invokes 'is-admin.crn' to deturmine if the user is an administrator, then either (1) deletes the file(s) specified on the command prompt or (2) gives the user appropriate feedback">
@@ -968,7 +968,7 @@ Response:</pre>
                 <p>Reads the resource at the specified location, constructs a new Phrase from the content, and returns the result of evaluating the Phrase.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="phrase-PHRASE.html">${phrase}</a> instead.</p>
+                <p>Use <a href="Main-phrase-PHRASE.html">${phrase}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -981,7 +981,7 @@ Response:</pre>
                 <p>Reads a new Grammar based on the specified resource and overlays the current one with it.  Subtasks will be read and bootstrapped in light of this new Grammar.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="grammar-TASK.html">&lt;grammar&gt;</a> and <a href="entry-TASK.html">&lt;entry&gt;</a> instead.</p>
+                <p>Use <a href="Main-grammar-TASK.html">&lt;grammar&gt;</a> and <a href="Main-entry-TASK.html">&lt;entry&gt;</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -1052,7 +1052,7 @@ Response:</pre>
                 	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
                 	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
                 	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
-                	<a href="if-TASK.html">&lt;if&gt;</a> and <a href="choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                	<a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
                 </p>
                 <p>
 					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
@@ -1087,7 +1087,7 @@ Response:</pre>
                 	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
                 	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
                 	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
-                	<a href="if-TASK.html">&lt;if&gt;</a> and <a href="choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                	<a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
                 </p>
                 <p>
 					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
@@ -1222,7 +1222,7 @@ Response:</pre>
                 <p>Opens the specified RDBMS connection and registers it as a request attribute.  By default, it will be registered under OpenConnectionTask.DEFAULT_ATTRIBUTE_NAME.  Cernunnos SQL tasks will look for a connection under this name as well.  In most cases, therefore, neither parent nor child tasks need specify an attribute name for the Connection object.</p>
             </description>
             <deprecation since="1.0.0">
-                <p>Use <a href="sql-datasource-TASK.html">&lt;sql-datasource&gt;</a> instead.</p>
+                <p>Use <a href="Main-sql-datasource-TASK.html">&lt;sql-datasource&gt;</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -1311,7 +1311,7 @@ Response:</pre>
         <entry name="append-node" impl="org.danann.cernunnos.xml.AppendNodeTask">
             <description>
                 <p>Adds the specified XML content to the specified PARENT (at the end) or after the specified SIBLING.</p>
-                <p>See also: <a href="prepend-node-TASK.html">&lt;prepend-node&gt;</a></p>
+                <p>See also: <a href="Main-prepend-node-TASK.html">&lt;prepend-node&gt;</a></p>
             </description>
             <example caption="Creates a new XML document containing '&lt;example foo=&quot;bar&quot;/&gt;', then writes it to the file 'example.xml'">
                 <pre><xmp><with-attribute key="Attributes.NODE" value="${newDoc(example)}">
@@ -1380,7 +1380,7 @@ Response:</pre>
                 parsable XML.</p>
             </description>
             <deprecation since="1.1.0">
-                <p>Use <a href="parseXml-PHRASE.html">${parseXml}</a> instead.</p>
+                <p>Use <a href="Main-parseXml-PHRASE.html">${parseXml}</a> instead.</p>
             </deprecation>
         </entry>
 
@@ -1437,7 +1437,7 @@ Response:</pre>
         <entry name="prepend-node" impl="org.danann.cernunnos.xml.PrependNodeTask">
             <description>
                 <p>Adds the specified XML content to the specified PARENT (at the beginning) or before the specified SIBLING.</p>
-                <p>See also: <a href="append-node-TASK.html">&lt;append-node&gt;</a></p>
+                <p>See also: <a href="Main-append-node-TASK.html">&lt;append-node&gt;</a></p>
             </description>
             <example caption="Parses the 'books.xml' document, adds a '&lt;book&gt;' child element, places a comment before the '&lt;book&gt;' element, then writes the file back to the same location">
                 <pre><xmp><with-attribute key="Attributes.NODE" value="${parseXml(example.xml)}">

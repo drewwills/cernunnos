@@ -26,26 +26,26 @@
                 <base target="mainFrame"/>
             </head>
             <body>
-                <h2>Reference</h2>
+                <h3><xsl:value-of select="@name"/> Grammar</h3>
                 <input id="hideDeprecated" type="checkbox">
                     <xsl:choose>
                         <xsl:when test="$showdeprecated = 'true'">
-                            <xsl:attribute name="onclick">window.location = 'reference-hidedeprecated.html'</xsl:attribute>
+                            <xsl:attribute name="onclick">window.location = '<xsl:value-of select="@name"/>-hidedeprecated.html'</xsl:attribute>
                         </xsl:when>
                         <xsl:otherwise>
                             <xsl:attribute name="checked">true</xsl:attribute>
-                            <xsl:attribute name="onclick">window.location = 'reference-showdeprecated.html'</xsl:attribute>
+                            <xsl:attribute name="onclick">window.location = '<xsl:value-of select="@name"/>-showdeprecated.html'</xsl:attribute>
                         </xsl:otherwise>
                     </xsl:choose>
                 </input>
                 <label for="hideDeprecated">Hide Deprecated Items</label>
-                <h3>Phrases</h3>
+                <h4>Phrases</h4>
                 <xsl:apply-templates select="entry[@type = 'PHRASE']">
                     <xsl:sort select="name"/>
                     <xsl:with-param name="showdeprecated"><xsl:value-of select="$showdeprecated"/></xsl:with-param>
                 </xsl:apply-templates>
                 <br/>
-                <h3>Tasks</h3>
+                <h4>Tasks</h4>
                 <xsl:apply-templates select="entry[@type = 'TASK']">
                     <xsl:sort select="name"/>
                     <xsl:with-param name="showdeprecated"><xsl:value-of select="$showdeprecated"/></xsl:with-param>
@@ -58,7 +58,7 @@
     <xsl:template match="entry">
         <xsl:param name="showdeprecated"/>
         <xsl:if test="not(deprecation) or $showdeprecated = 'true'">
-            <a href="entries/{name}-{@type}.html"><xsl:value-of select="name"/><xsl:if test="deprecation"><img src="deprecated.jpg" style="border: 0px"/></xsl:if></a><br/>
+            <a href="entries/{/grammar/@name}-{name}-{@type}.html"><xsl:value-of select="name"/><xsl:if test="deprecation"><img src="deprecated.jpg" style="border: 0px"/></xsl:if></a><br/>
         </xsl:if>
     </xsl:template>
 

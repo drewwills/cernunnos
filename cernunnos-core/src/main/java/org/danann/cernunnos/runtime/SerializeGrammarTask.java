@@ -22,8 +22,12 @@ import org.danann.cernunnos.AbstractContainerTask;
 import org.danann.cernunnos.Attributes;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
+import org.danann.cernunnos.LiteralPhrase;
+import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
+import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.SimpleFormula;
+import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.DocumentFactory;
@@ -33,6 +37,7 @@ import org.dom4j.Node;
 public final class SerializeGrammarTask extends AbstractContainerTask {
 
 	// Static Members.
+    private Phrase recursive;
     private static final DocumentFactory fac = new DocumentFactory();
 	
     // Instance Members.
@@ -42,26 +47,35 @@ public final class SerializeGrammarTask extends AbstractContainerTask {
      * Public API.
      */
 
+    public static final Reagent RECURSIVE = new SimpleReagent("RECURSIVE", "@recursive", ReagentType.PHRASE, 
+                    Boolean.class, "If true, entries from parent grammar(s) will be inclded in the " +
+                    "generated XML.  The default is true.", new LiteralPhrase(Boolean.TRUE));
+
+    public Formula getFormula() {
+        Reagent[] reagents = new Reagent[] {RECURSIVE, AbstractContainerTask.SUBTASKS};
+        final Formula rslt = new SimpleFormula(getClass(), reagents);
+        return rslt;
+    }
+
     public void init(EntityConfig config) {
 
         super.init(config);
 
         // Instance Members.
+        this.recursive = (Phrase) config.getValue(RECURSIVE);
         this.grammar = (XmlGrammar) config.getGrammar();
 
     }
 
-    public Formula getFormula() {
-        Reagent[] reagents = new Reagent[] {AbstractContainerTask.SUBTASKS};
-        final Formula rslt = new SimpleFormula(SerializeGrammarTask.class, reagents);
-        return rslt;
-    }
-
     public void perform(TaskRequest req, TaskResponse res) {
 
+        boolean recurse = (Boolean) this.recursive.evaluate(req, res);
+        
         Element rslt = fac.createElement("grammar");
+        rslt.addAttribute("name", grammar.getName());
+        rslt.addAttribute("origin", grammar.getOrigin());
 
-        for (Entry e : grammar.getEntries()) {
+        for (Entry e : grammar.getEntries(recurse)) {
             rslt.add(serializeEntry(e, fac));
         }
 
