@@ -45,7 +45,16 @@ public final class ResourceHelper {
                         // and 'classpath://' hare supported...
                         String s = spec.replaceAll("\\Aclasspath://", "/")
                                         .replaceAll("\\Aclasspath:/", "/");
-                        return this.getClass().getResource(s);
+                        URL rslt = this.getClass().getResource(s);
+
+                        // Make sure we have a resource...
+                        if (rslt == null) {
+                            String msg = "The specified resource cannot be " +
+                            		    "found on the classpath:  " + spec;
+                            throw new RuntimeException(msg);
+                        }
+
+                        return rslt;
 
                     }
                 });
