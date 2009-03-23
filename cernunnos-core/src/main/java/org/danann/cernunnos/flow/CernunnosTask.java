@@ -25,9 +25,12 @@ import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.ManagedException;
+import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
+import org.danann.cernunnos.ReagentType;
 import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.SimpleFormula;
+import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
@@ -42,18 +45,22 @@ public final class CernunnosTask implements Task {
     private Factory<String, Task> taskFactory;
     private CacheHelper<String, Task> taskCache;
     private EntityConfig config;
-    
-    
     private final ResourceHelper resource = new ResourceHelper();
     private Grammar grammar;
 	private ScriptRunner runner = null;
+	private Phrase task;
 	
 	/*
 	 * Public API.
 	 */
 
-	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_TASK};
+    public static final Reagent TASK = new SimpleReagent("TASK", "@task", ReagentType.PHRASE, Task.class,
+                        "Cernunnos Task to invoke.  Specify either LOCATION or TASK, but not both.", null);
+
+    public Formula getFormula() {
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, 
+		            ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_TASK_NODEFAULT, 
+		            TASK};
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
@@ -67,16 +74,23 @@ public final class CernunnosTask implements Task {
 		this.runner = new ScriptRunner(grammar);
 		this.taskFactory = new CachedTaskFactory(this.runner);
 		this.config = config;
+		this.task = (Phrase) config.getValue(TASK);
 
 	}
 
 	public void perform(TaskRequest req, TaskResponse res) {
-
-        final URL crn = resource.evaluate(req, res);
-			
-		// Choose a Task...
-		final String taskPath = crn.toExternalForm();
-		final Task k = this.taskCache.getCachedObject(req, res, taskPath, this.taskFactory);
+	    
+	    // Figure out what to run here...
+	    Task k = null;
+	    if (resource.isSpecified(req, res)) {
+	        // We go with LOCATION...
+	        final URL crn = resource.evaluate(req, res);
+	        final String taskPath = crn.toExternalForm();
+	        k = this.taskCache.getCachedObject(req, res, taskPath, this.taskFactory);
+	    } else {
+	        // We go with TASK...
+	        k = (Task) task.evaluate(req, res);
+	    }
 
 		try {
 			// Run it...

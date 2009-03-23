@@ -39,8 +39,10 @@ public final class CernunnosPhrase implements Phrase {
 	 */
 
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_PHRASE};
-		final Formula rslt = new SimpleFormula(CernunnosPhrase.class, reagents);
+		Reagent[] reagents = new Reagent[] {CacheHelper.CACHE, CacheHelper.CACHE_MODEL, 
+		                ResourceHelper.CONTEXT_SOURCE, ResourceHelper.LOCATION_PHRASE, 
+		                CernunnosTask.TASK};
+		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
 

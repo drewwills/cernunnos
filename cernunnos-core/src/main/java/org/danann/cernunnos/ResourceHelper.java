@@ -123,8 +123,19 @@ public final class ResourceHelper {
 
     }
     
+    /**
+     * Indicates whether a resource has been specified in the Cernunnos XML.  
+     * This method should only be invoked for resources that are optional and 
+     * (consequently) in cases where {@link LOCATION_TASK_NODEFAULT} or 
+     * {@link LOCATION_PHRASE_NODEFAULT} have been used to define the reagent.   
+     * 
+     * @param req The current {@link TaskRequest}
+     * @param res The current {@link TaskResponse}
+     * @return <code>true</code> if the Cernunnos XML specifies a resource, 
+     * otherwise <code>false</code>
+     */
     public boolean isSpecified(TaskRequest req, TaskResponse res) {
-        return contextPhrase.evaluate(req, res) != null;
+        return locationPhrase != null;
     }
     
     public static URL evaluate(String context, String location) {
