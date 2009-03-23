@@ -512,7 +512,7 @@ Response:</pre>
                 <p>Replaces each occurance of REGEX in the specified STRING with the specified REPLACEMENT.  The resulting String will be registered as the 'Attributes.STRING' request attribute.</p>
             </description>
             <example caption="Reads the file 'example.txt' into a String, replaces all instances of 'foo' with 'bar' and all instances of 'abc' with 'xyz' in the text, then writes the result back to 'example.txt'">
-                <pre><xmp><with-attribute key="Attributes.STRING" value="${contentsOf(example.txt)}">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${contents(example.txt)}">
     <string-replace regex="foo" replacement="bar">
         <string-replace regex="abc" replacement="xyz">
             <write-file file="example.txt"/>
@@ -912,7 +912,7 @@ Response:</pre>
                 <p>Writes the specified content to the specified file.</p>
             </description>
             <example caption="Reads the file 'example.txt' into a String, replaces all instances of 'foo' with 'bar' and all instances of 'abc' with 'xyz' in the text, then writes the result back to 'example.txt'">
-                <pre><xmp><with-attribute key="Attributes.STRING" value="${contentsOf(example.txt)}">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${contents(example.txt)}">
     <string-replace regex="foo" replacement="bar">
         <string-replace regex="abc" replacement="xyz">
             <write-file file="example.txt"/>
@@ -937,12 +937,12 @@ Response:</pre>
           | Package:  net
           +-->
 
-        <entry name="contentsOf" impl="org.danann.cernunnos.net.ContentsOfPhrase">
+        <entry name="contents" impl="org.danann.cernunnos.net.ContentsPhrase">
             <description>
                 <p>Reads the resource at the specified location and returns the contents as a <code>String</code>.</p>
             </description>
             <example caption="Reads the file 'example.txt' into a String, replaces all instances of 'foo' with 'bar' and all instances of 'abc' with 'xyz' in the text, then writes the result back to 'example.txt'">
-                <pre><xmp><with-attribute key="Attributes.STRING" value="${contentsOf(example.txt)}">
+                <pre><xmp><with-attribute key="Attributes.STRING" value="${contents(example.txt)}">
     <string-replace regex="foo" replacement="bar">
         <string-replace regex="abc" replacement="xyz">
             <write-file file="example.txt"/>
@@ -950,6 +950,15 @@ Response:</pre>
     </string-replace>
 </with-attribute></xmp></pre>
             </example>
+        </entry>
+
+        <entry name="contentsOf" impl="org.danann.cernunnos.net.ContentsOfPhrase">
+            <description>
+                <p>Reads the resource at the specified location and returns the contents as a <code>String</code>.</p>
+            </description>
+            <deprecation since="1.1.0">
+                <p>Use <a href="Main-contents-PHRASE.html">${contents}</a> instead, since it supports the standard ResourceHelper approach.</p>
+            </deprecation>
         </entry>
 
         <entry name="phrase" impl="org.danann.cernunnos.net.ParsePhrasePhrase">

@@ -20,48 +20,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.danann.cernunnos.CurrentDirectoryUrlPhrase;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
-import org.danann.cernunnos.ReagentType;
+import org.danann.cernunnos.ResourceHelper;
 import org.danann.cernunnos.SimpleFormula;
-import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
-/**
- * @deprecated
- */
-public final class ContentsOfPhrase implements Phrase {
+public final class ContentsPhrase implements Phrase {
 
 	// Instance Members.
-	private Phrase context;
-	private Phrase location;
+    private final ResourceHelper resource = new ResourceHelper();
 
 	/*
 	 * Public API.
 	 */
 
-	public static final Reagent CONTEXT = new SimpleReagent("CONTEXT", "@context", ReagentType.PHRASE, String.class,
-						"The context from which missing elements of the LOCATION can be inferred if it "
-						+ "is relative.  The default is a URL representing the filesystem location from which "
-						+ "Java is executing.", new CurrentDirectoryUrlPhrase());
-
-	public static final Reagent LOCATION = new SimpleReagent("LOCATION", "descendant-or-self::text()", ReagentType.PHRASE, String.class,
-						"Location of a resource to be read.  May be a filesystem path (absolute or relative), or a URL.");
-
 	public Formula getFormula() {
-		Reagent[] reagents = new Reagent[] {CONTEXT, LOCATION};
-		return new SimpleFormula(ContentsOfPhrase.class, reagents);
+        Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_TARGET, ResourceHelper.LOCATION_PHRASE};
+		return new SimpleFormula(ContentsPhrase.class, reagents);
 	}
 
 	public void init(EntityConfig config) {
 
 		// Instance Members.
-		this.context = (Phrase) config.getValue(CONTEXT);
-		this.location = (Phrase) config.getValue(LOCATION);
+	    this.resource.init(config);
 
 	}
 
@@ -69,14 +54,10 @@ public final class ContentsOfPhrase implements Phrase {
 
 		Object rslt = null;
 
-		// Now do the heavy-lifting...
-		String loc = (String) location.evaluate(req, res);
-
 		InputStream inpt = null;
 		try {
 
-			URL ctx = new URL((String) context.evaluate(req, res));
-			URL u = new URL(ctx, loc);
+	        URL u = resource.evaluate(req, res);
 			inpt = u.openStream();
 
 
@@ -89,7 +70,7 @@ public final class ContentsOfPhrase implements Phrase {
 			rslt = buff.toString();
 
 		} catch (Throwable t) {
-			String msg = "ContentsOfPhrase terminated unexpectedly.";
+			String msg = "ContentsPhrase terminated unexpectedly.";
 			throw new RuntimeException(msg, t);
 		} finally {
 			if (inpt != null) {
