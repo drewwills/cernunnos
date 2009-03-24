@@ -77,10 +77,14 @@ public final class EchoTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 
 		PrintStream ps = (PrintStream) stream.evaluate(req, res);
-		ps.print(prefix.evaluate(req, res));		
-		ps.print(message.evaluate(req, res));		
-		ps.print(suffix.evaluate(req, res));		
 		
+		final StringBuilder fullMessage = new StringBuilder();
+		
+		fullMessage.append(prefix.evaluate(req, res));		
+		fullMessage.append(message.evaluate(req, res));		
+		fullMessage.append(suffix.evaluate(req, res));		
+	
+		ps.print(fullMessage.toString());
 	}
 	
 }
