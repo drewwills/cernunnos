@@ -243,6 +243,7 @@ public final class Attributes {
 		public final Object RETURN_VALUE;
 		public final Map<?, ?> CACHE;
         public final String CACHE_MODEL;
+        public final Throwable EXCEPTION;
 		
 		public BindingsHelperImpl(Map<String,Object> bindings) {
 			
@@ -263,6 +264,7 @@ public final class Attributes {
 			this.RETURN_VALUE = bindings.get(Attributes.RETURN_VALUE);	
 			this.CACHE = (Map<?, ?>) bindings.get(Attributes.CACHE);
 			this.CACHE_MODEL = (String) bindings.get(Attributes.CACHE_MODEL);
+            this.EXCEPTION = (Throwable) bindings.get(Attributes.EXCEPTION);
 		}
 		
 		public String getBindingName() {

@@ -113,7 +113,7 @@ public final class ErrorHandlingTask implements Task {
             }
             
         } catch (Throwable t) {
-            log.warn("Caught the following error.", t);
+            log.info("Caught the following error.", t);
             
             // Figure out which error to match...
             Throwable compareTo = t instanceof ManagedException ? t.getCause(): t;

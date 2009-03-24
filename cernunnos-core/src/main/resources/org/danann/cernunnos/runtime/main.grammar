@@ -294,6 +294,30 @@
             </example>
         </entry>
 
+        <entry name="throw" impl="org.danann.cernunnos.core.ThrowTask">
+            <description>
+                <p>Throws the provided exception</p>
+            </description>
+            <example caption="Re-throws a handled exception">
+                <pre><xmp><handle-error>
+    <try>
+        <groovy>
+            <script>
+                throw new RuntimeException('Not good.');
+            </script>
+        </groovy>
+    </try>
+    <catch class="${groovy(IllegalArgumentException.class)}">
+        <echo-ln>I caught an IllegalArgumentException...</echo-ln>
+    </catch>
+    <catch>
+        <echo-ln>I caught something else...</echo-ln>
+        <throw/>
+    </catch>
+</handle-error></xmp></pre>
+            </example>
+        </entry>
+
         <entry name="invoke-method" impl="org.danann.cernunnos.core.InvokeMethodTask">
             <description>
                 <p>Invokes the specified METHOD on the specified OBJECT or CLASS.  If the specified method has a non-void return type, the returned object will be registered as a request attribute under ATTRIBUTE_NAME.</p>
