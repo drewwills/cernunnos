@@ -100,7 +100,9 @@ public abstract class AbstractContainerTask implements Task {
         if (warnIfMissing && subtasks.size() == 0 && log.isWarnEnabled()) {
             log.warn("POSSIBLE PROGRAMMING ERROR:  Class '" 
                     + getClass().getName() 
-                    + "' has an empty collection of " + subtasksPhrase.getName());
+                    + "' has an empty collection of " + subtasksPhrase.getName()            
+                    + "\n\t\tSource:  " + config.getSource()
+                    + "\n\t\tEntity Name:  " + config.getEntryName());
         }
         
         return subtasks;
