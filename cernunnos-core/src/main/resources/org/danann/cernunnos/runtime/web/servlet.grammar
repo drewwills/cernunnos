@@ -26,12 +26,28 @@
             <description>
                 <p>Include the specified resource using a RequestDispatcher.</p>
             </description>
+            <example caption="Renders the JSP at '/WEB-INF/jsp/HelloWorld.jsp'">
+                <pre><xmp><request-dispatcher resource="/WEB-INF/jsp/HelloWorld.jsp"/></xmp></pre>
+            </example>
         </entry>
 
         <entry name="download" impl="org.danann.cernunnos.runtime.web.DownloadTask">
             <description>
                 <p>Write the specified SOURCE content to the HTTP response.</p>
             </description>
+            <example caption="Loads properties from 'constants.properties', sends a file in the HttpSession to the user's browser for download, then removes that file from the HttpSession">
+                <pre><xmp><properties location="constants.properties">
+    <download source="${groovy(WebAttributes.REQUEST.getSession(true).getAttribute(DOCUMENT_ATTRIBUTE))}" 
+              to-file="${groovy(WebAttributes.REQUEST.getSession(true).getAttribute(FILENAME_ATTRIBUTE))}"/>
+    <groovy>
+        <script>
+            javax.servlet.http.HttpSession session = WebAttributes.REQUEST.getSession(true);
+            session.removeAttribute(DOCUMENT_ATTRIBUTE);
+            session.removeAttribute(FILENAME_ATTRIBUTE);
+        </script>
+    </groovy>
+</properties></xmp></pre>
+            </example>
         </entry>
 
     </entries>

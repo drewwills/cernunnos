@@ -26,6 +26,15 @@
             <description>
                 <p>Include the specified resource using a PortletRequestDispatcher.</p>
             </description>
+            <example caption="Obtains the REMOTE_USER setting and the 'loginUrl' portlet preference, then renders the JSP at '/WEB-INF/jsp/ExitFragmentAdministration/index.jsp' while passing those two attributes">
+                <pre><xmp><with>
+    <attribute key="loginUrl">${jexl(WebAttributes.REQUEST.getPreferences().getValue('loginUrl', 'Login'))}</attribute>
+    <attribute key="USERNAME">${jexl(WebAttributes.REQUEST.getRemoteUser())}</attribute>
+    <subtasks>
+        <request-dispatcher resource="/WEB-INF/jsp/ExitFragmentAdministration/index.jsp"/>
+    </subtasks>
+</with></xmp></pre>
+            </example>
         </entry>
 
     </entries>
