@@ -13,5 +13,13 @@
     <name>Cernunnos Webapp Archetype</name>
     <description>Maven archetype for Cernunnos webapp projects</description>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
 
 </project>
