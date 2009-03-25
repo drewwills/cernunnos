@@ -365,6 +365,21 @@
                 <p>Splits the specified STRING into lines (based on line feed character ASCII 10) and iterates over them, performing SUBTASKS once for each line in the collection.</p>
             </description>
             <content-model regex="${org.danann.cernunnos.core.SystemPropertyPhrase(line.separator)}"/>
+            <example caption="Analyzes a Subversion log file, specified by ${$1}, for modified files;  writes the path of each modified file to the console once">
+                <pre><xmp><with>
+    <attribute key="fileSet">${groovy(new HashSet())}</attribute>
+    <subtasks>
+        <line-iterator string="${contents(${$1})}">
+            <if test="${groovy(Attributes.STRING.matches('\\A   M .*'))}">
+                <groovy><script>fileSet.add(Attributes.STRING)</script></groovy>
+            </if>
+        </line-iterator>
+        <for-each items="${fileSet}">
+            <echo-ln>${Attributes.OBJECT}</echo-ln>
+        </for-each>
+    </subtasks>
+</with></xmp></pre>
+            </example>
         </entry>
 
         <entry name="log" impl="org.danann.cernunnos.core.LogTask">
