@@ -19,15 +19,15 @@
     
         <!-- Proceed... -->
 	    <if test="${groovy(!(new File('src/main/webapp/WEB-INF/portlet.xml').exists()))}">
-	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/portlet.xml)}" file="src/main/webapp/WEB-INF/portlet.xml"/>
+	        <write-file string="${phrase(${groovy(new File('${Attributes.ORIGIN}').getParentFile())}/util/portlet.xml)}" file="src/main/webapp/WEB-INF/portlet.xml"/>
 	    </if>
     
 	    <with-attribute key="Attributes.NODE" value="${parseXml(src/main/webapp/WEB-INF/portlet.xml)}">
 	
 	        <!-- Copy needed files -->
-	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/context.xml)}" file="src/main/webapp/WEB-INF/${$1}-portlet.xml"/>
-	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/index.crn)}" file="src/main/webapp/WEB-INF/views/${$1}/index.crn"/>
-	        <write-file string="${phrase(${Attributes.ORIGIN}/../util/portlet-index.jsp)}" file="src/main/webapp/WEB-INF/jsp/${$1}/index.jsp"/>
+	        <write-file string="${phrase(${groovy(new File('${Attributes.ORIGIN}').getParentFile())}/util/context.xml)}" file="src/main/webapp/WEB-INF/${$1}-portlet.xml"/>
+	        <write-file string="${phrase(${groovy(new File('${Attributes.ORIGIN}').getParentFile())}/util/index.crn)}" file="src/main/webapp/WEB-INF/views/${$1}/index.crn"/>
+	        <write-file string="${phrase(${groovy(new File('${Attributes.ORIGIN}').getParentFile())}/util/portlet-index.jsp)}" file="src/main/webapp/WEB-INF/jsp/${$1}/index.jsp"/>
 	
 	        <!-- Adjust portlet.xml -->
 	        <prepend-node>
