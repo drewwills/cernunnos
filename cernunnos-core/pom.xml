@@ -71,6 +71,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <classifier>jdk15</classifier>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.netbeans.lib</groupId>
             <artifactId>cvsclient</artifactId>
             <scope>compile</scope>

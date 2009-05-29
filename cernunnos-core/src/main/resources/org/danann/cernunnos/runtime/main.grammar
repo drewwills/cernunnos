@@ -962,6 +962,45 @@ Response:</pre>
         </entry>
 
         <!--
+          | Package:  json
+          +-->
+
+        <entry name="json-append" impl="org.danann.cernunnos.json.AppendJsonTask">
+            <description>
+                <p>Appends the specified JSON EXPRESSION or VALUE to the PARENT under the specified KEY.</p>
+                <p>Uses JSON-lib.</p>
+            </description>
+        </entry>
+
+        <entry name="jsonGet" impl="org.danann.cernunnos.json.JsonGetPhrase">
+            <description>
+                <p>Returns the value of the specified KEY from the specified JSON object.</p>
+                <p>Uses JSON-lib.</p>
+            </description>
+        </entry>
+
+        <entry name="newJson" impl="org.danann.cernunnos.json.NewJsonPhrase">
+            <description>
+                <p>Creates a new instance of <code>JSONObject</code> by parsing the specified EXPRESSION and returns it.</p>
+                <p>Uses JSON-lib.</p>
+            </description>
+        </entry>
+
+        <entry name="parseJson" impl="org.danann.cernunnos.json.ParseJsonPhrase">
+            <description>
+                <p>Parses a new <code>JSONObject</code> from the specified resource.</p>
+                <p>Uses JSON-lib.</p>
+            </description>
+        </entry>
+
+        <entry name="toJsonString" impl="org.danann.cernunnos.json.ToJsonStringPhrase">
+            <description>
+                <p>Returns the content of the specified <code>JSONObject</code> in standard JSON markup.</p>
+                <p>Uses JSON-lib.</p>
+            </description>
+        </entry>
+
+        <!--
           | Package:  ldap
           +-->
 
@@ -1096,16 +1135,16 @@ Response:</pre>
             <description>
                 <p>Returns the value of the specified Groovy EXPRESSION.</p>
                 <p>
-                	<a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
-                	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
-                	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
-                	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
-                	<a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                    <a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
+                    Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
+                    language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
+                    us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
+                    <a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
                 </p>
                 <p>
-					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
-					so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
-					with exisiting Java code seamlessly.   
+                    The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
+                    so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
+                    with exisiting Java code seamlessly.   
                 </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
@@ -1131,16 +1170,16 @@ Response:</pre>
             <description>
                 <p>Invokes operations specified by SCRIPT using the groovy engine.</p>
                 <p>
-                	<a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
-                	Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
-                	language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
-                	us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
-                	<a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
+                    <a href="http://groovy.codehaus.org/" style="float: right" target="_new"><img src="../groovy-logo.png" alt="Groovy Logo" style="border-style: none"/></a>
+                    Among dozens of things we can say about <a href="http://groovy.codehaus.org/" target="_new">Groovy</a>, it is a <i>dynamic 
+                    language</i> for the Java platform.  This feature -- dynamic -- offers tremendous synergy with Cernunnos because it allows 
+                    us to evaluate expressions at runtime and then execute them.  This feature is especially handy for tasks like 
+                    <a href="Main-if-TASK.html">&lt;if&gt;</a> and <a href="Main-choose-TASK.html">&lt;choose&gt;</a> that rely on conditionals.
                 </p>
                 <p>
-					The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
-					so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
-					with exisiting Java code seamlessly.   
+                    The Groovy Language is also <i>concise</i>, <i>modern</i>, and <i>powerful</i>.  Its syntax is based on regular Java syntax, 
+                    so Java developers will experience little difficulty getting up to speed.  Since it runs on the JVM, Groovy also integrates 
+                    with exisiting Java code seamlessly.   
                 </p>
             </description>
             <content-model engine="${org.danann.cernunnos.script.ScriptEnginePhrase(groovy)}"/>
