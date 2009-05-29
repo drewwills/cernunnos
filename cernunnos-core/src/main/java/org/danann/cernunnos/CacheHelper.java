@@ -36,7 +36,7 @@ public interface CacheHelper<K extends Serializable, V> {
             new AttributePhrase(Attributes.CACHE));
 
     public static final Reagent CACHE_MODEL = new SimpleReagent("CACHE_MODEL", "@cache-model", ReagentType.PHRASE, String.class,
-            "Specify either NONE, ONE, or ALL.", new AttributePhrase(Attributes.CACHE_MODEL, new LiteralPhrase(CacheMode.ONE.toString())));
+            "Specify either NONE, ONE, or ALL.  The default is ONE.", new AttributePhrase(Attributes.CACHE_MODEL, new LiteralPhrase(CacheMode.ONE.toString())));
 
     /**
      * Get from cache or create and cache an object for the specified request, response and key. The passed
