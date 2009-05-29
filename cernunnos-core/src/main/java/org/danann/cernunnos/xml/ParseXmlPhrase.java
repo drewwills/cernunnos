@@ -39,6 +39,7 @@ import org.dom4j.io.SAXReader;
 import org.xml.sax.EntityResolver;
 
 public final class ParseXmlPhrase implements Phrase {
+    
     //Hide factory mutex to avoid unforseen sync problems
     private static final Object FACTORY_MUTEX = new Object();
 
@@ -118,4 +119,5 @@ public final class ParseXmlPhrase implements Phrase {
             return FACTORY_MUTEX;
         }
     }
+
 }
