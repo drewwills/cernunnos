@@ -173,12 +173,17 @@ public class PojoTask implements Task, InitializingBean {
         runner.run(task, tr, res);
         
     }
-    
-    public Object evaluate() {
+
+    public Object evaluate(Object... args) {
         
         ReturnValueImpl rslt = new ReturnValueImpl();
         RuntimeRequestResponse tr = new RuntimeRequestResponse();
         tr.setAttribute(Attributes.RETURN_VALUE, rslt);
+        
+        // Load the varargs...
+        for (int i=0; i < args.length; i++) {
+            tr.setAttribute("$" + (i+1), args[i]);
+        }
         
         perform(tr, new RuntimeRequestResponse());
         return rslt.getValue();
