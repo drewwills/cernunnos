@@ -199,6 +199,33 @@ public final class ResourceHelper {
      * Nested Types.
      */
     
+    public static final class ToExternalFormPhrase implements Phrase {
+        
+        // Instance Members.
+        private final ResourceHelper resource = new ResourceHelper();
+
+        /*
+         * Public API.
+         */
+
+        public Formula getFormula() {
+            Reagent[] reagents = new Reagent[] {ResourceHelper.CONTEXT_TARGET, ResourceHelper.LOCATION_PHRASE};
+            return new SimpleFormula(getClass(), reagents);
+        }
+
+        public void init(EntityConfig config) {
+
+            // Instance Members.
+            resource.init(config);
+
+        }
+        
+        public Object evaluate(TaskRequest req, TaskResponse res) {
+            return resource.evaluate(req, res).toExternalForm();
+        }
+        
+    }
+    
     private static abstract class ProtocolTranslator {
         
         // Instance Members.

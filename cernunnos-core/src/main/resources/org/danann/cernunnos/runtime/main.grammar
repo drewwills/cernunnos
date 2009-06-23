@@ -75,6 +75,12 @@
             </example>
         </entry>
 
+        <entry name="toExternalForm" impl="org.danann.cernunnos.ResourceHelper$ToExternalFormPhrase">
+            <description>
+                <p>Calculates an <code>URL</code> from the specified <code>CONTEXT</code> and <code>LOCATION</code> and returns its (absolute) <code>String</code> representation.</p>
+            </description>
+        </entry>
+
         <!--
           | Package:  cache
           +-->
