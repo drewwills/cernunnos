@@ -52,8 +52,12 @@ public class DownloadTask implements Task {
                     "either a String, a byte array, or an InputStream.");
 
     public static final Reagent CONTENT_TYPE = new SimpleReagent("CONTENT_TYPE", "@content-type", ReagentType.PHRASE, 
-                    String.class, "Optional content type to specify for the downloaded file.  The default is " +
+                    String.class, "Optional Content-Type header value to specify for the downloaded file.  The default is " +
                     "'application/x-download'", new LiteralPhrase("application/x-download"));
+
+//    public static final Reagent CONTENT_DISPOSITION = new SimpleReagent("CONTENT_DISPOSITION", "@content-disposition", ReagentType.PHRASE, 
+//                    String.class, "Optional Content-Disposition header value to specify for the downloaded file.  The default is " +
+//                    "'application/x-download'", new LiteralPhrase("application/x-download"));
 
     public static final Reagent TO_FILE = new SimpleReagent("TO_FILE", "@to-file", ReagentType.PHRASE, String.class,
                     "Optional name of the downloaded file for saving, including extension (e.g. 'aLetter.doc').  " +
@@ -81,7 +85,7 @@ public class DownloadTask implements Task {
         String cType = (String) content_type.evaluate(req, res);
         
         String fName = to_file != null ? (String) to_file.evaluate(req, res) 
-                                            : "(Not Specified)";
+                                            : null;
 
         OutputStream os = null;
         try {
