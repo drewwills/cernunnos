@@ -46,7 +46,7 @@ class CernunnosPhraseTest {
         CernunnosPhrase cp = new CernunnosPhrase();
         
         // Reagents to bootstrap the CernunnosPhrase...
-        def phr = { req, res -> return 'classpath:/org/danann/cernunnos/flow/return-success.crn'; } as Phrase;
+        def phr = { req, res -> return 'classpath:/org/danann/cernunnos/return-success.crn'; } as Phrase;
         def mappings = [
                     (CernunnosPhrase.TASK):phr,
                     (CacheHelper.CACHE):CacheHelper.CACHE.getDefault(),

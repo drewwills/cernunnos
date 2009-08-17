@@ -156,6 +156,27 @@ public class PojoTask implements Task, InitializingBean {
         throw new UnsupportedOperationException();
     }
     
+    public void perform(Object... args) {
+        
+        RuntimeRequestResponse tr = new RuntimeRequestResponse();
+        
+        // Load the varargs...
+        for (int i=0; i < args.length; i++) {
+            tr.setAttribute("$" + (i+1), args[i]);
+        }
+        
+        perform(tr, new RuntimeRequestResponse());
+
+    }
+    
+    public void perform(Map<String,Object> attributes) {
+        
+        RuntimeRequestResponse tr = attributes != null ? new RuntimeRequestResponse(attributes) 
+                                                        : new RuntimeRequestResponse();
+        perform(tr, new RuntimeRequestResponse());
+
+    }
+
     public void perform(TaskRequest req, TaskResponse res) {
         
         // Assertions...
@@ -190,4 +211,17 @@ public class PojoTask implements Task, InitializingBean {
 
     }
     
+    public Object evaluate(Map<String,Object> attributes) {
+        
+        RuntimeRequestResponse tr = attributes != null ? new RuntimeRequestResponse(attributes) 
+                                                        : new RuntimeRequestResponse();
+        
+        ReturnValueImpl rslt = new ReturnValueImpl();
+        tr.setAttribute(Attributes.RETURN_VALUE, rslt);
+
+        perform(tr, new RuntimeRequestResponse());
+        return rslt.getValue();
+
+    }
+
 }

@@ -45,6 +45,19 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		this.mergedAttributes = this.attributes;
 
 	}
+	
+	public RuntimeRequestResponse(Map<String,Object> attributes) {
+	    this();
+	    
+        // Assertions...
+        if (attributes == null) {
+            String msg = "Argument 'attributes' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        
+         this.attributes.putAll(attributes);
+	    
+	}
 
 	public void setAttribute(String name, Object value) {
 		this.attributes.put(name, value);
@@ -86,7 +99,6 @@ public final class RuntimeRequestResponse implements TaskRequest, TaskResponse {
 		return Collections.unmodifiableMap(this.mergedAttributes);
 	}
 
-	
 	SortedSet<String> getSortedAttributeNames() {
 		return Collections.unmodifiableSortedSet(new TreeSet<String>(this.mergedAttributes.keySet()));
 	}

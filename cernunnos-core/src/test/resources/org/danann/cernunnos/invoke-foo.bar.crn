@@ -1,0 +1,3 @@
+<groovy>
+    <script>foo.bar();</script>
+</groovy>
