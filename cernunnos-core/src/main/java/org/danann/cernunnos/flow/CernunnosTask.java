@@ -18,12 +18,10 @@ package org.danann.cernunnos.flow;
 
 import java.net.URL;
 
-import org.danann.cernunnos.AbstractCacheHelperFactory;
 import org.danann.cernunnos.CacheHelper;
 import org.danann.cernunnos.DynamicCacheHelper;
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
-import org.danann.cernunnos.Grammar;
 import org.danann.cernunnos.ManagedException;
 import org.danann.cernunnos.Phrase;
 import org.danann.cernunnos.Reagent;
@@ -38,15 +36,12 @@ import org.danann.cernunnos.CacheHelper.Factory;
 import org.danann.cernunnos.runtime.ScriptRunner;
 
 public final class CernunnosTask implements Task {
-    //Hide factory mutex to avoid unforseen sync problems
-    private static final Object FACTORY_MUTEX = new Object();
 
 	// Instance Members.
     private Factory<String, Task> taskFactory;
     private CacheHelper<String, Task> taskCache;
     private EntityConfig config;
     private final ResourceHelper resource = new ResourceHelper();
-    private Grammar grammar;
 	private ScriptRunner runner = null;
 	private Phrase task;
 	
@@ -70,8 +65,7 @@ public final class CernunnosTask implements Task {
 		// Instance Members.
 	    this.taskCache = new DynamicCacheHelper<String, Task>(config);
         resource.init(config);
-		this.grammar = config.getGrammar();
-		this.runner = new ScriptRunner(grammar);
+		this.runner = new ScriptRunner(config.getGrammar());
 		this.taskFactory = new CachedTaskFactory(this.runner);
 		this.config = config;
 		this.task = (Phrase) config.getValue(TASK);
@@ -102,36 +96,4 @@ public final class CernunnosTask implements Task {
 
 	}
 
-    /**
-     * Factory to create new Task instances
-     */
-    protected static class CachedTaskFactory extends AbstractCacheHelperFactory<String, Task> {
-        private final ScriptRunner runner;
-        
-        public CachedTaskFactory(ScriptRunner runner) {
-            this.runner = runner;
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.CacheHelper.Factory#createObject(java.lang.Object)
-         */
-        public Task createObject(String key) {
-            return this.runner.compileTask(key);
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
-         */
-        public Object getMutex(String key) {
-            return FACTORY_MUTEX;
-        }
-
-        /* (non-Javadoc)
-         * @see org.danann.cernunnos.CacheHelper.Factory#isThreadSafe(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public boolean isThreadSafe(String key, Task instance) {
-            return true;
-        }
-    }
 }
