@@ -47,6 +47,7 @@ public class PojoTask implements Task, InitializingBean {
     // Instance Members.
     private String context = DEFAULT_CONTEXT;
     private String location;
+    private String origin;
     private Map<String,Object> requestAttributes = Collections.emptyMap();
     private Task task;
     private final ScriptRunner runner = new ScriptRunner();
@@ -136,6 +137,7 @@ public class PojoTask implements Task, InitializingBean {
             
             try {
                 URL u = ResourceHelper.evaluate(context, location);
+                origin = u.toExternalForm();
                 task = runner.compileTask(u.toExternalForm());
             } catch (Throwable t) {
                 String msg = "Unable to read the specified Cernunnos XML"
@@ -188,9 +190,15 @@ public class PojoTask implements Task, InitializingBean {
                 
         RuntimeRequestResponse tr = new RuntimeRequestResponse();
         tr.enclose(req);
+        
+        // Set Attributes.ORIGIN...
+        tr.setAttribute(Attributes.ORIGIN, origin);  // NB:  Can be overridden by requestAttributes 
+        
+        // Load request attributes specified by dependency injection...
         for (Map.Entry<String,Object> y : requestAttributes.entrySet()) {
             tr.setAttribute(y.getKey(), y.getValue());
         }
+
         runner.run(task, tr, res);
         
     }
