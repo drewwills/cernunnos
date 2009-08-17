@@ -71,6 +71,7 @@ public class CernunnosServlet extends HttpServlet {
 	
 	private final Log log = LogFactory.getLog(getClass());	// Don't declare as static in general libraries
 
+    @SuppressWarnings("unchecked")
     @Override
     public void init() throws ServletException {
 
@@ -167,6 +168,10 @@ public class CernunnosServlet extends HttpServlet {
 							+ actionPath
 							+ settings.getValue(Settings.Entry.ACTION_SUFFIX);
 			URL url = getServletConfig().getServletContext().getResource(scriptPath);
+			if (url == null) {
+			    String msg = "Cannot locate the specified script:  " + scriptPath;
+			    throw new RuntimeException(msg);
+			}
 			runScript(url, req, res);
 		}
 		
