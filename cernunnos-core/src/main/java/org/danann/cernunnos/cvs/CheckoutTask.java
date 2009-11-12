@@ -42,6 +42,7 @@ public class CheckoutTask implements Task {
 	private Phrase recurse;
 	private Phrase module;
 	private Phrase dir;
+    private Phrase prune_empty_dirs;
 
 	/*
 	 * Public API.
@@ -70,9 +71,15 @@ public class CheckoutTask implements Task {
 					"Optional directory into which the MODULE should be checked out.  Equivelent to " +
 					"the '-d' option in CVS.", null);
 
+    public static final Reagent PRUNE_EMPTY_DIRS = new SimpleReagent("PRUNE_EMPTY_DIRS", "@prune-empty-dirs", ReagentType.PHRASE, String.class,
+                     "Optional flag that tells CVS whether or not to check out empty directories.  Equivelent to " +
+                     "the '-P' option in the CVS checkout command.  Default is true", Boolean.valueOf(true));
+
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CLIENT, CVSROOT, LOCAL_PATH, 
-													RECURSE, MODULE, DIR};
+													RECURSE, MODULE, DIR,
+                                                    PRUNE_EMPTY_DIRS};
+
 		final Formula rslt = new SimpleFormula(getClass(), reagents);
 		return rslt;
 	}
@@ -86,6 +93,7 @@ public class CheckoutTask implements Task {
 		this.recurse = (Phrase) config.getValue(RECURSE);
 		this.module = (Phrase) config.getValue(MODULE);
 		this.dir = (Phrase) config.getValue(DIR);
+        this.prune_empty_dirs = (Phrase) config.getValue(PRUNE_EMPTY_DIRS);
 
 	}
 	
@@ -98,8 +106,10 @@ public class CheckoutTask implements Task {
 
 		Boolean r = (Boolean) recurse.evaluate(req, res);
 		String mod = (String) module.evaluate(req, res);
+        Boolean prune = (Boolean) prune_empty_dirs.evaluate(req, res);
+
 		CheckoutCommand co = new CheckoutCommand(r, mod);
-		co.setPruneDirectories(true);	// I think we always want this option...
+		co.setPruneDirectories(prune.booleanValue());	
 		
 		if (dir != null) {
 			co.setCheckoutDirectory((String) dir.evaluate(req, res));
