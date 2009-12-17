@@ -55,7 +55,6 @@
         <log4j.version>1.2.15</log4j.version>
         <nekohtml.version>1.9.6.2</nekohtml.version>
         <portlet-api.version>1.0</portlet-api.version>
-        <retrotranslator-runtime.version>1.2.7</retrotranslator-runtime.version>
         <rhino.version>1.7R1</rhino.version>
         <rhino-engine.version>1.1</rhino-engine.version>
         <script-api.version>1.0</script-api.version>
@@ -171,11 +170,6 @@
                 <artifactId>json-lib</artifactId>
                 <classifier>jdk15</classifier>
                 <version>${json-lib.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.sf.retrotranslator</groupId>
-                <artifactId>retrotranslator-runtime</artifactId>
-                <version>${retrotranslator-runtime.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
