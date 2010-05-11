@@ -1,10 +1,12 @@
 package org.danann.cernunnos.runtime.web;
 
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.danann.cernunnos.ResourceHelper;
 
 public class Settings {
 
@@ -46,7 +48,53 @@ public class Settings {
 
 	}
 
-	public String getValue(Entry y) {
+	/**
+	 * Locate the configuration file, if present, for a Portlet or Servlet. 
+	 * 
+	 * @param webappRootContext Context URL (in String form) from which 
+	 * <code>userSpecifiedContextLocation</code> will be evaluated by 
+	 * <code>ResourceHelper</code>, if specified
+	 * @param userSpecifiedContextLocation Optional location specified in the 
+	 * deployment descriptor
+	 * @param defaultLocation Optional default, which will be returned if 
+	 * <code>userSpecifiedContextLocation</code> is not provided
+	 * @return The location of a configuration file, if present, or 
+	 * <code>null</code>
+	 */
+    public static URL locateContextConfig(String webappRootContext, String userSpecifiedContextLocation, URL defaultLocation) {
+
+        // Assertions.
+        if (webappRootContext == null) {
+            String msg = "Argument 'webappRootContext' cannot be null.";
+            throw new IllegalArgumentException(msg);
+        }
+        // NB:  Both 'userSpecifiedContextLocation' & 'defaultLocation' may be null
+        
+        URL rslt = null;
+        if (userSpecifiedContextLocation != null) {
+            
+            /*
+             * SPECIAL HANDLING:  We remove a leaving slash ('/') here because, when 
+             * no protocol is specified, the expectation is that the path is 
+             * evaluated from the root of the webapp ('webappRootContext').  If we 
+             * didn't, the ResourceHelper would incorrectly interpret these as the 
+             * root of the protocol, which is likely 'file:/' or 'jndi:/'. 
+             */
+            if (userSpecifiedContextLocation.startsWith("/")) {
+                userSpecifiedContextLocation = userSpecifiedContextLocation.substring(1);
+            }
+            
+            rslt = ResourceHelper.evaluate(webappRootContext, userSpecifiedContextLocation);
+
+        } else {
+            rslt = defaultLocation;  // may be null...
+        }
+        
+        return rslt;
+
+    }
+
+    public String getValue(Entry y) {
 
 		// Assertions.
 		if (!entries.containsKey(y)) {
@@ -62,7 +110,7 @@ public class Settings {
 	 * Private Stuff.
 	 */
 
-	private Settings(Map<Entry,String> entries) {
+    private Settings(Map<Entry,String> entries) {
 		this.entries = entries;
 	}
 

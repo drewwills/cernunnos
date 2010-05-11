@@ -92,19 +92,18 @@ public class CernunnosServlet extends HttpServlet {
     		Grammar g = (Grammar) rslt.getValue();
 	        runner = new ScriptRunner(g);
 
-			// Choose a context location...
-			String contextConfigLocation = "/WEB-INF/" + config.getServletName() + "-servlet.xml";	// default...
-			if (config.getInitParameter(CONFIG_LOCATION_PARAM) != null) {
-				contextConfigLocation = config.getInitParameter(CONFIG_LOCATION_PARAM);
-			}
-
-			// Load it if it exists...
-			URL u = getServletConfig().getServletContext().getResource(contextConfigLocation);
-			if (u != null) {
-				// There *is* a resource mapped to this path name...
-				spring_context = new FileSystemXmlApplicationContext(u.toExternalForm());
-			}
-
+            // Choose a context location & load it if it exists...
+            String defaultLoc = "/WEB-INF/" + config.getServletName() + "-portlet.xml";
+            URL defaultUrl = getServletConfig().getServletContext().getResource(defaultLoc);
+            URL u = Settings.locateContextConfig(
+                    getServletConfig().getServletContext().getResource("/").toExternalForm(),
+                        config.getInitParameter(CONFIG_LOCATION_PARAM), 
+                        defaultUrl);
+            if (u != null) {
+                // There *is* a resource mapped to this path name...
+                spring_context = new FileSystemXmlApplicationContext(u.toExternalForm());
+            }
+			
 			if (log.isDebugEnabled()) {
 				log.debug("Location of spring context (null means none):  " + u);
 			}

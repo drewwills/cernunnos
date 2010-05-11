@@ -93,14 +93,13 @@ public class CernunnosPortlet extends GenericPortlet {
             Grammar g = (Grammar) rslt.getValue();
             runner = new ScriptRunner(g);
 
-            // Choose a context location...
-            String contextConfigLocation = "/WEB-INF/" + config.getPortletName() + "-portlet.xml";  // default...
-            if (config.getInitParameter(CONFIG_LOCATION_PARAM) != null) {
-                contextConfigLocation = config.getInitParameter(CONFIG_LOCATION_PARAM);
-            }
-
-            // Load it if it exists...
-            URL u = getPortletConfig().getPortletContext().getResource(contextConfigLocation);
+            // Choose a context location & load it if it exists...
+            String defaultLoc = "/WEB-INF/" + config.getPortletName() + "-portlet.xml";
+            URL defaultUrl = getPortletConfig().getPortletContext().getResource(defaultLoc);
+            URL u = Settings.locateContextConfig(
+                    getPortletConfig().getPortletContext().getResource("/").toExternalForm(),
+                        config.getInitParameter(CONFIG_LOCATION_PARAM), 
+                        defaultUrl);
             if (u != null) {
                 // There *is* a resource mapped to this path name...
                 spring_context = new FileSystemXmlApplicationContext(u.toExternalForm());
