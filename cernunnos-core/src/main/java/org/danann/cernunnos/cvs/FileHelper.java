@@ -37,7 +37,9 @@ public final class FileHelper {
 		}
 		
 		rslt.add(file);
-System.out.println("FileHelper collecting:  " + file.getAbsolutePath());
+		if (log.isDebugEnabled()) {
+		    log.debug("FileHelper collecting:  " + file.getAbsolutePath());
+		}
 
 		// Recurse if appropriate...
 		if (recurse && file.isDirectory()) {

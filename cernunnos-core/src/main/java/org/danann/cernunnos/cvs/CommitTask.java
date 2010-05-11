@@ -128,7 +128,7 @@ public class CommitTask implements Task {
 			c.executeCommand(commit, optns);
 		} catch (Throwable t) {
 			StringBuilder msg = new StringBuilder();
-			msg.append("Unable to perform the specified CVS remove:")
+			msg.append("Unable to perform the specified CVS commit:")
 						.append("\n\t\tLOCAL_PATH:  ").append(path)
 						.append("\n\t\tRECURSE:  ").append(r)
 						.append("\n\t\tMESSAGE:  ").append(m);

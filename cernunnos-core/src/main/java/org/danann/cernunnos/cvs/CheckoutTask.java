@@ -71,9 +71,9 @@ public class CheckoutTask implements Task {
 					"Optional directory into which the MODULE should be checked out.  Equivelent to " +
 					"the '-d' option in CVS.", null);
 
-    public static final Reagent PRUNE_EMPTY_DIRS = new SimpleReagent("PRUNE_EMPTY_DIRS", "@prune-empty-dirs", ReagentType.PHRASE, String.class,
+	public static final Reagent PRUNE_EMPTY_DIRS = new SimpleReagent("PRUNE_EMPTY_DIRS", "@prune-empty-dirs", ReagentType.PHRASE, Boolean.class,
                      "Optional flag that tells CVS whether or not to check out empty directories.  Equivelent to " +
-                     "the '-P' option in the CVS checkout command.  Default is true", Boolean.valueOf(true));
+                     "the '-P' option in the CVS checkout command.  Default is true", new LiteralPhrase(Boolean.TRUE));
 
 	public Formula getFormula() {
 		Reagent[] reagents = new Reagent[] {CLIENT, CVSROOT, LOCAL_PATH, 

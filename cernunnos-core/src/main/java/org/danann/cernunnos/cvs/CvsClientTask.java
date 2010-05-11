@@ -197,17 +197,34 @@ public class CvsClientTask extends AbstractContainerTask {
             String msg = e.getMessage();
             PrintStream stream = e.isError() ? System.err : System.out;
 
-            final StringBuffer taggedMsgBuffer = new StringBuffer();
             if (!e.isTagged()) {
             	// Simple case -- write the msg...
-                stream.println(msg);
+                if (msg.length() > 0 && !System.getProperty("line.separator").equals(msg)) {
+                    stream.println(msg);
+                }
             } else {
-            	// Gather the msg into a StringBuffer until we have a complete line...
-                String line = MessageEvent.parseTaggedMessage(taggedMsgBuffer, msg);
-                if (line != null) {
-                    stream.println(line);
+                /*
+                 * This is a sticky wicket.  The cvsclient lib wants us to use 
+                 * MessageEvent.parseTaggedMessage(StringBuffer,String) to 
+                 * gather message chunks until we have a complete line.  But we 
+                 * can't (easily) hold on to a StringBuffer due to the 
+                 * non-stateful, REST-like requirements of Tasks.
+                 * 
+                 * We need to (try very hard to) process each MessageEvent 
+                 * completely with each call to messageSent().  To that end, 
+                 * we're loosely duplicating/approximating the behavior of 
+                 * MessageEvent.parseTaggedMessage() right here.
+                 */
+                if (msg.charAt(0) == '+' || msg.charAt(0) == '-') {
+                    return;
+                }
+                if (msg.equals("newline") /* WARN:  magic string */ || msg.startsWith("\n")) {
+                    stream.println();
+                } else if (msg.indexOf(' ') > 0) {
+                    stream.print(msg.substring(msg.indexOf(' ') + 1));
                 }
             }
+
         }
         
     }
