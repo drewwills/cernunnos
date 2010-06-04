@@ -17,6 +17,7 @@
 package org.danann.cernunnos.runtime.web;
 
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -74,6 +75,7 @@ public class CernunnosPortlet extends GenericPortlet {
     public static final String PORTLET_REQUEST_PARAM = "CernunnosPortlet.PORTLET_REQUEST_PARAM";
 
     @SuppressWarnings("unchecked")
+    @Override
     public void init() throws PortletException {
 
         PortletConfig config = getPortletConfig();
@@ -123,6 +125,7 @@ public class CernunnosPortlet extends GenericPortlet {
 
     }
 
+    @Override
     public void processAction(ActionRequest req, ActionResponse res) throws PortletException {
 
         // If a 'view' parameter is provided, we need to forward it to the doView() method appropriately...
@@ -158,6 +161,7 @@ public class CernunnosPortlet extends GenericPortlet {
 
     }
 
+    @Override
     public void doView(RenderRequest req, RenderResponse res) throws PortletException {
 
         // Choose a view from 4 possibilities...
@@ -182,25 +186,111 @@ public class CernunnosPortlet extends GenericPortlet {
 
         // Render...
         try {
-            
-            res.setContentType(req.getResponseContentType());
-            String viewPath = settings.getValue(Settings.Entry.VIEW_PREFIX)
-                                + view
-                                + settings.getValue(Settings.Entry.VIEW_SUFFIX);
-            URL url = getPortletConfig().getPortletContext().getResource(viewPath);            
-            if (url == null) {
-                // This won't work at all...
-                String msg = "The specified viewPath is not found:  " + viewPath;
-                throw new RuntimeException(msg);
-            }            
-            runScript(url, req, res);
-            
-        } catch (Throwable t) {
+
+            renderView(view, req, res);
+        } catch(Throwable t) {
+
             String msg = "Rendering failure in CernunnosPortlet.doView()";
             throw new PortletException(msg, t);
         }
+    }
+
+
+    @Override
+    public void doEdit(RenderRequest req, RenderResponse res) throws PortletException {
+        // This is probably not a permanent approach, but atm all we need is...
+//        doView(req, res);
+        String editView = getViewNameFromPreferredValueOrDefaultValue(
+                req,
+                res,
+                Settings.Entry.DEFAULT_EDIT_VIEW);
+
+        // Render...
+        if (editView == null) {
+            doView(req, res);
+        } else {
+
+            try {
+
+                renderView(editView, req, res);
+            } catch (Throwable t) {
+
+                String msg = "Rendering failure in CernunnosPortlet.doEdit()";
+                throw new PortletException(msg, t);
+            }
+            
+        }
+    }
+
+
+    @Override
+    public void doHelp(RenderRequest req, RenderResponse res) 
+            throws PortletException {
+
+        String helpView = getViewNameFromPreferredValueOrDefaultValue(
+                req,
+                res,
+                Settings.Entry.DEFAULT_HELP_VIEW);
+
+        // Render...
+        if (helpView == null) {
+            doView(req, res);
+        } else {
+
+            try {
+
+                renderView(helpView, req, res);
+            } catch (Throwable t) {
+
+                String msg = "Rendering failure in CernunnosPortlet.doHelp()";
+                throw new PortletException(msg, t);
+            }
+
+        }
+    }
+
+
+    private String getViewNameFromPreferredValueOrDefaultValue(
+            RenderRequest req,
+            RenderResponse res,
+            Settings.Entry defaultValue) throws PortletException {
+
+        String viewToRender = null;
+
+        // Choose a view from 2 possibilities (note we are ignoring the session
+        // attribute and relying on PortletMode instead to get us into this
+        // method and the portlet preferences since there is no way to specify
+        // a view for Edit or Help modes without a Settings.Entry available)
+        if (req.getParameter(settings.getValue(Settings.Entry.VIEW_PARAMETER)) != null) {
+            // (1) A view has been specified on this request...
+            viewToRender = req.getParameter(settings.getValue(Settings.Entry.VIEW_PARAMETER));
+        } else {
+            // (2) Use the default page (note: this could be null if this is
+            // not set by the deployer in the Spring context)
+            viewToRender = settings.getValue(defaultValue);
+        }
+
+        // This still may be null if a value was not set for the defaultValue.
+        return viewToRender;
 
     }
+
+    private void renderView(String viewName, RenderRequest req, RenderResponse res)
+            throws PortletException, MalformedURLException {
+
+        res.setContentType(req.getResponseContentType());
+        String viewPath = settings.getValue(Settings.Entry.VIEW_PREFIX)
+                            + viewName
+                            + settings.getValue(Settings.Entry.VIEW_SUFFIX);
+        URL url = getPortletConfig().getPortletContext().getResource(viewPath);
+        if (url == null) {
+            // This won't work at all...
+            String msg = "The specified viewPath is not found:  " + viewPath;
+            throw new RuntimeException(msg);
+        }
+        runScript(url, req, res);
+    }
+
 
     private void runScript(URL u, PortletRequest req, PortletResponse res) {
         runScript(u, req, res, new RuntimeRequestResponse());
@@ -220,8 +310,10 @@ public class CernunnosPortlet extends GenericPortlet {
         // data & convert to request attributes if we find any...
         List<InputStream> streams = new LinkedList<InputStream>();
         if (req instanceof ActionRequest && PortletFileUpload.isMultipartContent((ActionRequest) req)) {
-            
-            log.debug("Miltipart form data detected (preparing to process).");
+
+            if (log.isDebugEnabled()) {
+                log.debug("Multipart form data detected (preparing to process).");
+            }
             
             try {
                 final DiskFileItemFactory fac = new DiskFileItemFactory();
@@ -248,7 +340,10 @@ public class CernunnosPortlet extends GenericPortlet {
             }
             
         } else {
-            log.debug("Miltipart form data was not detected.");
+
+            if (log.isDebugEnabled()) {
+                log.debug("Multipart form data was not detected.");
+            }
         }
 
         // Anything that should be included from the spring_context?
@@ -275,10 +370,6 @@ public class CernunnosPortlet extends GenericPortlet {
 
     }
 
-    public void doEdit(RenderRequest req, RenderResponse res) throws PortletException {
-        // This is probably not a permanent approach, but atm all we need is...
-        doView(req, res);
-    }
 
     /*
      * Private Stuff.

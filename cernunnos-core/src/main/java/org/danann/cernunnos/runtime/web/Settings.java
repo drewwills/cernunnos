@@ -136,7 +136,11 @@ public class Settings {
 
 		VIEW_SUFFIX("CernunnosPortlet.VIEW_SUFFIX", ".crn"),
 
-		DEFAULT_VIEW("CernunnosPortlet.DEFAULT_VIEW", "index");
+		DEFAULT_VIEW("CernunnosPortlet.DEFAULT_VIEW", "index"),
+
+        DEFAULT_EDIT_VIEW("CernunnosPortlet.DEFAULT_EDIT_VIEW", null),
+
+        DEFAULT_HELP_VIEW("CernunnosPortlet.DEFAULT_HELP_VIEW", null);
 
 		// Instance Members.
 		private final String name;
