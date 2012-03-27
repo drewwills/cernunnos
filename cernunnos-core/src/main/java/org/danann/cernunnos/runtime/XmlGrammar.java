@@ -18,13 +18,16 @@ package org.danann.cernunnos.runtime;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +64,7 @@ public final class XmlGrammar implements Grammar {
     private final String origin;
     private final Grammar parent;
     private final ClassLoader loader;
-    private Map<String,List<Entry>> entries;
+    private ConcurrentMap<String,List<Entry>> entries;
 	private final Log log = LogFactory.getLog(XmlGrammar.class);	// Don't declare as static in general libraries
 
     /*
@@ -261,8 +264,11 @@ public final class XmlGrammar implements Grammar {
         
         List<Entry> list = entries.get(e.getName());
         if (list == null) {
-        	list = new LinkedList<Entry>();
-        	entries.put(e.getName(), list);
+        	list = new CopyOnWriteArrayList<Entry>();
+        	final List<Entry> oldList = entries.putIfAbsent(e.getName(), list);
+        	if (oldList != null) {
+        	    list = oldList;
+        	}
         }
         list.add(e);
 
@@ -315,7 +321,7 @@ public final class XmlGrammar implements Grammar {
         this.loader = loader;
 
         // NB:  Tasks & phrases are added after creation...
-        this.entries = Collections.synchronizedMap(new HashMap<String,List<Entry>>());
+        this.entries = new ConcurrentHashMap<String, List<Entry>>();
 
     }
 
@@ -324,8 +330,8 @@ public final class XmlGrammar implements Grammar {
         Entry rslt = null;
 
         // If there's a matching entry w/in this Grammar it trumps all...
-        if (entries.containsKey(name)) {
-        	List<Entry> list = entries.get(name);
+        List<Entry> list = entries.get(name);
+        if (list != null) {
         	for (Entry y : list) {
         		// Be sure we have an entry of the correct type...
         		if (y.getType().equals(type)) {
