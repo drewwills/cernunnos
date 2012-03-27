@@ -49,7 +49,7 @@ import org.danann.cernunnos.TaskResponse;
 public final class CacheTask extends AbstractContainerTask {
 
 	// Instance Members.
-    private final Object factoryMutex = new Object();
+    private final CacheTaskMutex factoryMutex = new CacheTaskMutex();
     private CacheHelper<Serializable, Object> cache;
     private Phrase keyPhrase;
 	private Phrase cacheKeyPhrase;
@@ -111,10 +111,12 @@ public final class CacheTask extends AbstractContainerTask {
 	private final class SubtaskCachedObjectFactory extends AbstractCacheHelperFactory<Serializable, Object> {
 	    private final TaskRequest req;
 	    private final TaskResponse res;
+	    private final boolean threadSafe;
 	    
         public SubtaskCachedObjectFactory(TaskRequest req, TaskResponse res) {
             this.req = req;
             this.res = res;
+            this.threadSafe = Boolean.valueOf((String) CacheTask.this.threadSafePhrase.evaluate(this.req, this.res));
         }
 
         /* (non-Javadoc)
@@ -155,14 +157,21 @@ public final class CacheTask extends AbstractContainerTask {
          */
         @Override
         public boolean isThreadSafe(Serializable key, Object instance) {
-            return Boolean.valueOf((String) CacheTask.this.threadSafePhrase.evaluate(this.req, this.res));
+            return this.threadSafe;
         }
 
         /* (non-Javadoc)
          * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
          */
         public Object getMutex(Serializable key) {
+            if (this.threadSafe) {
+                return key;
+            }
+
             return CacheTask.this.factoryMutex;
         }
+	}
+	
+	private final class CacheTaskMutex {
 	}
 }

@@ -35,7 +35,9 @@ import org.danann.cernunnos.TaskResponse;
 
 public final class JexlPhrase implements Phrase {
     //Hide factory mutex to avoid unforseen sync problems
-    private static final Object FACTORY_MUTEX = new Object();
+    private enum JexlPhraseMutex {
+        INSTANCE;
+    }
 
 	// Instance Members.
     private CacheHelper<String, Expression> expressionCache;
@@ -100,7 +102,7 @@ public final class JexlPhrase implements Phrase {
          * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
          */
         public Object getMutex(String key) {
-            return FACTORY_MUTEX;
+            return key;
         }
     }
 }

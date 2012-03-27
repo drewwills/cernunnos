@@ -27,9 +27,6 @@ import org.dom4j.xpath.DefaultXPath;
  * @version $Revision$
  */
 public final class XPathCacheFactory extends AbstractCacheHelperFactory<String, XPath> {
-    //Hide factory mutex to avoid unforseen sync problems
-    private static final Object FACTORY_MUTEX = new Object();
-    
     public static final XPathCacheFactory INSTANCE = new XPathCacheFactory();
     
     private XPathCacheFactory() {
@@ -47,6 +44,6 @@ public final class XPathCacheFactory extends AbstractCacheHelperFactory<String, 
      * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
      */
     public Object getMutex(String key) {
-        return FACTORY_MUTEX;
+        return key;
     }
 }

@@ -17,7 +17,9 @@ import org.danann.cernunnos.Tuple;
  */
 final class ScriptEvaluatorFactory extends AbstractCacheHelperFactory<Tuple<ScriptEngine, String>, ScriptEvaluator> {
     //Hide factory mutex to avoid unforseen sync problems
-    private static final Object FACTORY_MUTEX = new Object();
+    private enum ScriptEvaluatorFactoryMutex {
+        INSTANCE;
+    }
     
     public static final ScriptEvaluatorFactory INSTANCE = new ScriptEvaluatorFactory();
     
@@ -38,13 +40,13 @@ final class ScriptEvaluatorFactory extends AbstractCacheHelperFactory<Tuple<Scri
     public boolean isThreadSafe(Tuple<ScriptEngine, String> key, ScriptEvaluator instance) {
         final ScriptEngineFactory factory = key.first.getFactory();
         final Object threadingAbility = factory.getParameter("THREADING");
-        return threadingAbility != null;
+        return threadingAbility != null && ("THREAD-ISOLATED".equals(threadingAbility) || "STATELESS".equals(threadingAbility));
     }
 
     /* (non-Javadoc)
      * @see org.danann.cernunnos.CacheHelper.Factory#getMutex(java.lang.Object)
      */
     public Object getMutex(Tuple<ScriptEngine, String> key) {
-        return FACTORY_MUTEX;
+        return key;
     }
 }

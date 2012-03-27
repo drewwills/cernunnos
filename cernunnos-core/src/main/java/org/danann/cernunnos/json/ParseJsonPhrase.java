@@ -36,10 +36,6 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ParseJsonPhrase implements Phrase {
-	
-    //Hide factory mutex to avoid unforseen sync problems
-    private static final Object FACTORY_MUTEX = new Object();
-
     // Instance Members.
     private final ResourceHelper resource = new ResourceHelper();
     private CacheHelper<String, JSONObject> jsonCache;
@@ -107,7 +103,7 @@ public final class ParseJsonPhrase implements Phrase {
         }
 
         public Object getMutex(String key) {
-            return FACTORY_MUTEX;
+            return key;
         }
 
     }
