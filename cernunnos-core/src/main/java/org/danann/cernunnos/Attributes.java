@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,8 @@ public final class Attributes {
 		Attributes.registerBindings("Attributes", BindingsHelperImpl.class);
 	}
 	private static final Log log = LogFactory.getLog(Attributes.class);
+	
+	private static final Pattern TOKEN_DELIM = Pattern.compile("\\.");
 	
 	/*
 	 * Public API.
@@ -141,7 +144,7 @@ public final class Attributes {
 				// may be based off Attributes-series keys...
 				continue;
 			}			
-			String token = y.getKey().split("\\.")[0];
+			String token = TOKEN_DELIM.split(y.getKey())[0];
 			if (BINDINGS_HELPERS.containsKey(token)) {
 				// We have a match...
 				Map<String,Object> m = bindings.get(token);

@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,7 @@ import org.netbeans.lib.cvsclient.command.KeywordSubstitutionOptions;
 import org.netbeans.lib.cvsclient.command.add.AddCommand;
 
 public class AddTask implements Task {
+    private static final Pattern NAME_DELIM = Pattern.compile("\\.");
 
 	// Instance Members.
 	private Phrase client;
@@ -137,7 +139,7 @@ public class AddTask implements Task {
 				}
 				normalFiles.add(f);
 			}
-			String[] tokens = f.getName().split("\\.");
+			String[] tokens = NAME_DELIM.split(f.getName());
 			if (bext.contains(tokens[tokens.length - 1].toLowerCase())) {
 				if (log.isTraceEnabled()) {
 					log.trace("Adding binary file:  " + f.getAbsolutePath());

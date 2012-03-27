@@ -25,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,6 +43,9 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class FileIteratorTask extends AbstractContainerTask {
+    
+    private static final Pattern LIST_DELIM = Pattern.compile(",");
+    private static final Pattern PATH_DELIM = Pattern.compile("/");
 
 	// Instance Members.
 	private Phrase attribute_name;
@@ -104,10 +108,10 @@ public final class FileIteratorTask extends AbstractContainerTask {
 		}
 
 		String incl = (String) includes.evaluate(req, res);
-		String[] inclTokens = incl.split(",");
+		String[] inclTokens = LIST_DELIM.split(incl);
 		List<String>[] inclStacks = new List[inclTokens.length];
 		for (int i=0; i < inclTokens.length; i++) {
-			inclStacks[i] = Arrays.asList(inclTokens[i].split("/"));
+			inclStacks[i] = Arrays.asList(PATH_DELIM.split(inclTokens[i]));
 		}
 
 		String excl = "[Not Evaluated]";
@@ -116,10 +120,10 @@ public final class FileIteratorTask extends AbstractContainerTask {
 
 		if (excludes != null) {
 			excl = (String) excludes.evaluate(req, res);
-			String[] exclTokens = excl.split(",");
+			String[] exclTokens = LIST_DELIM.split(excl);
 			List<String>[] exclStacks = new List[exclTokens.length];
 			for (int i=0; i < exclTokens.length; i++) {
-				exclStacks[i] = Arrays.asList(exclTokens[i].split("/"));
+				exclStacks[i] = Arrays.asList(PATH_DELIM.split(exclTokens[i]));
 			}
 			Set<File> exclSet = getMatchingDescendants(baseDir, exclStacks);
 			fileSet.removeAll(exclSet);

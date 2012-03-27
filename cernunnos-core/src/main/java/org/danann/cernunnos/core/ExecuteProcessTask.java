@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.danann.cernunnos.EntityConfig;
 import org.danann.cernunnos.Formula;
@@ -36,6 +37,8 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 
 public final class ExecuteProcessTask implements Task {
+    
+    private static final Pattern CMD_TOKEN_DELIM = Pattern.compile("\\s");
 
 	// Instance Members.
 	private Phrase cmd;
@@ -74,7 +77,7 @@ public final class ExecuteProcessTask implements Task {
 		try {
 
 			// Prepare the command.
-			String[] tokens = fullCmd.split("\\s");
+			String[] tokens = CMD_TOKEN_DELIM.split(fullCmd);
 			List<String> list = Arrays.asList(tokens);
 
 			ProcessBuilder pb = new ProcessBuilder(list);
