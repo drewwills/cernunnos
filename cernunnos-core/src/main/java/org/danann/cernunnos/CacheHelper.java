@@ -17,7 +17,7 @@
 package org.danann.cernunnos;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -30,8 +30,8 @@ import java.util.Map;
  * @param <V>
  */
 public interface CacheHelper<K extends Serializable, V> {
-    public static final Reagent CACHE = new SimpleReagent("CACHE", "@cache", ReagentType.PHRASE, Map.class,
-            "A shared Map to cache items in.  The default is the value of the 'Attributes.CACHE' " +
+    public static final Reagent CACHE = new SimpleReagent("CACHE", "@cache", ReagentType.PHRASE, ConcurrentMap.class,
+            "A shared ConcurrentMap to cache items in.  The default is the value of the 'Attributes.CACHE' " +
             "request attribute.",
             new AttributePhrase(Attributes.CACHE));
 
@@ -61,7 +61,7 @@ public interface CacheHelper<K extends Serializable, V> {
         public V createObject(K key);
         
         /**
-         * If the object is thread-safe. If not the object will be cached but bound to just the current thread.
+         * If the object returned by {@link #createObject(Serializable)} is thread-safe. If false the object will be cached but bound to just the current thread.
          */
         public boolean isThreadSafe(K key, V instance);
         
@@ -75,5 +75,28 @@ public interface CacheHelper<K extends Serializable, V> {
          * conflict. If this returns null the object is cached in the global namespace.
          */
         public Serializable getCacheNamespace(K key);
+    }
+    
+    /**
+     * Marks a cache Map that can notify listeners of entry eviction
+     */
+    public interface EvictionAwareCache<K1, V1> {
+        /**
+         * Register a cache eviction listener, if the same listener (determined by {@link CacheEvictionListener#equals(Object)}) is already
+         * registered this call is ignored.
+         * <br/>
+         * This call is thread-safe
+         */
+        void registerCacheEvictionListener(CacheEvictionListener<K1, V1> listener);
+    }
+    
+    /**
+     * Listener that is notified of cache evictions
+     */
+    public interface CacheEvictionListener<K1, V1> {
+        /**
+         * Called when an element is evicted. Any {@link RuntimeException} thrown is logged and then swallowed
+         */
+        void onEviction(K1 key, V1 value);
     }
 }

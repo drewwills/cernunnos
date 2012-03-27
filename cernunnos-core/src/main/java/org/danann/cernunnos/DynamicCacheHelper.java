@@ -18,6 +18,7 @@ package org.danann.cernunnos;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,7 @@ public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelpe
         }
         
         //Load the cache only if cache-all is enabled
-        final Map<Tuple<Serializable, K>, Object> cache;
+        final ConcurrentMap<Tuple<Serializable, K>, Object> cache;
         final Tuple<Serializable, K> compoundCacheKey;
         switch (cacheMode) {
             case NONE: {
@@ -70,7 +71,7 @@ public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelpe
             break;
             
             case ALL: {
-                cache = (Map<Tuple<Serializable, K>, Object>) this.cachePhrase.evaluate(req, res);
+                cache = (ConcurrentMap<Tuple<Serializable, K>, Object>) this.cachePhrase.evaluate(req, res);
                 final Serializable cacheNamespace = factory.getCacheNamespace(key);
                 compoundCacheKey = new Tuple<Serializable, K>(cacheNamespace, key);
             }
@@ -96,10 +97,7 @@ public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelpe
             }
             //Look in the passed cache for the instance
             else {
-                final Object object;
-                synchronized (cache) {
-                    object = cache.get(compoundCacheKey);
-                }
+                final Object object = cache.get(compoundCacheKey);
                 
                 //If the cached object is a ThreadLocal use it for the instance
                 if (object instanceof ThreadLocal<?>) {
@@ -134,16 +132,38 @@ public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelpe
                 //Cache available store there
                 else {
                     if (threadSafe) {
-                        synchronized (cache) {
-                            cache.put(compoundCacheKey, instance);
-                        }
+                        cache.put(compoundCacheKey, instance);
                     }
                     else {
-                        synchronized (cache) {
-                            ThreadLocal<V> threadInstanceHolder = (ThreadLocal<V>)cache.get(key);
-                            if (threadInstanceHolder == null) {
-                                threadInstanceHolder = new ThreadLocal<V>();
-                                cache.put(compoundCacheKey, threadInstanceHolder);
+                        ThreadLocal<V> threadInstanceHolder = (ThreadLocal<V>)cache.get(compoundCacheKey);
+                        if (threadInstanceHolder == null) {
+                            threadInstanceHolder = new ThreadLocal<V>();
+                            
+                            while (true) {
+                                Object existing = cache.putIfAbsent(compoundCacheKey, threadInstanceHolder);
+                                if (existing == null) {
+                                    //nothing existed for that key, put was successful
+                                    break;
+                                }
+                                
+                                if (existing instanceof ThreadLocal) {
+                                    //Existing ThreadLocal, just use it
+                                    threadInstanceHolder = (ThreadLocal)existing;
+                                    break;
+                                }
+                                
+                                //something other than a ThreadLocal already exists, try replacing with the ThreadLocal
+                                final boolean replaced = cache.replace(compoundCacheKey, threadInstanceHolder, existing);
+                                if (replaced) {
+                                    //Replace worked!
+                                    break;
+                                }
+                                
+                                //Replace didn't work, try the whole process again, yay non-blocking!
+                            }
+                            
+                            if (cache instanceof EvictionAwareCache) {
+                                ((EvictionAwareCache) cache).registerCacheEvictionListener(ThreadLocalCacheEvictionListener.INSTANCE);
                             }
                         }
 
@@ -164,5 +184,15 @@ public class DynamicCacheHelper<K extends Serializable, V> implements CacheHelpe
      */
     protected final boolean compareKeys(K k1, K k2) {
         return k1 == k2 || (k1 != null && k1.equals(k2));
+    }
+    
+    private static final class ThreadLocalCacheEvictionListener<K1, V1> implements CacheEvictionListener<K1, V1> {
+        public static final ThreadLocalCacheEvictionListener INSTANCE = new ThreadLocalCacheEvictionListener();
+        
+        public void onEviction(K1 key, V1 value) {
+            if (value instanceof ThreadLocal) {
+                ((ThreadLocal) value).remove();
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -266,7 +267,7 @@ public class ScriptRunner {
         
         // Set up Attributes.CACHE if not already provided...
         if (!tr.hasAttribute(Attributes.CACHE)) {
-            tr.setAttribute(Attributes.CACHE, new HashMap<Object, Object>());
+            tr.setAttribute(Attributes.CACHE, new ConcurrentHashMap<Object, Object>());
         }
 
         // Write the initial contents of the TaskRequest to the logs...
