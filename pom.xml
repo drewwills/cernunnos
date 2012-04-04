@@ -4,7 +4,7 @@
     
     <groupId>com.googlecode.cernunnos</groupId>
     <artifactId>cernunnos-parent</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.2</version>
     
     <packaging>pom</packaging>
     <name>Cernunnos - Parent</name>
@@ -29,9 +29,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://cernunnos.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://cernunnos.googlecode.com/svn/trunk</developerConnection>
-        <url>http://cernunnos.googlecode.com/svn/trunk</url>
+        <connection>scm:svn:http://cernunnos.googlecode.com/svn/tags/cernunnos-parent-1.2.2</connection>
+        <developerConnection>scm:svn:https://cernunnos.googlecode.com/svn/tags/cernunnos-parent-1.2.2</developerConnection>
+        <url>http://cernunnos.googlecode.com/svn/tags/cernunnos-parent-1.2.2</url>
     </scm>
 
     <modules>
