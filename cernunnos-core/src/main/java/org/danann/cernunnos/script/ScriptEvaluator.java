@@ -42,10 +42,10 @@ public class ScriptEvaluator {
         Method evalCompiledScriptWithBindingsMethodRef = null;
         Method compileCompilableMethodRef = null;
         try {
-            compilableClassRef = ClassUtils.forName("javax.script.Compilable");
+            compilableClassRef = ClassUtils.forName("javax.script.Compilable", ScriptEvaluator.class.getClassLoader());
             compileCompilableMethodRef = BeanUtils.findMethod(compilableClassRef, "compile", new Class[] { String.class });
 
-            final Class<?> compiledScriptClassRef = ClassUtils.forName("javax.script.CompiledScript");
+            final Class<?> compiledScriptClassRef = ClassUtils.forName("javax.script.CompiledScript", ScriptEvaluator.class.getClassLoader());
             evalCompiledScriptWithContextMethodRef = BeanUtils.findMethod(compiledScriptClassRef, "eval", new Class[] { ScriptContext.class });
             evalCompiledScriptWithBindingsMethodRef = BeanUtils.findMethod(compiledScriptClassRef, "eval", new Class[] { Bindings.class });
         }
