@@ -29,9 +29,10 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:svn:http://cernunnos.googlecode.com/svn/trunk</connection>
-        <developerConnection>scm:svn:https://cernunnos.googlecode.com/svn/trunk</developerConnection>
-        <url>http://cernunnos.googlecode.com/svn/trunk</url>
+        <connection>scm:git:git://github.com/drewwills/cernunnos.git</connection>
+        <developerConnection>scm:git:git@github.com:drewwills/cernunnos.git</developerConnection>
+        <url>https://github.com/drewwills/cernunnos</url>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
