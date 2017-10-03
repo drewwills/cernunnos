@@ -46,10 +46,9 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.Node;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 /**
  * Performs a specified query, then invokes child tasks once for each row in the
@@ -118,16 +117,15 @@ public final class QueryTask extends AbstractContainerTask {
 	public void perform(TaskRequest req, TaskResponse res) {
 	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
-        final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
-        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
-        
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
         //Setup the parameter setter and row callback handler for this task and the request/response
         final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(this.parameters, req, res);
         final ResponseMappingRowCallbackHandler rowCallbackHandler = new ResponseMappingRowCallbackHandler(this, req, res);
         
         //Get the SQL and run the query
         final String finalSql = (String) sql.evaluate(req, res);
-        jdbcOperations.query(finalSql, preparedStatementSetter, rowCallbackHandler);
+        jdbcTemplate.query(finalSql, preparedStatementSetter, rowCallbackHandler);
         
         if (rowCallbackHandler.getRowCount() == 0) {
             this.performSubtasks(req, res, this.emptyResult);

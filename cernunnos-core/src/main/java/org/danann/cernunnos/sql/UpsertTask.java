@@ -38,9 +38,8 @@ import org.danann.cernunnos.Task;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.Node;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 public final class UpsertTask implements Task {
 
@@ -141,14 +140,13 @@ public final class UpsertTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
-        final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
-        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
-        
-        final int updateResult = this.doUpdate(jdbcOperations, req, res);
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
+        final int updateResult = this.doUpdate(jdbcTemplate, req, res);
         
         // No information present, add the row...
         if (updateResult == 0) {
-            this.doInsert(jdbcOperations, req, res);
+            this.doInsert(jdbcTemplate, req, res);
         }
 	}
 
@@ -157,14 +155,14 @@ public final class UpsertTask implements Task {
      * 
      * Moved to its own method to reduce possibility for variable name confusion
      */
-    protected int doUpdate(JdbcOperations jdbcOperations, TaskRequest req, TaskResponse res) {
+    protected int doUpdate(JdbcTemplate jdbcTemplate, TaskRequest req, TaskResponse res) {
         //Setup the update parameters and setter
         final List<Phrase> parametersInUse = update_parameters != null ? update_parameters : parameters;
         final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(parametersInUse, req, res);
         
         //Get the update sql and execute the update.
         final String fUpdateSql = (String) update_sql.evaluate(req, res);
-        return jdbcOperations.update(fUpdateSql, preparedStatementSetter);
+        return jdbcTemplate.update(fUpdateSql, preparedStatementSetter);
     }
     
     /**
@@ -172,13 +170,13 @@ public final class UpsertTask implements Task {
      * 
      * Moved to its own method to reduce possibility for variable name confusion
      */
-    protected int doInsert(JdbcOperations jdbcOperations, TaskRequest req, TaskResponse res) {
+    protected int doInsert(JdbcTemplate jdbcTemplate, TaskRequest req, TaskResponse res) {
         //Setup the insert parameters and setter
         final List<Phrase> parametersInUse = insert_parameters != null ? insert_parameters : parameters;
         final PreparedStatementSetter preparedStatementSetter = new PhraseParameterPreparedStatementSetter(parametersInUse, req, res);
         
         //Get the insert sql and execute the insert
         final String fInsertSql = (String) insert_sql.evaluate(req, res);
-        return jdbcOperations.update(fInsertSql, preparedStatementSetter);
+        return jdbcTemplate.update(fInsertSql, preparedStatementSetter);
     }
 }

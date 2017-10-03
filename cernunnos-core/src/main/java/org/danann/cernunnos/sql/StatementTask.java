@@ -41,9 +41,8 @@ import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
 import org.dom4j.Node;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
 
 public class StatementTask implements Task {
     // Instance Members.
@@ -95,15 +94,14 @@ public class StatementTask implements Task {
 	public void perform(TaskRequest req, TaskResponse res) {
 	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
-        final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
-        final JdbcOperations jdbcOperations = jdbcTemplate.getJdbcOperations();
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         //Setup the callback class to do the PreparedStatement parameter binding and statement execution
 		final PreparedStatementCallback preparedStatementCallback = new PhraseParameterPreparedStatementCallback(this.parameters, req, res);
         
 		//Get the SQL and execute it in a PreparedStatement
 		final String fSql = (String) sql.evaluate(req, res);
-        jdbcOperations.execute(fSql, preparedStatementCallback);
+		jdbcTemplate.execute(fSql, preparedStatementCallback);
 	}
 	
 

@@ -36,8 +36,8 @@ import org.danann.cernunnos.SimpleFormula;
 import org.danann.cernunnos.SimpleReagent;
 import org.danann.cernunnos.TaskRequest;
 import org.danann.cernunnos.TaskResponse;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
-import org.springframework.jdbc.core.simple.SimpleJdbcTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 public final class SqlPhrase implements Phrase {
 
@@ -79,7 +79,7 @@ public final class SqlPhrase implements Phrase {
 	public Object evaluate(TaskRequest req, TaskResponse res) {
 	    final DataSource dataSource = DataSourceRetrievalUtil.getDataSource(dataSourcePhrase, connectionPhrase, req, res);
 		
-	    final SimpleJdbcTemplate jdbcTemplate = new SimpleJdbcTemplate(dataSource);
+	    final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 	    
 	    //Get the SQL and execute it
 	    final String fSql = (String) this.sql.evaluate(req, res);
@@ -96,7 +96,7 @@ public final class SqlPhrase implements Phrase {
     /**
      * RowMapper that always returns the first column as an Object
      */
-    private static final class FirstColumnObjectRowMapper implements ParameterizedRowMapper<Object> {
+    private static final class FirstColumnObjectRowMapper implements RowMapper<Object> {
         public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
             return rs.getObject(1);
         }
